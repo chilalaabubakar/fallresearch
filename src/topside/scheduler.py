@@ -263,15 +263,20 @@ def extract(m, sys, hours):
             "battery_energy_J": v(m.energy[t]) * MW * SECONDS_PER_HOUR,
             "unserved_W": v(m.unserved[t]) * MW, "reserve_short_W": v(m.res_short[t]) * MW,
         }
-        p_gt, q_gt, n_on, low, starts = 0.0, 0.0, 0, 0, 0
+        p_gt, q_gt, n_on, cap_on, starts = 0.0, 0.0, 0, 0.0, 0
         for u in U:
             on = round(v(m.on[u, t]))
             p, q = v(m.p_gt[u, t]) * MW, v(m.q_gt[u, t]) * MW
             r[f"gt{u}_on"], r[f"gt{u}_W"] = on, p
             p_gt, q_gt, n_on = p_gt + p, q_gt + q, n_on + on
+            cap_on += on * m.unit_list[u].gt.rated_power
             starts += round(v(m.start[u, t]))
-            if on and p / m.unit_list[u].gt.rated_power < sys.low_load_threshold:
-                low += 1
+        # Fuel is linear in power, so for identical units the split between them does
+        # not change fuel and the solver's split is arbitrary. Load is therefore reported
+        # as shared in proportion to rating (droop sharing, as in real operation).
+        load = p_gt / cap_on if cap_on > 0 else 0.0
+        low = n_on if (n_on and load < sys.low_load_threshold) else 0
+        r["gt_load_fraction"] = load
         fuel_sm3 = q_gt * SECONDS_PER_HOUR / sys.fuel.lhv
         r.update({"gt_total_W": p_gt, "gt_units_on": n_on, "gt_low_load_units": low, "gt_starts": starts,
                   "fuel_Sm3": fuel_sm3, "co2_kg": fuel_sm3 * sys.fuel.co2_factor,

@@ -79,3 +79,11 @@ def test_strong_wind_runs_minimum_gas_turbines(sys_, flexible):
 def test_battery_helps_or_is_neutral(sys_, wind, flexible):
     with_battery = run(sys_, wind, flexible=True, battery_power=4 * MW, battery_energy=4 * MW * 3600)
     assert with_battery["fuel_Sm3"].sum() <= flexible["fuel_Sm3"].sum() * 1.006
+
+
+def test_low_load_uses_shared_load(sys_, fixed):
+    # Low-load unit-hours follow the proportional (droop) load share of running units
+    cap = fixed["gt_units_on"] * sys_.units["main"].gt.rated_power
+    shared = fixed["gt_total_W"] / cap
+    expected = np.where(shared < sys_.low_load_threshold, fixed["gt_units_on"], 0)
+    assert np.array_equal(fixed["gt_low_load_units"].to_numpy(), expected)

@@ -197,6 +197,8 @@ economics:
   gt_start_cost: {value: 2000.0, unit: NOK, source: "penalty_start in Svendsen et al. (2023), LEOGO"}
   unserved_energy_cost: {value: 1.0e+6, unit: NOK/MWh, source: "Modelling choice: feasibility penalty, high enough that the 0.5 % MIP gap cannot leave demand unserved (LEOGO uses 36000 NOK/MWh for load shedding); should never be used"}
   reserve_shortfall_cost: {value: 1.0e+6, unit: NOK/MWh, source: "Modelling choice: same feasibility penalty as unserved energy; should never be used"}
+  # Production expressed in oil equivalents for CO2 intensity (kg CO2 / Sm3 o.e.)
+  gas_per_oil_equivalent: {value: 1000.0, unit: Sm3_gas/Sm3_oe, source: "Norwegian Offshore Directorate (Sodir) convention: 1000 Sm3 gas = 1 Sm3 oil equivalent"}
 
 scheduler:
   window_hours:    {value: 168, unit: h, source: "Modelling choice: one week committed per solve"}
@@ -215,3 +217,48 @@ scheduler:
   output:
     results_file: results/schedules/schedule_{case}.csv
     figure_file: results/figures/schedule_{case}.png
+
+cases:
+  # Each case: wind on/off, flexible demand on/off, battery on/off and the GT fleet.
+  # Cases 2-4 keep the existing GTs (retrofit, as for Hywind Tampen on Snorre/Gullfaks);
+  # the optimiser decides how many run. A "small GT" fleet is tested as a sensitivity.
+  gt_only:           {label: "1 Gas turbines only",      wind: false, flexible: false, battery: false, fleet: {main: 3}}
+  wind_fixed:        {label: "2 Wind, fixed demand",     wind: true,  flexible: false, battery: false, fleet: {main: 3}}
+  wind_flex:         {label: "3 Wind, flexible demand",  wind: true,  flexible: true,  battery: false, fleet: {main: 3}}
+  wind_flex_battery: {label: "4 Wind, flexible + battery", wind: true, flexible: true, battery: true,  fleet: {main: 3}}
+  battery_size:
+    power:  {value: 4.0, unit: MW,  source: "LEOGO battery option 4 MW / 4 MWh (Svendsen et al., 2023)"}
+    energy: {value: 4.0, unit: MWh, source: "LEOGO battery option 4 MW / 4 MWh (Svendsen et al., 2023)"}
+
+sensitivity:
+  # Each run overrides base-case values. Override keys understood by cases.py:
+  #   n_turbines, co2_price [NOK/kg], gas_price [NOK/Sm3], battery [MW, MWh],
+  #   min_gt_online, max_deficit [h], fleet {unit: count}
+  wind_farm_size:
+    cases: [wind_fixed, wind_flex]
+    runs: [{n_turbines: 1}, {n_turbines: 2}, {n_turbines: 3}, {n_turbines: 4}]
+    source: "Sensitivity range, 15-60 MW installed (modelling choice)"
+  co2_price:
+    cases: [wind_flex]
+    runs: [{co2_price: 0.5}, {co2_price: 1.0}, {co2_price: 2.0}, {co2_price: 3.0}]
+    source: "Sensitivity range NOK 500-3000/t (modelling choice; base NOK 2000/t)"
+  gas_price:
+    cases: [wind_flex]
+    runs: [{gas_price: 2.0}, {gas_price: 4.19}, {gas_price: 8.0}]
+    source: "Sensitivity range NOK 2-8/Sm3 (modelling choice; base LEOGO 4.19)"
+  battery_size:
+    cases: [wind_flex_battery]
+    runs: [{battery: [0, 0]}, {battery: [2, 2]}, {battery: [4, 4]}, {battery: [8, 8]}, {battery: [8, 16]}]
+    source: "Sensitivity range 0-8 MW, 1-2 h storage (modelling choice)"
+  injection_deficit:
+    cases: [wind_flex]
+    runs: [{max_deficit: 0}, {max_deficit: 24}, {max_deficit: 72}, {max_deficit: 168}]
+    source: "Sensitivity on the most uncertain flexibility limit; 0 h = no injection flexibility"
+  min_gt_online:
+    cases: [wind_flex_battery]
+    runs: [{min_gt_online: 1, battery: [8, 8]}, {min_gt_online: 0, battery: [8, 8]}]
+    source: "Tests whether a grid-forming battery (8 MW / 8 MWh) could allow all GTs off"
+  gt_fleet:
+    cases: [wind_flex]
+    runs: [{fleet: {main: 3}}, {fleet: {main: 2, small: 1}}]
+    source: "Retrofit (3 existing GTs) vs replacing one by a smaller unit (unverified SGT-500 class data)"

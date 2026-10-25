@@ -23,7 +23,7 @@ cut fuel gas use and CO2 emissions without large production losses.
 | 4 | `process.py` – NeqSim topside model | done (parameters to verify) |
 | 5 | `consumers.py` – flexibility classes | done (limits to verify) |
 | 6 | `scheduler.py` – Pyomo optimisation | done (tested on synthetic wind) |
-| 7 | `cases.py` – cases 1–4, sensitivity | – |
+| 7 | `cases.py` – cases 1–4, sensitivity | done (needs real ERA5 run) |
 | 8 | Validation against public field data | – |
 | 9 | Figures and tables | – |
 
@@ -68,6 +68,7 @@ python -m topside.gas_turbine       # fuel gas properties + part-load curves
 python -m topside.process           # topside design point + power vs rate per consumer
 python -m topside.consumers         # flexibility classes, lever power curves, demand map
 python -m topside.scheduler [--synthetic] [--weeks 2]  # demo: fixed vs flexible demand
+python -m topside.cases [--sensitivity all] [--jobs 4]  # cases 1-4 (+ sensitivities), full year
 ```
 
 Outputs:
