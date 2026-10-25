@@ -25,28 +25,20 @@ import numpy as np
 import pandas as pd
 
 from topside.config import load_config, param, repo_path
-from topside import cases, scheduler
+from topside import cases, scheduler, style
 
 CASE_ORDER = ["gt_only", "wind_fixed", "wind_flex", "wind_flex_battery"]
 CASE_COLOR = cases.CASE_COLOR
-INK, MUTED = "#0b0b0b", "#52514e"
+INK, MUTED = style.PALETTE["ink"], style.PALETTE["grey"]
 
 
 def set_style():
-    plt.rcParams.update({
-        "font.size": 9, "axes.titlesize": 10, "axes.labelsize": 9, "legend.fontsize": 8,
-        "axes.spines.top": False, "axes.spines.right": False, "axes.grid": True,
-        "grid.alpha": 0.25, "grid.linewidth": 0.5, "savefig.dpi": 300, "figure.dpi": 100,
-    })
+    style.apply_publication_style()
 
 
 def save(fig, out_dir, name):
-    """Save a figure as PNG and PDF; returns the PNG path."""
-    out_dir.mkdir(parents=True, exist_ok=True)
-    for ext in ("png", "pdf"):
-        fig.savefig(out_dir / f"{name}.{ext}")
-    plt.close(fig)
-    return out_dir / f"{name}.png"
+    """Save a figure as PNG (300 dpi) and vector PDF; returns the PNG path."""
+    return style.finalize_figure(fig, out_dir, name)
 
 
 # --------------------------------------------------------------------------
@@ -86,14 +78,14 @@ def fig_wind_resource(cfg, wind_W, out_dir, note=""):
     cf = wind_W / installed
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 3.6), constrained_layout=True)
     monthly = cf.groupby(cf.index.month).mean()
-    a1.bar(monthly.index, monthly.values * 100, color="#2a78d6", width=0.6)
+    a1.bar(monthly.index, monthly.values * 100, color=style.PALETTE["blue_secondary"], edgecolor="black", linewidth=1.2, width=0.65)
     a1.axhline(cf.mean() * 100, color=MUTED, lw=1, ls="--")
-    a1.text(12.4, cf.mean() * 100, f"annual {cf.mean():.0%}", va="bottom", ha="right", color=MUTED, fontsize=8)
+    a1.text(12.4, cf.mean() * 100, f"annual {cf.mean():.0%}", va="bottom", ha="right", color=MUTED, fontsize=style.FONT_SIZE - 3)
     a1.set_xticks(range(1, 13), list("JFMAMJJASOND"))
     a1.set_ylabel("Capacity factor [%]")
     a1.set_title(f"Monthly capacity factor{note}", loc="left")
     exceed, v = np.linspace(0, 100, len(cf)), np.sort(wind_W.values)[::-1] / 1e6
-    a2.plot(exceed, v, color="#2a78d6", lw=2)
+    a2.plot(exceed, v, color=style.PALETTE["blue_main"])
     a2.axhline(installed / 1e6, color=MUTED, lw=0.8, ls="--")
     a2.set_xlabel("Share of hours power is equalled or exceeded [%]")
     a2.set_ylabel("Wind farm power [MW]")
@@ -133,7 +125,7 @@ def fig_gt_load_duration(cfg, sched, out_dir, note=""):
         units = np.sort(df["gt_units_on"].to_numpy())[::-1]
         a2.step(x, units, color=CASE_COLOR[k], lw=2, where="post", label=case_label(cfg, k))
     a1.axhspan(0, thr, color=MUTED, alpha=0.07, lw=0)
-    a1.text(98, thr - 2, f"low load (< {thr:.0f} %)", ha="right", va="top", fontsize=8, color=MUTED)
+    a1.text(98, thr - 2, f"low load (< {thr:.0f} %)", ha="right", va="top", fontsize=style.FONT_SIZE - 3, color=MUTED)
     a1.set_ylim(0, 100)
     a1.set_xlim(0, 100)
     a1.set_xlabel("Share of hours [%]")
@@ -175,17 +167,17 @@ def fig_injection_mechanism(cfg, sched, out_dir, note=""):
     stats.columns = ["mean", "p10", "p90", "n"]
     mids = np.array([iv.mid for iv in stats.index])
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 3.8), constrained_layout=True)
-    a1.fill_between(mids, stats["p10"] * 100, stats["p90"] * 100, color="#1baf7a", alpha=0.18, lw=0,
+    a1.fill_between(mids, stats["p10"] * 100, stats["p90"] * 100, color=style.PALETTE["blue_main"], alpha=0.15, lw=0,
                     label="10-90 % of hours")
-    a1.plot(mids, stats["mean"] * 100, color="#1baf7a", lw=2, marker="o", ms=4, label="Mean")
+    a1.plot(mids, stats["mean"] * 100, color=style.PALETTE["blue_main"], marker="o", ms=6, label="Mean")
     a1.axhline(target, color=MUTED, lw=1, ls="--")
-    a1.text(mids.max(), target + 1.5, f"target {target:.0f} %", ha="right", fontsize=8, color=MUTED)
+    a1.text(mids.max(), target + 1.5, f"target {target:.0f} %", ha="right", fontsize=style.FONT_SIZE - 3, color=MUTED)
     a1.set_xlabel("Wind power available [MW]")
     a1.set_ylabel("Water injection [% of capacity]")
     a1.set_ylim(0, 105)
     a1.set_title(f"Injection follows the wind (case 3){note}", loc="left")
     a1.legend(frameon=False, loc="lower right")
-    a2.hist(df["deficit_h"], bins=40, color="#1baf7a", alpha=0.8)
+    a2.hist(df["deficit_h"], bins=40, color=style.PALETTE["blue_secondary"], edgecolor="black", linewidth=0.6)
     a2.axvline(param(cfg["flexibility"]["water_injection"]["max_deficit"]), color=MUTED, lw=1, ls="--")
     a2.set_xlabel("Injection deficit [h of full-rate injection]")
     a2.set_ylabel("Hours")
@@ -205,7 +197,7 @@ def fig_sensitivity_overview(cfg, sens, out_dir, note=""):
             ax.plot(x, dd["co2_kt"], marker="o", ms=5, lw=2, color=CASE_COLOR[case],
                     label=case_label(cfg, case))
             ax.set_xticks(list(x), [o.strip("{}").replace("'", "").split(": ", 1)[-1] for o in dd["overrides"]],
-                          fontsize=7)
+                          fontsize=style.FONT_SIZE - 4)
         ax.set_title(g.replace("_", " "), loc="left")
         ax.set_ylim(0, None)
         ax.set_ylabel("CO2 [kt/yr]")

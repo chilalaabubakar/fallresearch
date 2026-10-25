@@ -28,9 +28,10 @@ import numpy as np
 import pandas as pd
 
 from topside.config import load_config, param, repo_path
-from topside import process, scheduler
+from topside import process, scheduler, style
 
-STATUS_COLOR = {"within": "#1baf7a", "agrees": "#1baf7a", "differs": "#eb6834", "n/a": "#52514e"}
+STATUS_COLOR = {"within": style.PALETTE["blue_main"], "agrees": style.PALETTE["blue_main"],
+                "differs": style.PALETTE["red_strong"], "n/a": style.PALETTE["grey"]}
 
 
 # --------------------------------------------------------------------------
@@ -109,18 +110,18 @@ def plot_validation(table, fields, model_intensity, out_path, note=""):
                              constrained_layout=True, squeeze=False)
     ax = axes[0, 0]
     tol = 0.2
-    ax.axvspan(1 - tol, 1 + tol, color="#1baf7a", alpha=0.08, lw=0)
-    ax.axvline(1, color="#52514e", lw=0.8)
+    ax.axvspan(1 - tol, 1 + tol, color=style.PALETTE["green_1"], lw=0)
+    ax.axvline(1, color=style.PALETTE["grey"], lw=0.8)
     for i, r in t.iterrows():
         mid = (r.benchmark_low + r.benchmark_high) / 2
         if r.benchmark_high > r.benchmark_low:     # range: draw it relative to its midpoint
-            ax.plot([r.benchmark_low / mid, r.benchmark_high / mid], [i, i], color="#52514e", lw=3, alpha=0.4,
+            ax.plot([r.benchmark_low / mid, r.benchmark_high / mid], [i, i], color=style.PALETTE["grey"], lw=3, alpha=0.4,
                     solid_capstyle="round")
         ax.plot(r.model_to_benchmark, i, "o", ms=9, color=STATUS_COLOR[r.status])
         ax.text(r.model_to_benchmark, i - 0.32, f"{r.model:.3g} vs {r.benchmark_low:.3g}"
                 + (f"-{r.benchmark_high:.3g}" if r.benchmark_high > r.benchmark_low else "") + f" {r.unit}",
-                ha="center", fontsize=7, color="#52514e")
-    ax.set_yticks(range(len(t)), [b.replace("_", " ") for b in t["benchmark"]], fontsize=8)
+                ha="center", fontsize=style.FONT_SIZE - 4, color=style.PALETTE["grey"])
+    ax.set_yticks(range(len(t)), [b.replace("_", " ") for b in t["benchmark"]], fontsize=style.FONT_SIZE - 3)
     ax.invert_yaxis()
     ax.set_xlabel("Model / benchmark (1 = equal; shaded = within ±20 %; grey bar = published range)")
     ax.set_title(f"Model vs published benchmarks{note}", loc="left")
@@ -130,19 +131,19 @@ def plot_validation(table, fields, model_intensity, out_path, note=""):
     if has_fields:
         ax2 = axes[0, 1]
         lab = fields["field"] + " " + fields["year"].astype(str)
-        colors = ["#6250d6" if str(e).lower() == "yes" else "#2a78d6" for e in fields["electrified"]]
+        colors = [style.PALETTE["teal"] if str(e).lower() == "yes" else style.PALETTE["grey"] for e in fields["electrified"]]
         ax2.barh(lab, fields["co2_intensity_kg_per_boe"], color=colors, height=0.6)
         if model_intensity is not None:
-            ax2.axvline(model_intensity, color="#eb6834", lw=2, label=f"Model case 1: {model_intensity:.1f}")
+            ax2.axvline(model_intensity, color=style.CASE_COLOR["gt_only"], lw=2.5, ls="--", label=f"Model case 1: {model_intensity:.1f}")
         ax2.set_xlabel("CO2 intensity [kg CO2/boe]")
-        ax2.set_title("Field data (blue: GT-powered, violet: electrified)", loc="left")
+        ax2.set_title("Field data (grey: GT-powered, teal: electrified)", loc="left")
         ax2.invert_yaxis()
-        ax2.legend(frameon=False, fontsize=8)
+        ax2.legend(frameon=False, fontsize=style.FONT_SIZE - 3)
         ax2.grid(alpha=0.25, lw=0.5, axis="x")
         ax2.spines[["top", "right"]].set_visible(False)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=200)
+    fig.savefig(out_path, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     return out_path
 

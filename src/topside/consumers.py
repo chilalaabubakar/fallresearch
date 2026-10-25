@@ -34,10 +34,9 @@ import numpy as np
 import pandas as pd
 
 from topside.config import load_config, param, repo_path
-from topside import process
+from topside import process, style
 
-CLASS_COLORS = {"must_run": "#2a78d6", "flexible": "#1baf7a", "sheddable": "#eb6834",
-                "mixed": "#6250d6"}
+CLASS_COLORS = style.CLASS_COLOR
 CLASS_LABELS = {"must_run": "Must-run", "flexible": "Flexible (deferrable)",
                 "sheddable": "Sheddable (lost production)", "mixed": "Mixed"}
 PRODUCTION_CONSUMERS = ("recompression", "export_compressor", "oil_export_pump")
@@ -194,32 +193,32 @@ def plot_flexibility(table, flex, out_path):
     ax1.barh(t["label"], t["design_power_MW"], color=[CLASS_COLORS[c] for c in t["class"]],
              height=0.6)
     for y, (v, s) in enumerate(zip(t["design_power_MW"], t["share_of_total"])):
-        ax1.text(v + 0.15, y, f"{v:.1f} MW ({s:.0%})", va="center", fontsize=8, color="#52514e")
+        ax1.text(v + 0.15, y, f"{v:.1f} MW ({s:.0%})", va="center", fontsize=style.FONT_SIZE - 3, color=style.PALETTE["grey"])
     ax1.set_xlabel("Electric power at design [MW]")
     ax1.set_title("Demand map by flexibility class", loc="left")
     ax1.set_xlim(0, t["design_power_MW"].max() * 1.35)
     used = list(dict.fromkeys(table["class"]))
     ax1.legend(handles=[plt.Rectangle((0, 0), 1, 1, color=CLASS_COLORS[c]) for c in used],
-               labels=[CLASS_LABELS[c] for c in used], loc="lower right", frameon=False, fontsize=8)
+               labels=[CLASS_LABELS[c] for c in used], loc="lower right", frameon=False, fontsize=style.FONT_SIZE - 3)
 
     for (x, y), cls, label in ((flex.production_curve, "sheddable", "Production lever (sheddable)"),
                                (flex.injection_curve, "flexible", "Injection lever (flexible)")):
         ax2.plot(np.asarray(x) * 100, np.asarray(y) / 1e6, color=CLASS_COLORS[cls], lw=2, label=label)
-    ax2.axvspan(0, flex.production.min_fraction * 100, color="#52514e", alpha=0.07, lw=0)
+    ax2.axvspan(0, flex.production.min_fraction * 100, color=style.PALETTE["grey"], alpha=0.07, lw=0)
     ax2.text(flex.production.min_fraction * 50, 0.3, "below min.\nproduction", ha="center",
-             fontsize=8, color="#52514e")
+             fontsize=style.FONT_SIZE - 3, color=style.PALETTE["grey"])
     ax2.set_xlabel("Lever position [% of design]")
     ax2.set_ylabel("Electric power [MW]")
     ax2.set_title("Power vs lever position", loc="left")
     ax2.set_xlim(0, 100)
     ax2.set_ylim(0, None)
-    ax2.legend(loc="upper left", frameon=False, fontsize=9)
+    ax2.legend(loc="upper left", frameon=False, fontsize=style.FONT_SIZE - 2)
     for ax in (ax1, ax2):
         ax.grid(alpha=0.25, lw=0.5, axis="x" if ax is ax1 else "both")
         ax.spines[["top", "right"]].set_visible(False)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=200)
+    fig.savefig(out_path, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     return out_path
 

@@ -31,12 +31,10 @@ import numpy as np
 import pandas as pd
 
 from topside.config import load_config, param, repo_path
-from topside import scheduler
+from topside import scheduler, style
 
 MW = 1e6
-COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]   # fixed order, one per case
-CASE_COLOR = {"gt_only": COLORS[0], "wind_fixed": COLORS[1], "wind_flex": COLORS[2],
-              "wind_flex_battery": COLORS[3]}
+CASE_COLOR = style.CASE_COLOR
 
 
 def case_keys(cfg):
@@ -164,52 +162,50 @@ def add_reductions(base):
 
 
 def plot_base(base, out_path, note="", period="yr"):
+    """2 x 2 bars (CO2, fuel, low-load hours, lost production) + legend row; publication style."""
+    style.apply_publication_style()
     metrics = [("co2_kt", f"CO2 emitted [kt/{period}]"), ("fuel_MSm3", f"Fuel gas [MSm3/{period}]"),
-               ("gt_low_load_unit_hours", f"GT hours below 50 % load [unit-h/{period}]"),
+               ("gt_low_load_unit_hours", f"GT hours < 50 % load [unit-h/{period}]"),
                ("lost_production_pct", "Lost production [%]")]
-    fig, axes = plt.subplots(2, 2, figsize=(11, 7), constrained_layout=True)
-    labels = base["label"].tolist()
+    fig, axes = plt.subplots(2, 2, figsize=(11, 8))
+    keys = base["case"].tolist()
     for ax, (col, title) in zip(axes.flat, metrics):
         vals = base[col].to_numpy()
-        ax.bar(range(len(vals)), vals, color=[CASE_COLOR[c] for c in base["case"]], width=0.6)
-        for i, v in enumerate(vals):
+        for i, (k, v) in enumerate(zip(keys, vals)):
+            ax.bar(i, v, width=0.65, **style.bar_kwargs(k))
             ax.text(i, v, f"{v:,.2f}" if abs(v) < 10 else f"{v:,.0f}", ha="center", va="bottom",
-                    fontsize=8, color="#52514e")
-        ax.set_xticks(range(len(vals)), [l.split(" ", 1)[0] for l in labels])
-        ax.set_title(title, loc="left", fontsize=10)
-        ax.set_ylim(0, vals.max() * 1.15 if vals.max() > 0 else 1.0)
-        ax.grid(alpha=0.25, lw=0.5, axis="y")
-        ax.spines[["top", "right"]].set_visible(False)
-    handles = [plt.Rectangle((0, 0), 1, 1, color=CASE_COLOR[c]) for c in base["case"]]
-    fig.legend(handles, labels, loc="outside lower center", ncol=len(labels), frameon=False, fontsize=9)
-    fig.suptitle(f"Cases 1-4{note}", x=0.01, ha="left")
+                    fontsize=style.FONT_SIZE - 3, color=style.PALETTE["ink"])
+        ax.set_xticks(range(len(vals)), [str(i + 1) for i in range(len(vals))])
+        ax.set_title(title, loc="left")
+        ax.set_ylim(0, vals.max() * 1.18 if vals.max() > 0 else 1.0)   # bars always start at zero
+    handles = [plt.Rectangle((0, 0), 1, 1, **style.bar_kwargs(k)) for k in keys]
+    fig.legend(handles, base["label"].tolist(), loc="lower center", ncol=2, bbox_to_anchor=(0.5, -0.06))
+    if note:
+        fig.suptitle(f"Cases 1-4{note}", x=0.01, ha="left")
+    fig.tight_layout(pad=1.0)
     out_path = Path(out_path)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=200)
-    plt.close(fig)
-    return out_path
+    return style.finalize_figure(fig, out_path.parent, out_path.stem, formats=(out_path.suffix.lstrip("."),))
 
 
 def plot_sensitivity(sens, name, out_path, note="", period="yr"):
     """CO2 per run of one sensitivity, one line per case."""
+    style.apply_publication_style()
     d = sens[sens["group"] == name]
-    fig, ax = plt.subplots(figsize=(7, 4), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(7, 4.5))
     for case, g in d.groupby("case", sort=False):
         x = range(len(g))
-        ax.plot(x, g["co2_kt"], marker="o", ms=6, lw=2, color=CASE_COLOR[case], label=g["label"].iloc[0])
+        ax.plot(x, g["co2_kt"], marker="o", ms=8, color=CASE_COLOR[case], label=g["label"].iloc[0])
         ax.set_xticks(list(x), [o.strip("{}").replace("'", "") for o in g["overrides"]],
-                      rotation=20, ha="right", fontsize=8)
+                      rotation=20, ha="right")
     ax.set_ylabel(f"CO2 emitted [kt/{period}]")
     ax.set_title(f"Sensitivity: {name.replace('_', ' ')}{note}", loc="left")
-    ax.set_ylim(0, None)
-    ax.grid(alpha=0.25, lw=0.5)
-    ax.spines[["top", "right"]].set_visible(False)
-    ax.legend(frameon=False, fontsize=9)
+    lo, hi = d["co2_kt"].min(), d["co2_kt"].max()
+    pad = max((hi - lo) * 0.15, hi * 0.02)
+    ax.set_ylim(max(lo - pad, 0), hi + pad)                            # line plot: tightened range
+    ax.legend()
+    fig.tight_layout(pad=1.0)
     out_path = Path(out_path)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=200)
-    plt.close(fig)
-    return out_path
+    return style.finalize_figure(fig, out_path.parent, out_path.stem, formats=(out_path.suffix.lstrip("."),))
 
 
 def main(argv=None):

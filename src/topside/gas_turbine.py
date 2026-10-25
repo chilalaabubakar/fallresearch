@@ -27,9 +27,10 @@ import numpy as np
 import pandas as pd
 
 from topside.config import load_config, param, repo_path
+from topside import style
 
-COLORS = ["#2a78d6", "#eb6834"]
-INK_MUTED = "#52514e"
+COLORS = [style.PALETTE["blue_main"], style.PALETTE["red_strong"]]
+INK_MUTED = style.PALETTE["grey"]
 
 # Chemistry, not model parameters: carbon atoms per molecule and molar mass of CO2.
 CARBON_ATOMS = {"methane": 1, "ethane": 2, "propane": 3, "i-butane": 4, "n-butane": 4,
@@ -208,11 +209,11 @@ def plot_part_load(gts, fuel, out_path):
     ax1.set_ylim(0, None)
     ax2.set_ylim(0, None)
     ax1.text(min_load * 50, 2, "below\nmin. load", ha="center", va="bottom",
-             color=INK_MUTED, fontsize=8)
-    ax1.legend(loc="lower right", frameon=False, fontsize=9)
+             color=INK_MUTED, fontsize=style.FONT_SIZE - 3)
+    ax1.legend(loc="lower right", frameon=False, fontsize=style.FONT_SIZE - 2)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=200)
+    fig.savefig(out_path, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     return out_path
 

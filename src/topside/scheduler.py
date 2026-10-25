@@ -42,7 +42,7 @@ import pandas as pd
 import pyomo.environ as pyo
 
 from topside.config import load_config, param, param_si, repo_path
-from topside import consumers, gas_turbine, process
+from topside import consumers, gas_turbine, process, style
 
 MW = 1e6
 SECONDS_PER_HOUR = 3600.0
@@ -352,16 +352,17 @@ def plot_schedule(results, out_path, title_note=""):
         df = results[lab]
         x = df.index
         ax.stackplot(x, df["gt_total_W"] / MW, df["wind_used_W"] / MW,
-                     colors=["#eb6834", "#2a78d6"], labels=["Gas turbines", "Wind used"], lw=0)
-        ax.plot(x, (df["p_demand_W"] + df["p_heater_W"]) / MW, color="#0b0b0b", lw=1.2,
+                     colors=[style.SOURCE_COLOR["gt"], style.SOURCE_COLOR["wind"]], labels=["Gas turbines", "Wind used"], lw=0)
+        ax.plot(x, (df["p_demand_W"] + df["p_heater_W"]) / MW, color=style.PALETTE["ink"], lw=1.8,
                 label="Demand incl. heater")
-        ax.plot(x, df["wind_avail_W"] / MW, color="#2a78d6", lw=0.8, ls=":", label="Wind available")
+        ax.plot(x, df["wind_avail_W"] / MW, color=style.PALETTE["blue_main"], lw=1.2, ls=":", label="Wind available")
         ax.set_ylabel("Power [MW]")
         ax.set_title(f"{lab}{title_note}", loc="left")
         ax.set_ylim(0, max(df["wind_avail_W"].max(), (df["p_demand_W"] + df["p_heater_W"]).max()) / MW * 1.3)
-        ax.legend(loc="upper left", frameon=False, fontsize=8, ncol=4)
+        ax.legend(loc="upper left", frameon=False, fontsize=style.FONT_SIZE - 3, ncol=4)
     ax = axes[-1]
-    for lab, color in zip(labels, ["#52514e", "#1baf7a", "#6250d6", "#eda100"]):
+    for lab, color in zip(labels, [style.CASE_COLOR["wind_fixed"], style.CASE_COLOR["wind_flex"],
+                                   style.CASE_COLOR["wind_flex_battery"], style.CASE_COLOR["gt_only"]]):
         ax.plot(results[lab].index, results[lab]["f_wi"] * 100, color=color, lw=1.2,
                 label=f"Injection, {lab}")
         ax.plot(results[lab].index, results[lab]["f_p"] * 100, color=color, lw=1.2, ls="--",
@@ -369,13 +370,13 @@ def plot_schedule(results, out_path, title_note=""):
     ax.set_ylabel("Rate [% of design]")
     ax.set_ylim(0, 105)
     ax.set_title("Lever positions", loc="left")
-    ax.legend(loc="lower right", frameon=False, fontsize=8, ncol=2)
+    ax.legend(loc="lower right", frameon=False, fontsize=style.FONT_SIZE - 3, ncol=2)
     for a in axes:
         a.grid(alpha=0.25, lw=0.5)
         a.spines[["top", "right"]].set_visible(False)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=200)
+    fig.savefig(out_path, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     return out_path
 
