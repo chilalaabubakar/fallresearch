@@ -33,6 +33,24 @@ def param(entry):
     return value
 
 
+# Field units allowed in the YAML, converted to SI on load: (factor, offset)
+TO_SI = {
+    "Sm3/d": (1 / 86400, 0.0),    # -> Sm3/s
+    "bara": (1e5, 0.0),           # -> Pa
+    "bar": (1e5, 0.0),            # -> Pa (pressure difference)
+    "degC": (1.0, 273.15),        # -> K
+    "MW": (1e6, 0.0),             # -> W
+    "kJ/kg/K": (1e3, 0.0),        # -> J/kg/K
+}
+
+
+def param_si(entry):
+    """Like param(), but converts field units listed in TO_SI to SI."""
+    value = param(entry)
+    factor, offset = TO_SI.get(entry["unit"], (1.0, 0.0))
+    return value * factor + offset
+
+
 def repo_path(relative):
     """Resolve a path from the config relative to the repository root."""
     return REPO_ROOT / relative

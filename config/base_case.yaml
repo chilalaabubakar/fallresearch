@@ -83,3 +83,65 @@ gas_turbine:
 
   output:
     figure_file: results/figures/gas_turbine_part_load.png
+
+process:
+  # Generic North Sea oil platform. Steady-state operating points only.
+  # Field units (Sm3/d, bara, degC, MW) are converted to SI when loaded.
+  reservoir_fluid:
+    # Hydrocarbon well stream, mole basis (any scale). Water is handled separately.
+    # TBP fractions: [moles, molar mass kg/mol, density g/cm3 at 15 degC]
+    components:
+      value: {nitrogen: 0.5, CO2: 1.5, methane: 45.0, ethane: 6.0, propane: 4.0,
+              i-butane: 0.8, n-butane: 1.8, i-pentane: 0.7, n-pentane: 0.9, n-hexane: 1.0}
+      unit: mol (relative)
+      source: "ASSUMPTION: generic North Sea black oil, GOR about 180 Sm3/Sm3; replace with a published field fluid"
+    tbp_fractions:
+      value: {C7: [2.5, 0.0913, 0.746], C8: [2.5, 0.1041, 0.768], C10: [4.0, 0.135, 0.790],
+              C15: [6.0, 0.206, 0.832], C20: [5.0, 0.282, 0.856], C30: [6.0, 0.400, 0.880]}
+      unit: "[mol (relative), kg/mol, g/cm3]"
+      source: "ASSUMPTION: generic heavy-end split; replace with a published field fluid"
+
+  design:
+    oil_rate:        {value: 15000.0, unit: Sm3/d, source: "ASSUMPTION: mid-size North Sea platform, plateau rate"}
+    water_cut:       {value: 0.40,    unit: "-",   source: "ASSUMPTION: water fraction of produced liquid at standard conditions"}
+    water_injection_rate: {value: 25000.0, unit: Sm3/d, source: "ASSUMPTION: roughly voidage replacement"}
+    well_temperature: {value: 70.0,  unit: degC, source: "ASSUMPTION: arrival temperature at the inlet separator"}
+
+  pressures:
+    hp_separator:   {value: 60.0,  unit: bara, source: "ASSUMPTION: typical 3-stage North Sea separation train"}
+    mp_separator:   {value: 10.0,  unit: bara, source: "ASSUMPTION"}
+    lp_separator:   {value: 2.0,   unit: bara, source: "ASSUMPTION"}
+    gas_export:     {value: 180.0, unit: bara, source: "ASSUMPTION: rich gas export pipeline inlet"}
+    oil_export:     {value: 100.0, unit: bara, source: "ASSUMPTION: oil export pipeline inlet"}
+    water_injection: {value: 250.0, unit: bara, source: "ASSUMPTION: water injection pump discharge"}
+    wi_suction:     {value: 5.0,   unit: bara, source: "ASSUMPTION: after deaeration / booster"}
+    seawater_lift:  {value: 8.0,   unit: bar,  source: "ASSUMPTION: lift pump differential pressure incl. static lift"}
+
+  cooling:
+    gas_cooler_outlet: {value: 30.0, unit: degC, source: "ASSUMPTION: scrubber inlet temperature"}
+    seawater_temperature_rise: {value: 10.0, unit: K, source: "ASSUMPTION: typical cooling-water design"}
+    seawater_cp: {value: 3.99, unit: kJ/kg/K, source: "Sharqawy, Lienhard & Zubair (2010), Desalin. Water Treat. 16:354-380; salinity 35 g/kg, 10-20 degC"}
+    seawater_density: {value: 1026.0, unit: kg/m3, source: "Sharqawy, Lienhard & Zubair (2010); salinity 35 g/kg, about 15 degC"}
+
+  efficiencies:
+    compressor_polytropic: {value: 0.75, unit: "-", source: "ASSUMPTION: typical centrifugal compressor; verify"}
+    pump_isentropic:       {value: 0.75, unit: "-", source: "ASSUMPTION: typical large centrifugal pump; verify"}
+    motor_and_drive:       {value: 0.95, unit: "-", source: "ASSUMPTION: electric motor + VSD efficiency; verify"}
+
+  # Part-load behaviour of each consumer (applied on top of NeqSim results):
+  #   n_trains: identical parallel trains; trains can be switched off at low flow
+  #   min_flow: minimum flow per train as fraction of train design flow
+  #             (anti-surge recycle for compressors, minimum-flow recirculation for pumps).
+  #             Below it the train recycles and draws min_flow power.
+  consumers:
+    recompression:     {n_trains: 1, min_flow: {value: 0.70, unit: "-", source: "ASSUMPTION: surge margin; verify"}}
+    export_compressor: {n_trains: 2, min_flow: {value: 0.70, unit: "-", source: "ASSUMPTION: surge margin; verify"}}
+    oil_export_pump:   {n_trains: 2, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow; verify"}}
+    water_injection_pump: {n_trains: 3, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow; verify"}}
+    seawater_lift_pump: {n_trains: 3, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow; verify"}}
+
+  base_load: {value: 5.0, unit: MW, source: "ASSUMPTION: utilities, HVAC, living quarters, instruments, produced water treatment"}
+
+  output:
+    table_file: data/processed/process_power_table.csv
+    figure_file: results/figures/process_power_vs_rate.png
