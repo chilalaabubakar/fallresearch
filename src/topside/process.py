@@ -192,9 +192,19 @@ class DesignPoint:
     seawater_cooling_rate: float  # m3/s
     gor: float                    # Sm3 gas / Sm3 oil
     export_discharge_T: float     # K
+    heat_per_production: float = 0.0    # W heat demand per unit production fraction
+    heat_per_injection: float = 0.0     # W heat demand per unit second-lever fraction
+    line_pack_hours: float | None = None  # gas platform: pipeline buffer (h at full rate)
+
+
+def is_gas_platform(cfg):
+    return cfg["process"].get("type", "oil") == "gas"
 
 
 def design_point(cfg):
+    if is_gas_platform(cfg):
+        from topside import process_gas
+        return process_gas.design_point(cfg)
     pc = cfg["process"]
     pr, eff, cool = pc["pressures"], pc["efficiencies"], pc["cooling"]
     eta_motor = param(eff["motor_and_drive"])
@@ -256,6 +266,9 @@ def consumer_power(design_power, flow_fraction, n_trains, min_flow):
 
 def platform_power(cfg, dp, production_fraction, injection_fraction):
     """Electric power per consumer (W) for production and water-injection fractions of design."""
+    if is_gas_platform(cfg):
+        from topside import process_gas
+        return process_gas.platform_power(cfg, dp, production_fraction, injection_fraction)
     cons = cfg["process"]["consumers"]
     f_p = np.asarray(production_fraction, dtype=float)
     f_wi = np.asarray(injection_fraction, dtype=float)
@@ -280,16 +293,18 @@ def platform_power(cfg, dp, production_fraction, injection_fraction):
 # --------------------------------------------------------------------------
 LABELS = {"recompression": "Recompression", "export_compressor": "Gas export compression",
           "oil_export_pump": "Oil export pumps", "water_injection_pump": "Water injection pumps",
-          "seawater_lift_pump": "Seawater lift pumps", "base_load": "Utilities and base load"}
+          "seawater_lift_pump": "Seawater lift pumps", "base_load": "Utilities and base load",
+          "condensate_pump": "Condensate export pump", "meg_regeneration": "MEG regeneration",
+          "meg_injection_pump": "MEG injection pumps"}
 
 
 def plot_power_vs_rate(table, out_path):
     """Stacked electric power per consumer vs platform rate (production and injection together)."""
     x = table.index.to_numpy() * 100
-    cols = list(LABELS)
+    cols = [c for c in LABELS if c in table]
     fig, ax = plt.subplots(figsize=(9, 5), constrained_layout=True)
     ys = [table[c].to_numpy() / 1e6 for c in cols]
-    polys = ax.stackplot(x, ys, colors=COLORS, labels=[LABELS[c] for c in cols],
+    polys = ax.stackplot(x, ys, colors=COLORS[:len(cols)], labels=[LABELS[c] for c in cols],
                          edgecolor="white", linewidth=1.0)
     ax.set_xlabel("Production and water injection rate [% of design]")
     ax.set_ylabel("Electric power [MW]")
@@ -308,6 +323,9 @@ def plot_power_vs_rate(table, out_path):
 
 def main():
     cfg = load_config()
+    if is_gas_platform(cfg):
+        from topside import process_gas
+        return process_gas.main(cfg)
     dp = design_point(cfg)
     print("Design point")
     print(f"  oil rate            {dp.oil_rate * 86400:10.0f} Sm3/d")

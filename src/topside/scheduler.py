@@ -124,6 +124,7 @@ class State:
     deficit: float                   # h of full-rate injection
     energy: float                    # battery, MWh
     on: dict                         # unit index -> 0/1
+    prod_deficit: float = 0.0        # h of full-rate production (gas: line pack drawn down)
 
 
 def build_model(sys, opt, wind_mw, state):
@@ -172,6 +173,18 @@ def build_model(sys, opt, wind_mw, state):
         m.deficit, t, state.deficit) + fx.injection.target_fraction - m.f_wi[t])
     m.deficit_end = pyo.Constraint(expr=m.deficit[T[-1]] <= state.deficit + 1e-6)
 
+    # production deficit (gas platform: line pack of the export pipeline), if configured
+    pl = fx.production
+    has_prod_storage = pl.max_deficit is not None
+    m.prod_deficit = pyo.Var(T, bounds=(0, pl.max_deficit if has_prod_storage else 0))
+    if has_prod_storage:
+        m.prod_deficit_balance = pyo.Constraint(T, rule=lambda m, t: m.prod_deficit[t] == prev(
+            m.prod_deficit, t, state.prod_deficit) + pl.target_fraction - m.f_p[t])
+        m.prod_deficit_end = pyo.Constraint(expr=m.prod_deficit[T[-1]] <= state.prod_deficit + 1e-6)
+    else:
+        for t in T:
+            m.prod_deficit[t].fix(0.0)
+
     # --- gas turbines (MW)
     m.on = pyo.Var(U, T, domain=pyo.Binary)
     m.start = pyo.Var(U, T, bounds=(0, 1))
@@ -215,7 +228,8 @@ def build_model(sys, opt, wind_mw, state):
                                      + m.dis[t] - m.ch[t] + m.unserved[t] == demand(t) + m.p_heat[t])
     m.heat_balance = pyo.Constraint(T, rule=lambda m, t: sum(
         unit_list[u].heat_recovery * (m.q_gt[u, t] - m.p_gt[u, t]) for u in U)
-        + sys.heater_eff * m.p_heat[t] >= sys.heat_demand / MW)
+        + sys.heater_eff * m.p_heat[t]
+        >= (sys.heat_demand + fx.heat_per_production * m.f_p[t] + fx.heat_per_injection * m.f_wi[t]) / MW)
     m.reserve = pyo.Constraint(T, rule=lambda m, t: sum(
         unit_list[u].gt.rated_power / MW * m.on[u, t] - m.p_gt[u, t] for u in U)
         + m.r_bat[t] + m.res_short[t] >= sys.reserve / MW)
@@ -255,6 +269,9 @@ def extract(m, sys, hours):
     for t in T:
         r = {
             "f_p": v(m.f_p[t]), "f_wi": v(m.f_wi[t]), "deficit_h": v(m.deficit[t]),
+            "prod_deficit_h": v(m.prod_deficit[t]),
+            "heat_demand_W": sys.heat_demand + sys.flex.heat_per_production * v(m.f_p[t])
+            + sys.flex.heat_per_injection * v(m.f_wi[t]),
             "p_demand_W": (v(m.p_prod[t]) + v(m.p_inj[t])) * MW + sys.flex.base_load
             + sys.flex.seawater_per_production * v(m.f_p[t]) + sys.flex.seawater_per_injection * v(m.f_wi[t]),
             "p_heater_W": v(m.p_heat[t]) * MW,
@@ -307,6 +324,7 @@ def run(sys, opt, wind_W, index=None, verbose=True):
         rows += extract(m, sys, commit)
         last = rows[-1]
         state = State(f_p=last["f_p"], f_wi=last["f_wi"], deficit=last["deficit_h"],
+                      prod_deficit=last["prod_deficit_h"],
                       energy=last["battery_energy_J"] / MW / SECONDS_PER_HOUR,
                       on={u: last[f"gt{u}_on"] for u in range(n_units)})
         if verbose:
@@ -335,6 +353,7 @@ def summarize(df, sys):
         "heater_GWh": df["p_heater_W"].sum() * h / 3.6e12,
         "mean_injection_fraction": df["f_wi"].mean(),
         "end_deficit_h": df["deficit_h"].iloc[-1],
+        "end_prod_deficit_h": df["prod_deficit_h"].iloc[-1],
         "unserved_MWh": df["unserved_W"].sum() / MW,
         "reserve_short_MWh": df["reserve_short_W"].sum() / MW,
     }

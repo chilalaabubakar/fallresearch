@@ -39,21 +39,22 @@ from topside import process, style
 CLASS_COLORS = style.CLASS_COLOR
 CLASS_LABELS = {"must_run": "Must-run", "flexible": "Flexible (deferrable)",
                 "sheddable": "Sheddable (lost production)", "mixed": "Mixed"}
+# Default lever groups (oil platform); a site config can set flexibility.levers instead
 PRODUCTION_CONSUMERS = ("recompression", "export_compressor", "oil_export_pump")
 INJECTION_CONSUMERS = ("water_injection_pump",)
+LEVER_LABELS = {"production": "Production lever (sheddable)", "injection": "Injection lever (flexible)"}
 
 
 @dataclass(frozen=True)
 class LeverLimits:
     min_fraction: float
     max_fraction: float
-    ramp_rate: float            # fraction of design per hour
+    ramp_rate: float                    # fraction of design per hour
+    target_fraction: float | None = None  # average the lever must keep (virtual storage)
+    max_deficit: float | None = None      # h of full-rate operation that may be postponed
 
 
-@dataclass(frozen=True)
-class InjectionLimits(LeverLimits):
-    target_fraction: float
-    max_deficit: float          # h of full-rate injection
+InjectionLimits = LeverLimits
 
 
 @dataclass(frozen=True)
@@ -66,6 +67,8 @@ class PlatformFlexibility:
     seawater_per_injection: float    # W per unit f_wi
     production: LeverLimits
     injection: InjectionLimits
+    heat_per_production: float = 0.0    # W heat demand per unit f_p (e.g. TEG reboiler)
+    heat_per_injection: float = 0.0     # W heat demand per unit f_wi (e.g. MEG regeneration)
 
     def power(self, f_p, f_wi):
         """Total platform electric power (W) for lever settings."""
@@ -107,6 +110,13 @@ def lever_curve(cfg, dp, names, f_min, f_max, step=0.001):
     return x, y
 
 
+def levers(cfg):
+    """Consumer names driven by the production and the second ("injection") lever."""
+    lv = cfg["flexibility"].get("levers", {})
+    return (tuple(lv.get("production", PRODUCTION_CONSUMERS)),
+            tuple(lv.get("injection", INJECTION_CONSUMERS)))
+
+
 def seawater_coefficients(dp):
     """Linear split of seawater lift power into production- and injection-driven parts.
 
@@ -120,28 +130,37 @@ def seawater_coefficients(dp):
     return per_prod, per_inj
 
 
-def _limits(entry, cls=LeverLimits, **extra):
-    return cls(min_fraction=param(entry["min_fraction"]), max_fraction=param(entry["max_fraction"]),
-               ramp_rate=param(entry["ramp_rate"]), **extra)
+def _limits(entry, dp):
+    """LeverLimits from a config block; max_deficit "line_pack" uses the pipeline buffer."""
+    target = param(entry["target_fraction"]) if "target_fraction" in entry else None
+    deficit = None
+    if "max_deficit" in entry:
+        deficit = entry["max_deficit"]["value"]
+        deficit = dp.line_pack_hours if deficit == "line_pack" else param(entry["max_deficit"])
+    return LeverLimits(min_fraction=param(entry["min_fraction"]), max_fraction=param(entry["max_fraction"]),
+                       ramp_rate=param(entry["ramp_rate"]), target_fraction=target, max_deficit=deficit)
 
 
 def build_flexibility(cfg, dp=None):
     """Assemble PlatformFlexibility from the config (runs NeqSim if dp is not given)."""
     dp = dp or process.design_point(cfg)
     fx = cfg["flexibility"]
-    prod = _limits(fx["production"])
-    wi = fx["water_injection"]
-    inj = _limits(wi, InjectionLimits, target_fraction=param(wi["target_fraction"]),
-                  max_deficit=param(wi["max_deficit"]))
-    sw_p, sw_i = seawater_coefficients(dp)
+    prod, inj = _limits(fx["production"], dp), _limits(fx["water_injection"], dp)
+    prod_names, inj_names = levers(cfg)
+    classes = fx["classes"]
+    # Seawater lift is split between the levers only where it is a "mixed" consumer
+    sw_p, sw_i = seawater_coefficients(dp) if classes.get("seawater_lift_pump") == "mixed" else (0.0, 0.0)
+    must_run = sum(p for n, p in dp.power.items() if classes.get(n) == "must_run")
     return PlatformFlexibility(
-        base_load=dp.power["base_load"],
-        production_curve=lever_curve(cfg, dp, PRODUCTION_CONSUMERS, prod.min_fraction, prod.max_fraction),
-        injection_curve=lever_curve(cfg, dp, INJECTION_CONSUMERS, inj.min_fraction, inj.max_fraction),
+        base_load=must_run,
+        production_curve=lever_curve(cfg, dp, prod_names, prod.min_fraction, prod.max_fraction),
+        injection_curve=lever_curve(cfg, dp, inj_names, inj.min_fraction, inj.max_fraction),
         seawater_per_production=sw_p,
         seawater_per_injection=sw_i,
         production=prod,
         injection=inj,
+        heat_per_production=dp.heat_per_production,
+        heat_per_injection=dp.heat_per_injection,
     )
 
 
@@ -162,11 +181,14 @@ def check_schedule(flex, f_p, f_wi, dt=1.0, tol=1e-6):
             problems.append(f"{name} outside [{lim.min_fraction}, {lim.max_fraction}]")
         if len(f) > 1 and np.abs(np.diff(f)).max() > lim.ramp_rate * dt + tol:
             problems.append(f"{name} ramp above {lim.ramp_rate}/h")
-    d = injection_deficit(f_wi, flex.injection.target_fraction, dt)
-    if d.min() < -tol:
-        problems.append("injection deficit below zero (over-injection ahead of target)")
-    if d.max() > flex.injection.max_deficit + tol:
-        problems.append(f"injection deficit above {flex.injection.max_deficit} h")
+    for name, f, lim in (("production", f_p, flex.production), ("injection", f_wi, flex.injection)):
+        if lim.max_deficit is None:
+            continue
+        d = injection_deficit(f, lim.target_fraction, dt)
+        if d.min() < -tol:
+            problems.append(f"{name} deficit below zero (ahead of target)")
+        if d.max() > lim.max_deficit + tol:
+            problems.append(f"{name} deficit above {lim.max_deficit} h")
     return problems
 
 
@@ -175,9 +197,12 @@ def check_schedule(flex, f_p, f_wi, dt=1.0, tol=1e-6):
 # --------------------------------------------------------------------------
 def classification_table(cfg, dp):
     classes = cfg["flexibility"]["classes"]
-    lever = {**{n: "production fraction" for n in PRODUCTION_CONSUMERS},
-             **{n: "injection fraction" for n in INJECTION_CONSUMERS},
-             "seawater_lift_pump": "both", "base_load": "none"}
+    prod_names, inj_names = levers(cfg)
+    lever = {**{n: "none" for n in dp.power},
+             **{n: "production fraction" for n in prod_names},
+             **{n: "second lever fraction" for n in inj_names}}
+    if classes.get("seawater_lift_pump") == "mixed":
+        lever["seawater_lift_pump"] = "both"
     rows = [{"consumer": n, "label": process.LABELS[n], "class": classes[n],
              "lever": lever[n], "design_power_MW": dp.power[n] / 1e6} for n in dp.power]
     t = pd.DataFrame(rows).sort_values("design_power_MW", ascending=False)
@@ -185,8 +210,9 @@ def classification_table(cfg, dp):
     return t
 
 
-def plot_flexibility(table, flex, out_path):
+def plot_flexibility(table, flex, out_path, lever_labels=None):
     """Left: design power per consumer by class. Right: power vs lever position."""
+    labels = {**LEVER_LABELS, **(lever_labels or {})}
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5), constrained_layout=True,
                                    gridspec_kw={"width_ratios": [1, 1.1]})
     t = table.iloc[::-1]
@@ -201,16 +227,19 @@ def plot_flexibility(table, flex, out_path):
     ax1.legend(handles=[plt.Rectangle((0, 0), 1, 1, color=CLASS_COLORS[c]) for c in used],
                labels=[CLASS_LABELS[c] for c in used], loc="lower right", frameon=False, fontsize=style.FONT_SIZE - 3)
 
-    for (x, y), cls, label in ((flex.production_curve, "sheddable", "Production lever (sheddable)"),
-                               (flex.injection_curve, "flexible", "Injection lever (flexible)")):
-        ax2.plot(np.asarray(x) * 100, np.asarray(y) / 1e6, color=CLASS_COLORS[cls], lw=2, label=label)
+    # Production lever is red where it is sheddable, dark blue where it is flexible (line pack)
+    prod_color = CLASS_COLORS["flexible"] if flex.production.max_deficit else CLASS_COLORS["sheddable"]
+    inj_color = style.PALETTE["teal"] if flex.production.max_deficit else CLASS_COLORS["flexible"]
+    for (x, y), color, label in ((flex.production_curve, prod_color, labels["production"]),
+                                 (flex.injection_curve, inj_color, labels["injection"])):
+        ax2.plot(np.asarray(x) * 100, np.asarray(y) / 1e6, color=color, lw=2, label=label)
     ax2.axvspan(0, flex.production.min_fraction * 100, color=style.PALETTE["grey"], alpha=0.07, lw=0)
     ax2.text(flex.production.min_fraction * 50, 0.3, "below min.\nproduction", ha="center",
              fontsize=style.FONT_SIZE - 3, color=style.PALETTE["grey"])
     ax2.set_xlabel("Lever position [% of design]")
     ax2.set_ylabel("Electric power [MW]")
     ax2.set_title("Power vs lever position", loc="left")
-    ax2.set_xlim(0, 100)
+    ax2.set_xlim(0, max(flex.production.max_fraction, flex.injection.max_fraction, 1.0) * 100)
     ax2.set_ylim(0, None)
     ax2.legend(loc="upper left", frameon=False, fontsize=style.FONT_SIZE - 2)
     for ax in (ax1, ax2):
@@ -237,14 +266,20 @@ def main():
     print(f"Power at full production, full injection:   {p_full / 1e6:6.2f} MW")
     print(f"Power at full production, target injection: {p_target / 1e6:6.2f} MW")
     print(f"Power at minimum production, no injection:  {p_min / 1e6:6.2f} MW")
-    print(f"Flexible range without losing production:   {(p_full - flex.power(1.0, 0.0)) / 1e6:6.2f} MW")
+    print(f"Flexible range without losing production:   {(p_full - flex.power(1.0, 0.0)) / 1e6:6.2f} MW"
+          + (" (second lever only)" if flex.production.max_deficit else ""))
+    if flex.production.max_deficit:
+        lo = flex.power(flex.production.min_fraction, 0.0)
+        print(f"Production lever buffered by line pack:      {flex.production.max_deficit:.2f} h; "
+              f"power can swing {lo / 1e6:.2f}-{p_full / 1e6:.2f} MW within it")
     print(f"Production curve breakpoints: {len(flex.production_curve[0])}, "
           f"injection curve breakpoints: {len(flex.injection_curve[0])}")
 
     out_csv = repo_path(cfg["flexibility"]["output"]["table_file"])
     out_csv.parent.mkdir(parents=True, exist_ok=True)
     table.to_csv(out_csv, index=False, float_format="%.3f")
-    out_fig = plot_flexibility(table, flex, repo_path(cfg["flexibility"]["output"]["figure_file"]))
+    out_fig = plot_flexibility(table, flex, repo_path(cfg["flexibility"]["output"]["figure_file"]),
+                               cfg["flexibility"].get("lever_labels"))
     print(f"Saved {out_csv}\nSaved {out_fig}")
     return flex
 

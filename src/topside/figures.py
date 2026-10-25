@@ -196,7 +196,7 @@ SENS_TITLES = {"wind_farm_size": "Wind farm size [turbines]", "co2_price": "CO2 
                "gas_price": "Gas price [NOK/Sm3]", "battery_size": "Battery [MW / MWh]",
                "injection_deficit": "Injection deficit limit [h]",
                "min_gt_online": "Min. GTs online (8 MW battery)", "gt_fleet": "GT fleet",
-               "gt_operation_practice": "Keep 2 GTs online"}
+               "gt_operation_practice": "Keep 2 GTs online", "line_pack": "Line pack buffer [h]"}
 
 
 def override_label(text):
@@ -292,7 +292,8 @@ def main(argv=None):
     flex = consumers.build_flexibility(cfg, dp)
     tbl = consumers.classification_table(cfg, dp)
     for ext in ("pdf", "png"):
-        p = consumers.plot_flexibility(tbl, flex, out / f"fig02_demand_map.{ext}")
+        p = consumers.plot_flexibility(tbl, flex, out / f"fig02_demand_map.{ext}",
+                                       cfg["flexibility"].get("lever_labels"))
     made.append(p)
     fuel = gas_turbine.fuel_gas_from_config(cfg)
     gts = [gas_turbine.gas_turbine_from_config(cfg, k) for k in cfg["gas_turbine"]["units"]]

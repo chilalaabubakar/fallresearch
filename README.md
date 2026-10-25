@@ -27,6 +27,22 @@ cut fuel gas use and CO2 emissions without large production losses.
 | 8 | `validation.py` – benchmarks + field data | done (Gullfaks, Snorre, Statfjord) |
 | 9 | `figures.py` – paper figures and tables | done (results/paper) |
 
+## Sites
+The North Sea case (`config/base_case.yaml`) is the default. A site config lists
+only what differs and is selected with the `TOPSIDE_CONFIG` environment variable
+(or `--config` for `topside.wind`); its results go to its own folder.
+
+| Site | Config | Platform | Results |
+|---|---|---|---|
+| North Sea, Tampen (61 N, 2 E) | `config/base_case.yaml` | oil (NeqSim, 4-stage separation, water injection) | `results/` |
+| Tanzania deepwater (9.5 S, 40.5 E) | `config/tanzania.yaml` | gas (NeqSim, export compression, TEG, MEG, line pack) | `results/tanzania/` |
+
+```bash
+python -m topside.wind --config config/tanzania.yaml --download
+export TOPSIDE_CONFIG=config/tanzania.yaml     # PowerShell: $env:TOPSIDE_CONFIG="config/tanzania.yaml"
+python -m topside.cases --sensitivity all && python -m topside.validation && python -m topside.figures
+```
+
 ## Setup
 
 Python 3.11 or newer.

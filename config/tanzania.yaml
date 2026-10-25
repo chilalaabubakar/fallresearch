@@ -29,8 +29,103 @@ sensitivity:
     cases: [wind_flex]
     runs: [{co2_price: 0.0}, {co2_price: 0.5}, {co2_price: 1.0}, {co2_price: 2.0}]
     source: "Sensitivity: no carbon price (base) up to the Norwegian 2030 target of NOK 2/kg"
+  line_pack:
+    cases: [wind_flex]
+    runs: [{line_pack_hours: 0.0}, {line_pack_hours: 1.8}, {line_pack_hours: 3.6}, {line_pack_hours: 7.2}]
+    source: "Sensitivity on the export-pipeline buffer (base 3.6 h from 150-110 bar swing); 0 h = no production flexibility"
 
 validation:
+  # North Sea benchmarks and Norwegian field data do not apply to this site
+  benchmarks: {replace: true}
+  field_data_file: data/validation/field_data_tanzania.csv
   output:
     table_file: results/tanzania/validation/validation_table.csv
     figure_file: results/tanzania/validation/validation.png
+
+fuel_gas:
+  # Lean export gas is used as fuel; the CO2 factor follows from its carbon content
+  composition:
+    value: {nitrogen: 0.005, CO2: 0.005, methane: 0.9595, ethane: 0.020, propane: 0.006,
+            i-butane: 0.0015, n-butane: 0.0015, i-pentane: 0.0005, n-pentane: 0.0005, n-hexane: 0.0005}
+    unit: mol/mol
+    source: "ASSUMPTION: lean dry gas (no public composition for Blocks 1, 2, 4 found); same as process gas without C7+"
+  co2_factor_method: composition   # carbon balance of the composition instead of the Norwegian 2.34 kg/Sm3
+
+gas_turbine:
+  # Hot-climate correction relative to ISO 15 degC (applied to rated power and efficiency)
+  ambient:
+    temperature: {value: 27.0, unit: degC, source: "ASSUMPTION: annual mean air temperature offshore southern Tanzania; to be replaced by the ERA5 2 m mean"}
+    iso_temperature: {value: 15.0, unit: degC, source: "ISO 3977 reference conditions"}
+    power_derate_per_K: {value: 0.007, unit: 1/K, source: "Rule of thumb 0.5-0.9 %/K above ISO for gas turbines (Wartsila; USPE; Power Engineering) - verify with OEM site rating"}
+    efficiency_derate_per_K: {value: 0.001, unit: 1/K, source: "Rule of thumb about 1 % efficiency per 10 K above ISO (Wartsila; Power Engineering heat-rate rule) - verify with OEM"}
+  output:
+    figure_file: results/tanzania/figures/gas_turbine_part_load.png
+
+process:
+  type: gas
+  gas:
+    components:
+      value: {nitrogen: 0.5, CO2: 0.5, methane: 95.5, ethane: 2.0, propane: 0.6, i-butane: 0.15,
+              n-butane: 0.15, i-pentane: 0.05, n-pentane: 0.05, n-hexane: 0.05}
+      unit: mol (relative)
+      source: "ASSUMPTION: lean gas with little condensate; no public composition for Blocks 1, 2, 4 found"
+    tbp_fractions:
+      value: {C7: [0.15, 0.0913, 0.746], C10: [0.10, 0.135, 0.790]}
+      unit: "[mol (relative), kg/mol, g/cm3]"
+      source: "ASSUMPTION: small condensate fraction"
+    design_gas_rate: {value: 10.0e+6, unit: Sm3/d, source: "ASSUMPTION: one processing platform supplying about a quarter of a 2-train (10 Mtpa) LNG plant"}
+    arrival_pressure: {value: 70.0, unit: bara, source: "ASSUMPTION: subsea flowline arrival pressure, mid-life"}
+    arrival_temperature: {value: 15.0, unit: degC, source: "ASSUMPTION: gas cooled towards seabed temperature in deepwater flowlines"}
+    stabiliser_pressure: {value: 10.0, unit: bara, source: "ASSUMPTION: condensate stabiliser"}
+    export_pressure: {value: 150.0, unit: bara, source: "ASSUMPTION: export pipeline inlet pressure"}
+    pipeline:
+      length: {value: 100.0e+3, unit: m, source: "About 100 km subsea pipeline from the deepwater discoveries to the Lindi LNG site (The EastAfrican; Shell)"}
+      inner_diameter: {value: 0.6, unit: m, source: "ASSUMPTION: 24-inch class export line for about 10 MSm3/d"}
+      max_pressure: {value: 150.0, unit: bara, source: "ASSUMPTION: equal to export pressure"}
+      min_pressure: {value: 110.0, unit: bara, source: "ASSUMPTION: lowest pipeline inlet pressure that still meets the shore delivery pressure"}
+      temperature: {value: 15.0, unit: degC, source: "ASSUMPTION: average gas temperature along the deep and shallow sections"}
+    teg_heat: {value: 1.5, unit: MW, source: "ASSUMPTION: TEG regeneration reboiler duty at design gas rate (order of magnitude from GPSA glycol rules); verify"}
+    meg:
+      regeneration_heat: {value: 3.0, unit: MW, source: "ASSUMPTION: MEG regeneration (water boil-off) heat at full regeneration rate"}
+      regeneration_electric: {value: 0.3, unit: MW, source: "ASSUMPTION: MEG regeneration pumps and fans at full rate"}
+      injection_pumps: {value: 0.5, unit: MW, source: "ASSUMPTION: lean MEG injection to subsea wells, must run for hydrate control"}
+  cooling:
+    gas_cooler_outlet: {value: 38.0, unit: degC, source: "ASSUMPTION: about 10 K above warm seawater"}
+    seawater_temperature_rise: {value: 8.0, unit: K, source: "ASSUMPTION: smaller rise allowed with warm seawater"}
+    seawater_inlet_temperature: {value: 28.0, unit: degC, source: "ASSUMPTION: tropical sea-surface temperature; to be replaced by the ERA5 SST mean"}
+  heat_demand: {value: 0.5, unit: MW, source: "ASSUMPTION: utility heat; TEG and MEG heat are modelled per lever"}
+  consumers:
+    condensate_pump:  {n_trains: 1, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow"}}
+    meg_regeneration: {n_trains: 1, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: regeneration unit turndown"}}
+  output:
+    table_file: results/tanzania/process_power_table.csv
+    figure_file: results/tanzania/figures/process_power_vs_rate.png
+
+flexibility:
+  levers:
+    production: [export_compressor, condensate_pump, seawater_lift_pump]
+    injection: [meg_regeneration]
+  lever_labels: {production: "Gas production (line pack)", injection: "MEG regeneration"}
+  classes:
+    export_compressor: flexible
+    condensate_pump: flexible
+    seawater_lift_pump: flexible
+    meg_regeneration: flexible
+    meg_injection_pump: must_run
+    base_load: must_run
+  production:
+    # Fractions of the sales rate. Capacity 10 % above it lets the platform refill the line pack.
+    min_fraction: {value: 0.50, unit: "-", source: "ASSUMPTION: lowest stable well and compressor turndown"}
+    max_fraction: {value: 1.10, unit: "-", source: "ASSUMPTION: 10 % process capacity above the sales rate"}
+    target_fraction: {value: 1.00, unit: "-", source: "Contracted sales rate to the LNG plant on average"}
+    max_deficit: {value: line_pack, unit: h, source: "Computed from the export pipeline line pack (process_gas.line_pack_hours)"}
+  water_injection:
+    # Second lever = MEG regeneration (key kept for the shared scheduler)
+    min_fraction: {value: 0.0, unit: "-", source: "Regeneration can pause; lean MEG supplied from storage"}
+    max_fraction: {value: 1.0, unit: "-", source: "Regeneration capacity"}
+    target_fraction: {value: 0.80, unit: "-", source: "ASSUMPTION: average regeneration need as fraction of capacity"}
+    ramp_rate: {value: 0.50, unit: 1/h, source: "ASSUMPTION"}
+    max_deficit: {value: 48.0, unit: h, source: "ASSUMPTION: rich-MEG tank holds 48 h of full-rate regeneration feed"}
+  output:
+    table_file: results/tanzania/tables/consumer_classification.csv
+    figure_file: results/tanzania/figures/consumer_flexibility.png

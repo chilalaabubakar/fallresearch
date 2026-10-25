@@ -1,0 +1,7 @@
+consumer,label,class,lever,design_power_MW,share_of_total
+export_compressor,Gas export compression,flexible,production fraction,11.180,0.699
+base_load,Utilities and base load,must_run,none,3.500,0.219
+seawater_lift_pump,Seawater lift pumps,flexible,production fraction,0.504,0.032
+meg_injection_pump,MEG injection pumps,must_run,none,0.500,0.031
+meg_regeneration,MEG regeneration,flexible,second lever fraction,0.300,0.019
+condensate_pump,Condensate export pump,flexible,production fraction,0.021,0.001

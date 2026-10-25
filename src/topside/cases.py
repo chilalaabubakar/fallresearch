@@ -66,6 +66,9 @@ def apply_overrides(cfg, sys_, case_key, wind_W, overrides=None):
             s.prices[key] = float(overrides.pop(key))
     if "min_gt_online" in overrides:
         s.min_gt_online = int(overrides.pop("min_gt_online"))
+    if "line_pack_hours" in overrides:
+        prod = dataclasses.replace(s.flex.production, max_deficit=float(overrides.pop("line_pack_hours")))
+        s.flex = dataclasses.replace(s.flex, production=prod)
     if "max_deficit" in overrides:
         inj = dataclasses.replace(s.flex.injection, max_deficit=float(overrides.pop("max_deficit")))
         s.flex = dataclasses.replace(s.flex, injection=inj)

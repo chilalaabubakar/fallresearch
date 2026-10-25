@@ -45,7 +45,8 @@ def model_metrics(cfg, dp, wind_W, cases_summary=None, sensitivity=None):
     m = {
         "design_power_MW": sum(dp.power.values()) / 1e6,
         "wind_capacity_factor": float(np.mean(wind_W)) / installed,
-        "wi_specific_energy_kWh_per_m3": dp.power["water_injection_pump"] / dp.water_injection_rate / 3.6e6,
+        "wi_specific_energy_kWh_per_m3": (dp.power["water_injection_pump"] / dp.water_injection_rate / 3.6e6
+                                          if dp.water_injection_rate > 0 else None),
         "co2_avoided_t_per_MWh": None,
         "co2_avoided_t_per_MWh_2gt": None,
         "co2_intensity_kg_per_boe": None,
@@ -85,7 +86,8 @@ def compare(cfg, metrics):
                      "model": model, "benchmark_low": lo, "benchmark_high": hi,
                      "model_to_benchmark": None if model is None else model / mid,
                      "status": status, "note": b.get("note", ""), "source": b["source"]})
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows, columns=["benchmark", "metric", "unit", "model", "benchmark_low", "benchmark_high",
+                                       "model_to_benchmark", "status", "note", "source"])
 
 
 # --------------------------------------------------------------------------
@@ -121,6 +123,15 @@ def plot_validation(table, fields, model_intensity, out_path, note=""):
     fig, axes = plt.subplots(1, 2 if has_fields else 1, figsize=(13 if has_fields else 8, 0.5 * len(t) + 2),
                              constrained_layout=True, squeeze=False)
     ax = axes[0, 0]
+    if t.empty:
+        ax.text(0.5, 0.5, "No published benchmarks configured for this site", ha="center", va="center",
+                transform=ax.transAxes, color=style.PALETTE["dark"])
+        ax.set_axis_off()
+        out_path = Path(out_path)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, bbox_inches="tight", pad_inches=0.06)
+        plt.close(fig)
+        return out_path
     tol = 0.2
     ax.axvspan(1 - tol, 1 + tol, color=style.PALETTE["green_1"], lw=0)
     ax.axvline(1, color=style.PALETTE["grey"], lw=0.8)

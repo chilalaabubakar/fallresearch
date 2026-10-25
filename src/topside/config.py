@@ -15,10 +15,19 @@ DEFAULT_CONFIG = REPO_ROOT / "config" / "base_case.yaml"
 
 
 def _deep_merge(base, override):
-    """Recursively merge override into base (override wins)."""
+    """Recursively merge override into base (override wins).
+
+    A dict containing `replace: true` replaces the inherited dict instead of
+    being merged into it (e.g. a site with its own list of benchmarks).
+    """
     out = dict(base)
     for k, v in override.items():
-        out[k] = _deep_merge(out[k], v) if isinstance(v, dict) and isinstance(out.get(k), dict) else v
+        if isinstance(v, dict) and v.get("replace") is True:
+            out[k] = {kk: vv for kk, vv in v.items() if kk != "replace"}
+        elif isinstance(v, dict) and isinstance(out.get(k), dict):
+            out[k] = _deep_merge(out[k], v)
+        else:
+            out[k] = v
     return out
 
 

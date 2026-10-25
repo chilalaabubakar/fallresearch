@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from topside.config import load_config, param, repo_path
+from topside.config import load_config, param, param_si, repo_path
 from topside import style
 
 COLORS = [style.PALETTE["blue_main"], style.PALETTE["red_strong"]]
@@ -91,9 +91,10 @@ def fuel_gas_from_config(cfg):
         raise ValueError(f"Fuel gas mole fractions sum to {total}, not 1")
     lhv, density, molar_density = _iso6976(tuple(sorted(comp.items())),
                                            param(fg["standard_temperature"]))
-    return FuelGas(lhv=lhv, density=density,
-                   co2_factor=param(fg["co2_emission_factor"]),
-                   co2_factor_composition=co2_factor_from_composition(comp, molar_density))
+    from_composition = co2_factor_from_composition(comp, molar_density)
+    # "composition": use the carbon balance of this gas instead of a reported factor
+    used = from_composition if fg.get("co2_factor_method") == "composition" else param(fg["co2_emission_factor"])
+    return FuelGas(lhv=lhv, density=density, co2_factor=used, co2_factor_composition=from_composition)
 
 
 # --------------------------------------------------------------------------
@@ -134,6 +135,20 @@ class GasTurbine:
         return np.divide(power, eta, out=np.zeros_like(power), where=eta > 0)
 
 
+def ambient_factors(cfg):
+    """Multipliers on rated power and efficiency for air warmer than ISO (1, 1 if not set).
+
+    Linear rule of thumb: each kelvin above the ISO temperature lowers rated
+    power and efficiency by the configured fractions. The minimum load stays
+    the same fraction of the (derated) rated power.
+    """
+    amb = cfg["gas_turbine"].get("ambient")
+    if not amb:
+        return 1.0, 1.0
+    dT = max(param_si(amb["temperature"]) - param_si(amb["iso_temperature"]), 0.0)
+    return 1 - param(amb["power_derate_per_K"]) * dT, 1 - param(amb["efficiency_derate_per_K"]) * dT
+
+
 def gas_turbine_from_config(cfg, unit_key):
     g = cfg["gas_turbine"]
     u = g["units"][unit_key]
@@ -143,8 +158,9 @@ def gas_turbine_from_config(cfg, unit_key):
         table = (tuple(t["load_fraction"]), tuple(t["relative_efficiency"]))
     elif g["part_load_method"] != "willans":
         raise ValueError(f"Unknown part_load_method {g['part_load_method']!r}")
-    return GasTurbine(name=u["name"], rated_power=param(u["rated_power"]),
-                      rated_efficiency=param(u["rated_efficiency"]),
+    power_factor, eff_factor = ambient_factors(cfg)
+    return GasTurbine(name=u["name"], rated_power=param(u["rated_power"]) * power_factor,
+                      rated_efficiency=param(u["rated_efficiency"]) * eff_factor,
                       no_load_fuel_fraction=param(u["no_load_fuel_fraction"]),
                       min_load=param(u["min_load"]), table=table)
 
