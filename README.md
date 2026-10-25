@@ -26,6 +26,7 @@ cut fuel gas use and CO2 emissions without large production losses.
 | 7 | `cases.py` – cases 1–4, sensitivity | done (real ERA5 results in results/cases) |
 | 8 | `validation.py` – benchmarks + field data | done (Gullfaks, Snorre, Statfjord) |
 | 9 | `figures.py` – paper figures and tables | done (results/paper) |
+| 10 | Tanzania site + `compare_sites.py` – North Sea vs Tanzania | in progress (results/comparison) |
 
 ## Sites
 The North Sea case (`config/base_case.yaml`) is the default. A site config lists
@@ -41,6 +42,8 @@ only what differs and is selected with the `TOPSIDE_CONFIG` environment variable
 python -m topside.wind --config config/tanzania.yaml --download
 export TOPSIDE_CONFIG=config/tanzania.yaml     # PowerShell: $env:TOPSIDE_CONFIG="config/tanzania.yaml"
 python -m topside.cases --sensitivity all && python -m topside.validation && python -m topside.figures
+unset TOPSIDE_CONFIG                           # PowerShell: Remove-Item Env:TOPSIDE_CONFIG
+python -m topside.compare_sites                # both sites side by side -> results/comparison/
 ```
 
 ## Setup
