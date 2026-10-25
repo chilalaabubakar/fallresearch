@@ -12,12 +12,20 @@ def cfg():
 
 @pytest.fixture(scope="module")
 def gt(cfg):
-    return gtm.gas_turbine_from_config(cfg, "large")
+    return gtm.gas_turbine_from_config(cfg, "main")
 
 
 @pytest.fixture(scope="module")
 def fuel(cfg):
     return gtm.fuel_gas_from_config(cfg)
+
+
+def test_leogo_fuel_model(gt):
+    # LEOGO: fuel_energy / P_max = B + A * P / P_max with A = 2.35, B = 0.53 (Svendsen et al., 2023)
+    A, B = 2.35, 0.53
+    for load in (0.2, 0.5, 1.0):
+        p = load * gt.rated_power
+        assert gt.fuel_power(p) / gt.rated_power == pytest.approx(B + A * load, rel=2e-3)
 
 
 def test_willans_shape():
@@ -43,10 +51,10 @@ def test_overload_rejected(gt):
 
 
 def test_table_method_matches_willans(cfg):
-    # The template table holds Willans values with a = 0.25
+    # The template table holds Willans values with the LEOGO shape (a = 0.184)
     cfg_t = {**cfg, "gas_turbine": {**cfg["gas_turbine"], "part_load_method": "table"}}
-    t = gtm.gas_turbine_from_config(cfg_t, "large")
-    w = gtm.gas_turbine_from_config(cfg, "large")
+    t = gtm.gas_turbine_from_config(cfg_t, "main")
+    w = gtm.gas_turbine_from_config(cfg, "main")
     p = np.array([0.3, 0.5, 0.8]) * w.rated_power
     assert np.allclose(t.efficiency(p), w.efficiency(p), atol=1e-3)
 
@@ -64,11 +72,11 @@ def test_config_co2_factor_close_to_composition(fuel):
 
 
 def test_baseline_dispatch_and_totals(gt, fuel):
-    demand = np.array([20e6, 40e6, 60e6])
+    demand = np.array([10e6, 30e6, 40e6])
     n, p_unit = gtm.equal_sharing_dispatch(demand, gt, min_units=2)
     assert list(n) == [2, 2, 2]
     assert np.allclose(p_unit * n, demand)
     out = gtm.fuel_and_co2(p_unit, n, gt, fuel, low_load_threshold=0.5)
-    # 10, 20 and 30 MW per 32 MW unit -> 31 %, 62.5 %, 94 % load
+    # 5, 15 and 20 MW per 21.8 MW unit -> 23 %, 69 %, 92 % load
     assert list(out["low_load"]) == [True, False, False]
     assert np.allclose(out["co2_kg"], out["fuel_Sm3"] * fuel.co2_factor)

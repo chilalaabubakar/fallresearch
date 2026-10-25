@@ -48,6 +48,8 @@ def param_si(entry):
     """Like param(), but converts field units listed in TO_SI to SI."""
     value = param(entry)
     factor, offset = TO_SI.get(entry["unit"], (1.0, 0.0))
+    if isinstance(value, list):
+        return [v * factor + offset for v in value]
     return value * factor + offset
 
 

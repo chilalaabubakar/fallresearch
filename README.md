@@ -96,5 +96,9 @@ results/                figures and tables
   Offshore Reference Wind Turbine*, NREL/TP-5000-75698.
   <https://github.com/IEAWindTask37/IEA-15-240-RWT>
 - Fuel gas heating value: computed with NeqSim to ISO 6976 from the composition in the config.
+- LEOGO reference platform: Svendsen et al. (2023), IET Energy Syst. Integr., doi:10.1049/esi2.12085
+  (gas turbines, efficiencies, export/injection pressures, base load, CO2 factor).
+- Separator pressures: Voldsund et al. North Sea platform studies (Energy 55:716–727, 2013, and related).
+- See `docs/parameter_verification.md` for what was verified and what is still assumed.
 - Seawater properties: Sharqawy, Lienhard & Zubair (2010), Desalin. Water Treat. 16:354–380.
 - Wind shear exponent at sea: Hsu, Meindl & Gilhousen (1994), J. Appl. Meteorol. 33:757–765.

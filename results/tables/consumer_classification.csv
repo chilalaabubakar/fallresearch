@@ -1,7 +1,7 @@
 consumer,label,class,lever,design_power_MW,share_of_total
-water_injection_pump,Water injection pumps,flexible,injection fraction,9.754,0.387
-export_compressor,Gas export compression,sheddable,production fraction,5.042,0.200
-base_load,Utilities and base load,must_run,none,5.000,0.198
-oil_export_pump,Oil export pumps,sheddable,production fraction,2.533,0.101
-recompression,Recompression,sheddable,production fraction,2.516,0.100
-seawater_lift_pump,Seawater lift pumps,mixed,both,0.358,0.014
+water_injection_pump,Water injection pumps,flexible,injection fraction,9.191,0.453
+export_compressor,Gas export compression,sheddable,production fraction,3.731,0.184
+base_load,Utilities and base load,must_run,none,3.500,0.173
+recompression,Recompression,sheddable,production fraction,1.946,0.096
+oil_export_pump,Oil export pumps,sheddable,production fraction,1.482,0.073
+seawater_lift_pump,Seawater lift pumps,mixed,both,0.435,0.021

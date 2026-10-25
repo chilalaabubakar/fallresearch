@@ -32,7 +32,8 @@ wind:
     cut_out_speed: {value: 25.0, unit: m/s, source: "Gaertner et al. (2020)"}
 
   farm:
-    n_turbines: {value: 2, unit: "-", source: "ASSUMPTION: 30 MW installed (about 26 MW after losses), matched to the 25 MW design demand from process.py; varied in sensitivity analysis"}
+    n_turbines: {value: 2, unit: "-", source: "Base case choice: 30 MW installed, same order as the 32 MW wind farm of the LEOGO reference platform (Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)); varied in sensitivity"}
+    n_turbines_sensitivity: {value: [1, 2, 3, 4], unit: "-", source: "Sensitivity range, 15-60 MW installed"}
     # Loss factors, applied as multipliers (1 - loss).
     wake_loss:       {value: 0.05, unit: "-", source: "ASSUMPTION: small cluster of 2 turbines; verify against literature"}
     electrical_loss: {value: 0.02, unit: "-", source: "ASSUMPTION: short subsea cable to platform; verify against literature"}
@@ -51,12 +52,12 @@ fuel_gas:
     value: {nitrogen: 0.01, CO2: 0.02, methane: 0.84, ethane: 0.07, propane: 0.035,
             i-butane: 0.007, n-butane: 0.008, i-pentane: 0.005, n-pentane: 0.005}
     unit: mol/mol
-    source: "ASSUMPTION: generic lean North Sea fuel gas; replace with a published field composition"
+    source: "ASSUMPTION: generic lean North Sea fuel gas; gives LHV 39.0 MJ/Sm3 vs 40 MJ/Sm3 used in LEOGO (Svendsen et al., 2023). No public field composition found"
   # LHV is computed from the composition with NeqSim (ISO 6976), not entered here.
   co2_emission_factor:
     value: 2.34
     unit: kg_CO2/Sm3
-    source: "ASSUMPTION (verify): Norwegian standard factor for fuel gas combustion, as recalled from Offshore Norge guideline 044 / Norwegian Environment Agency M-107. Cross-checked in code against the factor computed from the composition."
+    source: "LEOGO reference platform gas carrier co2_content = 2.34 kg/Sm3, citing Statistics Norway (SSB) 2016 (Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)). Cross-checked in code against the carbon balance of the composition."
 
 gas_turbine:
   # Part-load model: Willans line, i.e. fuel power is linear in electric power:
@@ -66,20 +67,27 @@ gas_turbine:
   part_load_method: willans   # or "table" (relative efficiency vs load from CSV)
   part_load_table_file: data/turbines/gt_part_load_table.csv
   units:
-    large:
-      name: Aeroderivative GT, LM2500+G4 class
-      rated_power: {value: 32.0e+6, unit: W, source: "ASSUMPTION (verify): LM2500+G4 class, ISO, generator terminals; check GE datasheet or Riboldi & Nord (2017), Energy Convers. Manag. 148:860-875"}
-      rated_efficiency: {value: 0.38, unit: "-", source: "ASSUMPTION (verify): LM2500+G4 class, ISO, LHV; check GE datasheet"}
-      no_load_fuel_fraction: {value: 0.25, unit: "-", source: "ASSUMPTION: gives eta(50%)/eta(100%) = 0.80; calibrate to published part-load data"}
-      min_load: {value: 0.30, unit: "-", source: "ASSUMPTION: minimum stable load as fraction of rated (emission/stability limit); verify"}
+    main:
+      # LEOGO fuel model: fuel_energy / P_max = B * on + A * P / P_max, with A = 2.35, B = 0.53
+      #   -> rated efficiency 1/(A+B) = 0.347, no-load fuel fraction B/(A+B) = 0.184
+      name: LEOGO reference gas turbine
+      rated_power: {value: 21.8e+6, unit: W, source: "Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+      rated_efficiency: {value: 0.3472, unit: "-", source: "1/(A+B) with A = 2.35, B = 0.53 from Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+      no_load_fuel_fraction: {value: 0.184, unit: "-", source: "B/(A+B) with A = 2.35, B = 0.53 from Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+      min_load: {value: 0.161, unit: "-", source: "3.5 MW minimum of 21.8 MW, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+      n_installed: {value: 3, unit: "-", source: "Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+      heat_recovery_efficiency: {value: 0.5, unit: "-", source: "Share of (fuel - electricity) recovered as useful heat, eta_heat in Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
     small:
       name: Industrial GT, SGT-500 class
       rated_power: {value: 19.0e+6, unit: W, source: "ASSUMPTION (verify): SGT-500 class, ISO; check Siemens Energy datasheet"}
       rated_efficiency: {value: 0.335, unit: "-", source: "ASSUMPTION (verify): SGT-500 class, ISO, LHV; check Siemens Energy datasheet"}
-      no_load_fuel_fraction: {value: 0.25, unit: "-", source: "ASSUMPTION: same shape as large unit; calibrate to published part-load data"}
-      min_load: {value: 0.30, unit: "-", source: "ASSUMPTION: verify"}
+      no_load_fuel_fraction: {value: 0.184, unit: "-", source: "Same part-load shape as LEOGO turbine (Svendsen et al., 2023)"}
+      min_load: {value: 0.161, unit: "-", source: "Same as LEOGO turbine (Svendsen et al., 2023)"}
+      n_installed: {value: 1, unit: "-", source: "Project definition: one small GT in wind cases"}
+      heat_recovery_efficiency: {value: 0.5, unit: "-", source: "Same as LEOGO turbine (Svendsen et al., 2023)"}
   low_load_threshold: {value: 0.50, unit: "-", source: "ASSUMPTION: load fraction below which a GT hour is counted as low-load (inefficient)"}
   min_units_running: {value: 2, unit: "-", source: "ASSUMPTION: N+1 redundancy common on Norwegian platforms; fixed per case later"}
+  spinning_reserve: {value: 5.0e+6, unit: W, source: "el_reserve_margin = 5 MW in Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
 
   output:
     figure_file: results/figures/gas_turbine_part_load.png
@@ -108,14 +116,12 @@ process:
     well_temperature: {value: 70.0,  unit: degC, source: "ASSUMPTION: arrival temperature at the inlet separator"}
 
   pressures:
-    hp_separator:   {value: 60.0,  unit: bara, source: "ASSUMPTION: typical 3-stage North Sea separation train"}
-    mp_separator:   {value: 10.0,  unit: bara, source: "ASSUMPTION"}
-    lp_separator:   {value: 2.0,   unit: bara, source: "ASSUMPTION"}
-    gas_export:     {value: 180.0, unit: bara, source: "ASSUMPTION: rich gas export pipeline inlet"}
-    oil_export:     {value: 100.0, unit: bara, source: "ASSUMPTION: oil export pipeline inlet"}
-    water_injection: {value: 250.0, unit: bara, source: "ASSUMPTION: water injection pump discharge"}
-    wi_suction:     {value: 5.0,   unit: bara, source: "ASSUMPTION: after deaeration / booster"}
-    seawater_lift:  {value: 8.0,   unit: bar,  source: "ASSUMPTION: lift pump differential pressure incl. static lift"}
+    separators: {value: [70.0, 29.2, 7.9, 1.8], unit: bara, source: "Voldsund et al. North Sea platform separation train, 7 / 2.92 / 0.79 / 0.18 MPa (HYSYS model; as reported in Nguyen, Voldsund et al. 2014 four-platform comparison, last stage 1.7-2.8 bar on all four) - verify in original"}
+    gas_export:     {value: 180.0, unit: bara, source: "About 175-180 bar export/lift pressure on North Sea platform D in Nguyen, Voldsund et al. (2014); LEOGO uses 200 bar (sensitivity)"}
+    oil_export:     {value: 50.0,  unit: bara, source: "5 MPa oil export pressure, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+    water_injection: {value: 250.0, unit: bara, source: "25 MPa injection pressure, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+    wi_suction:     {value: 7.0,   unit: bara, source: "0.7 MPa water deck pressure, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+    seawater_lift:  {value: 10.4,  unit: bar,  source: "0.1 -> 1.14 MPa incl. 40 m lift, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
 
   cooling:
     gas_cooler_outlet: {value: 30.0, unit: degC, source: "ASSUMPTION: scrubber inlet temperature"}
@@ -124,9 +130,12 @@ process:
     seawater_density: {value: 1026.0, unit: kg/m3, source: "Sharqawy, Lienhard & Zubair (2010); salinity 35 g/kg, about 15 degC"}
 
   efficiencies:
-    compressor_polytropic: {value: 0.75, unit: "-", source: "ASSUMPTION: typical centrifugal compressor; verify"}
-    pump_isentropic:       {value: 0.75, unit: "-", source: "ASSUMPTION: typical large centrifugal pump; verify"}
-    motor_and_drive:       {value: 0.95, unit: "-", source: "ASSUMPTION: electric motor + VSD efficiency; verify"}
+    # LEOGO efficiencies relate electric power to fluid power directly, so no
+    # separate motor loss is applied (motor_and_drive = 1).
+    compressor_isentropic: {value: 0.75, unit: "-", source: "Isentropic efficiency of export and re-compressors, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+    water_pump:            {value: 0.75, unit: "-", source: "Water injection and seawater lift pumps, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+    oil_export_pump:       {value: 0.60, unit: "-", source: "Oil export pump, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+    motor_and_drive:       {value: 1.0,  unit: "-", source: "Included in the LEOGO efficiencies above"}
 
   # Part-load behaviour of each consumer (applied on top of NeqSim results):
   #   n_trains: identical parallel trains; trains can be switched off at low flow
@@ -134,13 +143,14 @@ process:
   #             (anti-surge recycle for compressors, minimum-flow recirculation for pumps).
   #             Below it the train recycles and draws min_flow power.
   consumers:
-    recompression:     {n_trains: 1, min_flow: {value: 0.70, unit: "-", source: "ASSUMPTION: surge margin; verify"}}
-    export_compressor: {n_trains: 2, min_flow: {value: 0.70, unit: "-", source: "ASSUMPTION: surge margin; verify"}}
-    oil_export_pump:   {n_trains: 2, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow; verify"}}
-    water_injection_pump: {n_trains: 3, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow; verify"}}
-    seawater_lift_pump: {n_trains: 3, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow; verify"}}
+    recompression:     {n_trains: 1, min_flow: {value: 0.70, unit: "-", source: "ASSUMPTION: surge margin; no public value found; verify"}}
+    export_compressor: {n_trains: 2, min_flow: {value: 0.70, unit: "-", source: "ASSUMPTION: surge margin; no public value found; verify"}}
+    oil_export_pump:   {n_trains: 2, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow; no public value found; verify"}}
+    water_injection_pump: {n_trains: 3, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow; no public value found; verify"}}
+    seawater_lift_pump: {n_trains: 3, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow; no public value found; verify"}}
 
-  base_load: {value: 5.0, unit: MW, source: "ASSUMPTION: utilities, HVAC, living quarters, instruments, produced water treatment"}
+  base_load: {value: 3.5, unit: MW, source: "2.5 MW general electric load + 1.0 MW air compressors, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
+  heat_demand: {value: 3.0, unit: MW, source: "Process/utility heat demand (thermal), Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml); met by GT waste heat or an electric heater"}
 
   output:
     table_file: data/processed/process_power_table.csv

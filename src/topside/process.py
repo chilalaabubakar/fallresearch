@@ -1,12 +1,16 @@
 """Process module: NeqSim topside model -> electric power per consumer vs flow.
 
-Flowsheet (steady state, hydrocarbons in NeqSim with Peng-Robinson):
+Flowsheet (steady state, hydrocarbons in NeqSim with Peng-Robinson), for N
+separator stages (base case 4: 70 / 29.2 / 7.9 / 1.8 bara):
 
-    well stream -> HP sep -> valve -> MP sep -> valve -> LP sep -> oil export pump
-                     |                 |                  |
-                     |                 |         LP gas -> recompressor 1
-                     |                 +-- MP gas ------+-> cooler -> scrubber -> recompressor 2
-                     +-- HP gas ----------------------------+-> cooler -> scrubber -> export compressor
+    well -> sep 1 -> valve -> sep 2 -> ... -> sep N -> oil export pump
+              |                 |                |
+              |                 |      gas N -> recompressor N-1 -> ...
+              |                 +-- gas 2 --(mix)-> cooler -> scrubber -> recompressor 1
+              +-- gas 1 ----------------------(mix)-> cooler -> scrubber -> export compressor
+
+Each recompressor lifts the gas from one stage to the stage above, where it
+mixes with that stage's gas. Compressors use an isentropic efficiency.
 
 Water side (pure water, CPA equation of state, which gets liquid water right):
     water injection pumps:  suction -> injection pressure
@@ -14,8 +18,8 @@ Water side (pure water, CPA equation of state, which gets liquid water right):
                             water injection not covered by produced water
 
 Simplifications: scrubber liquids are not recycled to the separators; fuel gas
-take-off is not subtracted from export gas; heat demand is assumed covered by
-waste heat recovery (no electric heating).
+take-off is not subtracted from export gas; heat demand (config heat_demand) is
+not part of the electric load here, it is handled in the scheduler.
 
 At fixed pressures, temperatures and efficiencies, steady-state power is
 proportional to flow. So NeqSim is run at the design point and part-load power
@@ -84,64 +88,72 @@ def run_hydrocarbon_process(cfg, well_mass_flow):
     J = _jneqsim()
     E = J.process.equipment
     pr, pc, eff = cfg["process"]["pressures"], cfg["process"], cfg["process"]["efficiencies"]
-    bar = lambda key: param_si(pr[key]) / 1e5          # NeqSim setters take bara
-    eta_c = param(eff["compressor_polytropic"])
+    p_sep = [p / 1e5 for p in param_si(pr["separators"])]   # NeqSim setters take bara
+    eta_c = param(eff["compressor_isentropic"])
     t_cool = param_si(pc["cooling"]["gas_cooler_outlet"]) - 273.15
+    units = []
 
     well = E.stream.Stream("well", build_reservoir_fluid(cfg))
     well.setFlowRate(float(well_mass_flow), "kg/sec")
     well.setTemperature(param_si(pc["design"]["well_temperature"]) - 273.15, "C")
-    well.setPressure(bar("hp_separator"), "bara")
+    well.setPressure(p_sep[0], "bara")
+    units.append(well)
 
-    hp = E.separator.Separator("HP separator", well)
-    v1 = E.valve.ThrottlingValve("HP-MP valve", hp.getLiquidOutStream())
-    v1.setOutletPressure(bar("mp_separator"))
-    mp = E.separator.Separator("MP separator", v1.getOutletStream())
-    v2 = E.valve.ThrottlingValve("MP-LP valve", mp.getLiquidOutStream())
-    v2.setOutletPressure(bar("lp_separator"))
-    lp = E.separator.Separator("LP separator", v2.getOutletStream())
+    # Separation train: stage 1 at p_sep[0], ..., stage N at p_sep[-1]
+    seps, liquid = [], well
+    for i, p in enumerate(p_sep):
+        if i > 0:
+            valve = E.valve.ThrottlingValve(f"valve {i}-{i + 1}", liquid)
+            valve.setOutletPressure(p)
+            units.append(valve)
+            liquid = valve.getOutletStream()
+        sep = E.separator.Separator(f"separator {i + 1}", liquid)
+        units.append(sep)
+        seps.append(sep)
+        liquid = sep.getLiquidOutStream()
 
-    oil_pump = E.pump.Pump("oil export pump", lp.getLiquidOutStream())
-    oil_pump.setOutletPressure(bar("oil_export"))
-    oil_pump.setIsentropicEfficiency(param(eff["pump_isentropic"]))
+    oil_pump = E.pump.Pump("oil export pump", liquid)
+    oil_pump.setOutletPressure(param_si(pr["oil_export"]) / 1e5)
+    oil_pump.setIsentropicEfficiency(param(eff["oil_export_pump"]))
+    units.append(oil_pump)
 
     def compressor(name, inlet, p_out):
         c = E.compressor.Compressor(name, inlet)
         c.setOutletPressure(p_out)
-        c.setUsePolytropicCalc(True)
-        c.setPolytropicEfficiency(eta_c)
+        c.setIsentropicEfficiency(eta_c)
+        units.append(c)
         return c
 
-    rc1 = compressor("recompressor 1", lp.getGasOutStream(), bar("mp_separator"))
-    mix1 = E.mixer.Mixer("MP gas mixer")
-    mix1.addStream(rc1.getOutletStream())
-    mix1.addStream(mp.getGasOutStream())
-    cool1 = E.heatexchanger.Cooler("MP gas cooler", mix1.getOutletStream())
-    cool1.setOutTemperature(t_cool, "C")
-    scrub1 = E.separator.Separator("MP scrubber", cool1.getOutletStream())
-    rc2 = compressor("recompressor 2", scrub1.getGasOutStream(), bar("hp_separator"))
-    mix2 = E.mixer.Mixer("HP gas mixer")
-    mix2.addStream(rc2.getOutletStream())
-    mix2.addStream(hp.getGasOutStream())
-    cool2 = E.heatexchanger.Cooler("HP gas cooler", mix2.getOutletStream())
-    cool2.setOutTemperature(t_cool, "C")
-    scrub2 = E.separator.Separator("HP scrubber", cool2.getOutletStream())
-    exp = compressor("export compressor", scrub2.getGasOutStream(), bar("gas_export"))
+    # Recompression: lift gas from the last stage upwards, mixing at each level
+    recompressors, coolers, gas = [], [], seps[-1].getGasOutStream()
+    for i in range(len(seps) - 1, 0, -1):          # i = target stage index (0-based) + 1
+        rc = compressor(f"recompressor {i}", gas, p_sep[i - 1])
+        recompressors.append(rc)
+        mix = E.mixer.Mixer(f"stage {i} gas mixer")
+        mix.addStream(rc.getOutletStream())
+        mix.addStream(seps[i - 1].getGasOutStream())
+        cool = E.heatexchanger.Cooler(f"stage {i} gas cooler", mix.getOutletStream())
+        cool.setOutTemperature(t_cool, "C")
+        scrub = E.separator.Separator(f"stage {i} scrubber", cool.getOutletStream())
+        units += [mix, cool, scrub]
+        coolers.append(cool)
+        gas = scrub.getGasOutStream()
+    exp = compressor("export compressor", gas, param_si(pr["gas_export"]) / 1e5)
 
     ps = J.process.processmodel.ProcessSystem()
-    for unit in (well, hp, v1, mp, v2, lp, oil_pump, rc1, mix1, cool1, scrub1,
-                 rc2, mix2, cool2, scrub2, exp):
+    for unit in units:
         ps.add(unit)
     ps.run()
 
     return {
-        "recompression_shaft_W": rc1.getPower() + rc2.getPower(),
+        "recompression_shaft_W": sum(rc.getPower() for rc in recompressors),
         "export_compressor_shaft_W": exp.getPower(),
         "oil_export_pump_shaft_W": oil_pump.getPower(),
-        "cooling_duty_W": -(cool1.getDuty() + cool2.getDuty()),
-        "oil_rate_Sm3_s": _standard_oil_volume_rate(lp.getLiquidOutStream()),
+        "cooling_duty_W": -sum(c.getDuty() for c in coolers),
+        "oil_rate_Sm3_s": _standard_oil_volume_rate(liquid),
         "gas_export_Sm3_s": exp.getOutletStream().getFlowRate("Sm3/sec"),
         "export_discharge_T_K": exp.getOutletStream().getTemperature("K"),
+        "max_recompressor_T_K": max(rc.getOutletStream().getTemperature("K") for rc in recompressors),
     }
 
 
@@ -186,7 +198,7 @@ def design_point(cfg):
     pc = cfg["process"]
     pr, eff, cool = pc["pressures"], pc["efficiencies"], pc["cooling"]
     eta_motor = param(eff["motor_and_drive"])
-    eta_pump = param(eff["pump_isentropic"])
+    eta_pump = param(eff["water_pump"])
     target_oil = param_si(pc["design"]["oil_rate"])
 
     # Find the well flow that gives the design oil rate (results scale linearly).

@@ -37,7 +37,7 @@ def test_water_injection_pump_matches_hand_calculation(cfg, dp):
     pr, eff = cfg["process"]["pressures"], cfg["process"]["efficiencies"]
     dp_pa = param_si(pr["water_injection"]) - param_si(pr["wi_suction"])
     hand = dp.water_injection_rate * dp_pa / (
-        param_si(eff["pump_isentropic"]) * param_si(eff["motor_and_drive"]))
+        param_si(eff["water_pump"]) * param_si(eff["motor_and_drive"]))
     assert dp.power["water_injection_pump"] == pytest.approx(hand, rel=0.05)
 
 
