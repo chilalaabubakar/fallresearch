@@ -1,0 +1,43 @@
+# Base case: generic North Sea platform near Tampen.
+#
+# Every physical parameter is written as
+#   name: {value: ..., unit: ..., source: ...}
+# Units are SI (m, s, W, kg, Sm3) unless the unit field says otherwise.
+# A source starting with "ASSUMPTION" is a placeholder that still needs a
+# literature reference or a sensitivity run before it goes into the paper.
+
+site:
+  name: Tampen area, northern North Sea
+  latitude:  {value: 61.0, unit: deg_N, source: "Project definition; near Snorre/Gullfaks and Hywind Tampen"}
+  longitude: {value: 2.0,  unit: deg_E, source: "Project definition"}
+  year:      {value: 2023, unit: "-",   source: "Project definition; one full calendar year of hourly data"}
+
+wind:
+  era5:
+    dataset: reanalysis-era5-single-levels
+    variables: [100m_u_component_of_wind, 100m_v_component_of_wind]
+    raw_dir: data/raw/era5
+    reference_height: {value: 100.0, unit: m, source: "ERA5 100 m wind components (Hersbach et al., 2020, QJRMS 146:1999-2049)"}
+
+  height_correction:
+    method: power_law
+    hub_height: {value: 150.0, unit: m, source: "IEA-15-240-RWT hub height (Gaertner et al., 2020, NREL/TP-5000-75698)"}
+    shear_exponent: {value: 0.11, unit: "-", source: "Hsu, Meindl & Gilhousen (1994), J. Appl. Meteorol. 33:757-765, near-neutral conditions at sea"}
+
+  turbine:
+    name: IEA-15-240-RWT
+    power_curve_file: data/turbines/iea_15mw_power_curve.csv
+    rated_power: {value: 15.0e6, unit: W, source: "Gaertner et al. (2020)"}
+    cut_in_speed:  {value: 3.0,  unit: m/s, source: "Gaertner et al. (2020)"}
+    cut_out_speed: {value: 25.0, unit: m/s, source: "Gaertner et al. (2020)"}
+
+  farm:
+    n_turbines: {value: 3, unit: "-", source: "ASSUMPTION: 45 MW farm, sized to the order of platform demand; varied in sensitivity analysis"}
+    # Loss factors, applied as multipliers (1 - loss).
+    wake_loss:       {value: 0.05, unit: "-", source: "ASSUMPTION: small cluster of 3 turbines; verify against literature"}
+    electrical_loss: {value: 0.02, unit: "-", source: "ASSUMPTION: short subsea cable to platform; verify against literature"}
+    availability:    {value: 0.95, unit: "-", source: "ASSUMPTION: typical offshore availability; verify against literature"}
+
+  output:
+    processed_file: data/processed/wind_farm_power_{year}.csv
+    figure_file: results/figures/wind_farm_power_{year}.png

@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Large downloaded data (re-create with the download scripts)
+data/raw/**/*.nc
+data/raw/**/*.grib
+
+# Demo outputs made from synthetic data, never for the paper
+results/**/*synthetic*
+data/processed/*synthetic*
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
