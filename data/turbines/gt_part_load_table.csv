@@ -1,0 +1,15 @@
+# TEMPLATE for gas_turbine.part_load_method = "table".
+# Relative efficiency eta/eta_rated vs load fraction (P/P_rated).
+# Current values are the Willans line with a = 0.25, NOT published data.
+# Replace with points digitised from a published part-load curve and cite it here.
+load_fraction,relative_efficiency
+0.1,0.308
+0.2,0.500
+0.3,0.632
+0.4,0.727
+0.5,0.800
+0.6,0.857
+0.7,0.903
+0.8,0.941
+0.9,0.973
+1.0,1.000

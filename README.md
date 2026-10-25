@@ -19,7 +19,7 @@ cut fuel gas use and CO2 emissions without large production losses.
 |---|---|---|
 | 1 | Repo setup, environment, config | done |
 | 2 | `wind.py` – ERA5 → wind farm power | done (needs real ERA5 run) |
-| 3 | `gas_turbine.py` – load → efficiency → fuel → CO2 | – |
+| 3 | `gas_turbine.py` – load → efficiency → fuel → CO2 | done (parameters to verify) |
 | 4 | `process.py` – NeqSim topside model | – |
 | 5 | `consumers.py` – flexibility classes | – |
 | 6 | `scheduler.py` – Pyomo optimisation | – |
@@ -64,6 +64,7 @@ install a Java runtime (for example Temurin 17+).
 python -m topside.wind --download   # download ERA5 (12 monthly files) and process
 python -m topside.wind              # re-process files already in data/raw/era5
 python -m topside.wind --synthetic  # demo with fake wind, no download needed
+python -m topside.gas_turbine       # fuel gas properties + part-load curves
 ```
 
 Outputs:
@@ -92,4 +93,5 @@ results/                figures and tables
 - IEA 15 MW turbine: Gaertner et al. (2020), *Definition of the IEA 15-Megawatt
   Offshore Reference Wind Turbine*, NREL/TP-5000-75698.
   <https://github.com/IEAWindTask37/IEA-15-240-RWT>
+- Fuel gas heating value: computed with NeqSim to ISO 6976 from the composition in the config.
 - Wind shear exponent at sea: Hsu, Meindl & Gilhousen (1994), J. Appl. Meteorol. 33:757–765.

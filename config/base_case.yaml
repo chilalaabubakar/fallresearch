@@ -41,3 +41,45 @@ wind:
   output:
     processed_file: data/processed/wind_farm_power_{year}.csv
     figure_file: results/figures/wind_farm_power_{year}.png
+
+fuel_gas:
+  # Standard conditions for Sm3 (Norwegian petroleum practice; ISO 13443).
+  standard_temperature: {value: 288.15,    unit: K,  source: "ISO 13443 standard reference conditions (15 degC)"}
+  standard_pressure:    {value: 101325.0,  unit: Pa, source: "ISO 13443 standard reference conditions"}
+  # Mole fractions; must sum to 1. Names are NeqSim component names.
+  composition:
+    value: {nitrogen: 0.01, CO2: 0.02, methane: 0.84, ethane: 0.07, propane: 0.035,
+            i-butane: 0.007, n-butane: 0.008, i-pentane: 0.005, n-pentane: 0.005}
+    unit: mol/mol
+    source: "ASSUMPTION: generic lean North Sea fuel gas; replace with a published field composition"
+  # LHV is computed from the composition with NeqSim (ISO 6976), not entered here.
+  co2_emission_factor:
+    value: 2.34
+    unit: kg_CO2/Sm3
+    source: "ASSUMPTION (verify): Norwegian standard factor for fuel gas combustion, as recalled from Offshore Norge guideline 044 / Norwegian Environment Agency M-107. Cross-checked in code against the factor computed from the composition."
+
+gas_turbine:
+  # Part-load model: Willans line, i.e. fuel power is linear in electric power:
+  #   Q_fuel = P_rated/eta_rated * (a + (1 - a) * L),   L = P / P_rated
+  # so eta(L) = eta_rated * L / (a + (1 - a) * L).
+  # a = no-load fuel as a fraction of full-load fuel.
+  part_load_method: willans   # or "table" (relative efficiency vs load from CSV)
+  part_load_table_file: data/turbines/gt_part_load_table.csv
+  units:
+    large:
+      name: Aeroderivative GT, LM2500+G4 class
+      rated_power: {value: 32.0e+6, unit: W, source: "ASSUMPTION (verify): LM2500+G4 class, ISO, generator terminals; check GE datasheet or Riboldi & Nord (2017), Energy Convers. Manag. 148:860-875"}
+      rated_efficiency: {value: 0.38, unit: "-", source: "ASSUMPTION (verify): LM2500+G4 class, ISO, LHV; check GE datasheet"}
+      no_load_fuel_fraction: {value: 0.25, unit: "-", source: "ASSUMPTION: gives eta(50%)/eta(100%) = 0.80; calibrate to published part-load data"}
+      min_load: {value: 0.30, unit: "-", source: "ASSUMPTION: minimum stable load as fraction of rated (emission/stability limit); verify"}
+    small:
+      name: Industrial GT, SGT-500 class
+      rated_power: {value: 19.0e+6, unit: W, source: "ASSUMPTION (verify): SGT-500 class, ISO; check Siemens Energy datasheet"}
+      rated_efficiency: {value: 0.335, unit: "-", source: "ASSUMPTION (verify): SGT-500 class, ISO, LHV; check Siemens Energy datasheet"}
+      no_load_fuel_fraction: {value: 0.25, unit: "-", source: "ASSUMPTION: same shape as large unit; calibrate to published part-load data"}
+      min_load: {value: 0.30, unit: "-", source: "ASSUMPTION: verify"}
+  low_load_threshold: {value: 0.50, unit: "-", source: "ASSUMPTION: load fraction below which a GT hour is counted as low-load (inefficient)"}
+  min_units_running: {value: 2, unit: "-", source: "ASSUMPTION: N+1 redundancy common on Norwegian platforms; fixed per case later"}
+
+  output:
+    figure_file: results/figures/gas_turbine_part_load.png
