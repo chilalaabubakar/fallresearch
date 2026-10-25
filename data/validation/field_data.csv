@@ -1,0 +1,7 @@
+# Field data for validation. Fill one row per field and year from public sources:
+#   CO2:        norskeutslipp.no -> Industri / Petroleum -> field or installation -> Utslipp til luft (CO2, tonnes)
+#   production: factpages.sodir.no -> Field -> Production (yearly, net oil / gas / water)
+# Units: co2_t in tonnes; oil_Sm3, gas_Sm3, water_Sm3 in Sm3 (gas in Sm3, not MSm3).
+# co2_turbines_t is optional: emissions from turbines only, if the source splits by source type.
+# electrified: yes if the field gets power from shore or Hywind Tampen in that year.
+field,year,co2_t,co2_turbines_t,oil_Sm3,gas_Sm3,water_Sm3,electrified,source
