@@ -4,4 +4,16 @@
 # Units: co2_t in tonnes; oil_Sm3, gas_Sm3, water_Sm3 in Sm3 (gas in Sm3, not MSm3).
 # co2_turbines_t is optional: emissions from turbines only, if the source splits by source type.
 # electrified: yes if the field gets power from shore or Hywind Tampen in that year.
-field,year,co2_t,co2_turbines_t,oil_Sm3,gas_Sm3,water_Sm3,electrified,source
+# fuel_gas_Sm3 and diesel_t: fuel gas burned and diesel used (Norskeutslipp 'Energiforbruk')
+# Gullfaks field centre also processes Gullfaks Sør and Tordis; production summed over those fields
+# 'electrified' = receives Hywind Tampen power (Gullfaks from Nov 2022, Snorre from May 2023; ~35 % share)
+field,year,co2_t,co2_turbines_t,oil_Sm3,gas_Sm3,water_Sm3,electrified,fuel_gas_Sm3,diesel_t,source
+Gullfaks,2021,752807,,5385000,5812000000,20796000,no,324630914,1167.9,"CO2 and fuel: Norskeutslipp CompanyID=22311 (Excel export, accessed 2026-10-25); net production: Sodir FactPages field_production_yearly (Gullfaks + Gullfaks Sør + Tordis)"
+Gullfaks,2023,542808,,4548000,5091000000,17573000,yes,226140536,1863.2,"CO2 and fuel: Norskeutslipp CompanyID=22311 (Excel export, accessed 2026-10-25); net production: Sodir FactPages field_production_yearly (Gullfaks + Gullfaks Sør + Tordis)"
+Gullfaks,2024,516861,,4040000,4660000000,18490000,yes,220081482,2645.5,"CO2 and fuel: Norskeutslipp CompanyID=22311 (Excel export, accessed 2026-10-25); net production: Sodir FactPages field_production_yearly (Gullfaks + Gullfaks Sør + Tordis)"
+Snorre,2021,515975,,5827000,0,8510000,no,135196820,15603.8,"CO2 and fuel: Norskeutslipp CompanyID=16791 (Excel export, accessed 2026-10-25); net production: Sodir FactPages field_production_yearly (Snorre)"
+Snorre,2023,445190,,5491000,0,8604000,yes,125175804,2691.0,"CO2 and fuel: Norskeutslipp CompanyID=16791 (Excel export, accessed 2026-10-25); net production: Sodir FactPages field_production_yearly (Snorre)"
+Snorre,2024,386609,,5010000,0,9582000,yes,119961806,3201.6,"CO2 and fuel: Norskeutslipp CompanyID=16791 (Excel export, accessed 2026-10-25); net production: Sodir FactPages field_production_yearly (Snorre)"
+Statfjord,2021,758505,,1384000,822000000,15729000,no,271633206,2862.9,"CO2 and fuel: Norskeutslipp CompanyID=16790 (Excel export, accessed 2026-10-25); net production: Sodir FactPages field_production_yearly (Statfjord)"
+Statfjord,2023,686506,,977000,652000000,12134000,no,242675292,6562.4,"CO2 and fuel: Norskeutslipp CompanyID=16790 (Excel export, accessed 2026-10-25); net production: Sodir FactPages field_production_yearly (Statfjord)"
+Statfjord,2024,755561,,1037000,497000000,11599000,no,276491219,5641.5,"CO2 and fuel: Norskeutslipp CompanyID=16790 (Excel export, accessed 2026-10-25); net production: Sodir FactPages field_production_yearly (Statfjord)"

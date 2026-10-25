@@ -105,6 +105,10 @@ def load_field_data(cfg, path=None):
     df["co2_intensity_kg_per_boe"] = df["co2_t"] * 1e3 / boe
     if "co2_turbines_t" in df:
         df["co2_turbines_kg_per_boe"] = df["co2_turbines_t"] * 1e3 / boe
+    if "fuel_gas_Sm3" in df:
+        # All reported CO2 (incl. flaring and diesel) per Sm3 of fuel gas: an upper bound
+        # for the fuel-gas emission factor used in the model
+        df["co2_per_fuel_gas_kg_per_Sm3"] = df["co2_t"] * 1e3 / df["fuel_gas_Sm3"]
     return df
 
 
@@ -198,7 +202,9 @@ def main(argv=None):
     print(show.to_string(index=False, float_format=lambda v: f"{v:.3g}"))
     if len(fields):
         print("\nField data:")
-        print(fields[["field", "year", "co2_intensity_kg_per_boe", "electrified"]]
+        cols = [c for c in ("field", "year", "co2_intensity_kg_per_boe", "co2_per_fuel_gas_kg_per_Sm3",
+                            "electrified") if c in fields]
+        print(fields[cols]
               .to_string(index=False, float_format=lambda v: f"{v:.2f}"))
     else:
         print(f"\nNo field data yet: fill in {cfg['validation']['field_data_file']}")

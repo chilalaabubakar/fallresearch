@@ -78,5 +78,17 @@ def test_field_data_intensity(cfg, tmp_path):
     assert d.loc[0, "co2_turbines_kg_per_boe"] == pytest.approx(50000e3 / 6.2898e6, rel=1e-4)
 
 
-def test_template_is_empty_but_valid(cfg):
-    assert validation.load_field_data(cfg).empty
+def test_field_data_fuel_factor(cfg, tmp_path):
+    f = tmp_path / "fields.csv"
+    f.write_text("field,year,co2_t,co2_turbines_t,oil_Sm3,gas_Sm3,water_Sm3,electrified,fuel_gas_Sm3,diesel_t,source\n"
+                 "A,2023,234000,,1000000,0,0,no,100000000,0,test\n")
+    d = validation.load_field_data(cfg, f)
+    assert d.loc[0, "co2_per_fuel_gas_kg_per_Sm3"] == pytest.approx(2.34)
+
+
+def test_real_field_data_is_plausible(cfg):
+    d = validation.load_field_data(cfg)
+    assert len(d) > 0
+    assert d["co2_intensity_kg_per_boe"].between(1, 200).all()
+    # all-source CO2 per Sm3 fuel gas should be at or above the pure fuel-gas factor (2.34)
+    assert (d["co2_per_fuel_gas_kg_per_Sm3"] > 2.0).all()
