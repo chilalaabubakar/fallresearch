@@ -188,3 +188,30 @@ flexibility:
   output:
     table_file: results/tables/consumer_classification.csv
     figure_file: results/figures/consumer_flexibility.png
+
+economics:
+  # Currency: NOK (as in the LEOGO reference platform)
+  oil_price: {value: 4190.0, unit: NOK/Sm3, source: "Oil export price in Svendsen et al. (2023), LEOGO reference platform"}
+  gas_price: {value: 4.19,   unit: NOK/Sm3, source: "Gas export price in Svendsen et al. (2023), LEOGO; also the value of fuel gas burned instead of exported"}
+  co2_price: {value: 2.0,    unit: NOK/kg_CO2, source: "NOK 2000/t: Norwegian target total CO2 price (tax + EU ETS) by 2030, Meld. St. 13 (2020-2021) Klimaplan 2021-2030; varied in sensitivity"}
+  gt_start_cost: {value: 2000.0, unit: NOK, source: "penalty_start in Svendsen et al. (2023), LEOGO"}
+  unserved_energy_cost: {value: 1.0e+6, unit: NOK/MWh, source: "Modelling choice: feasibility penalty, high enough that the 0.5 % MIP gap cannot leave demand unserved (LEOGO uses 36000 NOK/MWh for load shedding); should never be used"}
+  reserve_shortfall_cost: {value: 1.0e+6, unit: NOK/MWh, source: "Modelling choice: same feasibility penalty as unserved energy; should never be used"}
+
+scheduler:
+  window_hours:    {value: 168, unit: h, source: "Modelling choice: one week committed per solve"}
+  lookahead_hours: {value: 24,  unit: h, source: "Modelling choice: extra day solved but not committed, so end-of-week decisions are sensible"}
+  mip_gap:         {value: 0.005, unit: "-", source: "Modelling choice: solver stops within 0.5 % of the proven optimum"}
+  time_limit:      {value: 120, unit: s, source: "Modelling choice: per weekly solve"}
+  min_gt_online:   {value: 1, unit: "-", source: "ASSUMPTION: wind turbines are grid-following; at least one GT online for frequency/voltage control (as on Hywind Tampen platforms)"}
+  electric_heater_efficiency: {value: 0.99, unit: "-", source: "ASSUMPTION: resistive electric heater"}
+  heater_tiebreak_cost: {value: 0.1, unit: NOK/MWh, source: "Modelling choice: tiny cost so surplus wind is curtailed rather than dumped in the heater; does not change real decisions"}
+  battery:
+    # Size is set per case (case 4) and in the sensitivity analysis; 0 = no battery.
+    power:  {value: 0.0, unit: W,  source: "Set per case; LEOGO option is 4 MW / 4 MWh (Svendsen et al., 2023)"}
+    energy: {value: 0.0, unit: J,  source: "Set per case; LEOGO option is 4 MW / 4 MWh (Svendsen et al., 2023)"}
+    round_trip_efficiency: {value: 0.9, unit: "-", source: "eta = 0.9 in Svendsen et al. (2023), LEOGO"}
+    reserve_duration: {value: 1800.0, unit: s, source: "reserve_storage_minutes = 30 in Svendsen et al. (2023), LEOGO: stored energy must sustain the reserve for 30 min"}
+  output:
+    results_file: results/schedules/schedule_{case}.csv
+    figure_file: results/figures/schedule_{case}.png
