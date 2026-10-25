@@ -41,7 +41,7 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as pyo
 
-from topside.config import load_config, param, param_si, repo_path
+from topside.config import load_config, param, param_si, repo_path, results_path
 from topside import consumers, gas_turbine, process, style
 
 MW = 1e6
@@ -415,7 +415,7 @@ def main(argv=None):
         print(f"\n{label}:")
         for k, v in summarize(df, sys_).items():
             print(f"  {k:>24}: {v:.3f}" if isinstance(v, float) else f"  {k:>24}: {v}")
-    out = plot_schedule(results, repo_path(f"results/figures/schedule_demo{tag}.png"), note)
+    out = plot_schedule(results, results_path(cfg, f"figures/schedule_demo{tag}.png"), note)
     print(f"Saved {out}")
     return results
 

@@ -5,6 +5,7 @@ helper `param()` returns only the value, but refuses to work if the unit or
 source is missing, so every number used in the model stays traceable.
 """
 
+import os
 from pathlib import Path
 
 import yaml
@@ -13,9 +14,35 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG = REPO_ROOT / "config" / "base_case.yaml"
 
 
-def load_config(path=DEFAULT_CONFIG):
+def _deep_merge(base, override):
+    """Recursively merge override into base (override wins)."""
+    out = dict(base)
+    for k, v in override.items():
+        out[k] = _deep_merge(out[k], v) if isinstance(v, dict) and isinstance(out.get(k), dict) else v
+    return out
+
+
+def load_config(path=None):
+    """Load a case config.
+
+    Path order: argument, environment variable TOPSIDE_CONFIG, base_case.yaml.
+    A config with `extends: <file>` is merged on top of that file, so a site
+    config only lists what differs from the base case.
+    """
+    path = Path(path or os.environ.get("TOPSIDE_CONFIG") or DEFAULT_CONFIG)
+    if not path.is_absolute() and not path.exists():
+        path = REPO_ROOT / path
     with open(path) as f:
-        return yaml.safe_load(f)
+        cfg = yaml.safe_load(f)
+    parent = cfg.pop("extends", None)
+    if parent:
+        cfg = _deep_merge(load_config(path.parent / parent), cfg)
+    return cfg
+
+
+def results_path(cfg, relative=""):
+    """Path inside this site's results folder (results/ for the base case)."""
+    return REPO_ROOT / cfg["site"].get("results_dir", "results") / relative
 
 
 def param(entry):

@@ -69,3 +69,17 @@ def test_pipeline_synthetic(cfg):
     s = wind.summarize(df, cfg)
     assert 0 < s["capacity_factor"] < 1
     assert df["p_wind_W"].max() <= s["installed_MW"] * 1e6
+
+
+def test_load_era5_keeps_temperatures(tmp_path):
+    t = pd.date_range("2023-01-01", periods=3, freq="h")
+    dims = ("valid_time", "latitude", "longitude")
+    ds = xr.Dataset(
+        {"u100": (dims, np.ones((3, 1, 1))), "v100": (dims, np.zeros((3, 1, 1))),
+         "t2m": (dims, np.full((3, 1, 1), 300.0)), "sst": (dims, np.full((3, 1, 1), 301.0))},
+        coords={"valid_time": t, "latitude": [-9.5], "longitude": [40.5]},
+    )
+    f = tmp_path / "era5_tz.nc"
+    ds.to_netcdf(f)
+    df = wind.load_era5_wind([f])
+    assert np.allclose(df["t2m_K"], 300.0) and np.allclose(df["sst_K"], 301.0)

@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from topside.config import load_config, param, repo_path
+from topside.config import load_config, param, repo_path, results_path
 from topside import cases, scheduler, style
 
 CASE_ORDER = ["gt_only", "wind_fixed", "wind_flex", "wind_flex_battery"]
@@ -54,14 +54,14 @@ def load_inputs(cfg, synthetic):
         print(f"skip wind: {e}")
     sched = {}
     for k in CASE_ORDER:
-        p = repo_path(f"results/schedules/schedule_{k}{tag}.csv")
+        p = results_path(cfg, f"schedules/schedule_{k}{tag}.csv")
         if p.exists():
             sched[k] = pd.read_csv(p, index_col=0, parse_dates=True)
     out["schedules"] = sched
-    for key, rel in (("summary", f"results/cases/cases_summary{tag}.csv"),
-                     ("sensitivity", f"results/cases/sensitivity_summary{tag}.csv"),
-                     ("validation", f"results/validation/validation_table{tag}.csv")):
-        p = repo_path(rel)
+    for key, rel in (("summary", f"cases/cases_summary{tag}.csv"),
+                     ("sensitivity", f"cases/sensitivity_summary{tag}.csv"),
+                     ("validation", f"validation/validation_table{tag}.csv")):
+        p = results_path(cfg, rel)
         out[key] = pd.read_csv(p) if p.exists() else None
     return out
 
@@ -273,7 +273,7 @@ def main(argv=None):
     cfg = load_config()
     inp = load_inputs(cfg, args.synthetic)
     tag, note = inp["tag"], inp["note"]
-    out = repo_path(f"results/paper{tag}")
+    out = results_path(cfg, f"paper{tag}")
     tables = out / "tables"
     made = []
 

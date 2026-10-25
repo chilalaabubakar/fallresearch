@@ -65,8 +65,16 @@ def download_era5(year, lat, lon, out_dir, variables,
     return paths
 
 
+# Optional ERA5 variables kept when present in the files: short name -> column
+EXTRA_VARIABLES = {"t2m": "t2m_K", "sst": "sst_K"}
+
+
 def load_era5_wind(paths):
-    """Read ERA5 NetCDF files and return hourly 100 m wind speed (m/s), UTC index."""
+    """Read ERA5 NetCDF files: hourly 100 m wind speed (m/s), UTC index.
+
+    Air temperature at 2 m and sea-surface temperature (K) are kept as extra
+    columns when they were downloaded (used for warm sites such as Tanzania).
+    """
     import xarray as xr
 
     frames = []
@@ -77,10 +85,11 @@ def load_era5_wind(paths):
             ds = ds.squeeze(drop=True)  # drop the 1x1 latitude/longitude dims
             if "expver" in ds.dims:     # near-real-time data can carry two versions
                 ds = ds.max("expver")
-            frames.append(pd.DataFrame({
-                "u100": ds["u100"].values.ravel(),
-                "v100": ds["v100"].values.ravel(),
-            }, index=pd.DatetimeIndex(ds[time_name].values, name="time_utc")))
+            cols = {"u100": ds["u100"].values.ravel(), "v100": ds["v100"].values.ravel()}
+            for short, col in EXTRA_VARIABLES.items():
+                if short in ds:
+                    cols[col] = ds[short].values.ravel()
+            frames.append(pd.DataFrame(cols, index=pd.DatetimeIndex(ds[time_name].values, name="time_utc")))
     df = pd.concat(frames).sort_index()
     df = df[~df.index.duplicated()]
     df["ws100"] = np.hypot(df["u100"], df["v100"])
@@ -241,10 +250,16 @@ def main(argv=None):
             paths = sorted(raw_dir.glob(f"era5_wind100m_*_{year}_*.nc"))
             if not paths:
                 raise SystemExit(f"No ERA5 files in {raw_dir}. Run with --download first.")
-        ws100 = load_era5_wind(paths)["ws100"]
-        note = f", ERA5 {lat:.0f}N {lon:.0f}E, {year}"
+        era = load_era5_wind(paths)
+        ws100 = era["ws100"]
+        ns = "N" if lat >= 0 else "S"
+        note = f", ERA5 {abs(lat):.1f}{ns} {lon:.1f}E, {year}"
 
     df = build_wind_power(cfg, ws100)
+    if not args.synthetic:
+        for col in EXTRA_VARIABLES.values():
+            if col in era:
+                df[col] = era[col]
     out_csv.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_csv)
     installed = param(cfg["wind"]["farm"]["n_turbines"]) * param(cfg["wind"]["turbine"]["rated_power"])

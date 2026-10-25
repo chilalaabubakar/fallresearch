@@ -1,0 +1,36 @@
+# Tanzania deepwater comparison case.
+# Only what differs from base_case.yaml is listed here; everything else is inherited.
+# Use with:   TOPSIDE_CONFIG=config/tanzania.yaml python -m topside.<module>
+#   (PowerShell: $env:TOPSIDE_CONFIG="config/tanzania.yaml")
+extends: base_case.yaml
+
+site:
+  name: Tanzania deepwater gas blocks (off Lindi / Mtwara)
+  latitude:  {value: -9.5, unit: deg_N, source: "ASSUMPTION: approximate location of the deepwater gas discoveries in Blocks 1, 2 and 4 (water depth 1000-3000 m); ERA5 grid point"}
+  longitude: {value: 40.5, unit: deg_E, source: "ASSUMPTION: approximate location of the deepwater gas discoveries in Blocks 1, 2 and 4; ERA5 grid point"}
+  year:      {value: 2023, unit: "-", source: "Same weather year as the North Sea base case"}
+  results_dir: results/tanzania
+
+wind:
+  era5:
+    variables: [100m_u_component_of_wind, 100m_v_component_of_wind, 2m_temperature, sea_surface_temperature]
+    raw_dir: data/raw/era5_tanzania
+  # Same IEA 15 MW turbine on a floating foundation (deep water, as for Hywind Tampen);
+  # the power curve is unchanged.
+  output:
+    processed_file: data/processed/wind_farm_power_tanzania_{year}.csv
+    figure_file: results/tanzania/figures/wind_farm_power_tanzania_{year}.png
+
+economics:
+  co2_price: {value: 0.0, unit: NOK/kg_CO2, source: "ASSUMPTION (verify): no carbon tax or emissions trading on Tanzanian upstream petroleum; NOK 2/kg tested as sensitivity"}
+
+sensitivity:
+  co2_price:
+    cases: [wind_flex]
+    runs: [{co2_price: 0.0}, {co2_price: 0.5}, {co2_price: 1.0}, {co2_price: 2.0}]
+    source: "Sensitivity: no carbon price (base) up to the Norwegian 2030 target of NOK 2/kg"
+
+validation:
+  output:
+    table_file: results/tanzania/validation/validation_table.csv
+    figure_file: results/tanzania/validation/validation.png

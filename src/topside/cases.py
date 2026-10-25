@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from topside.config import load_config, param, repo_path
+from topside.config import load_config, param, repo_path, results_path
 from topside import scheduler, style
 
 MW = 1e6
@@ -230,8 +230,8 @@ def main(argv=None):
     tag += f"_{args.hours}h" if args.hours else ""
     note = " (SYNTHETIC wind, demo only)" if args.synthetic else ""
     period = f"{args.hours} h" if args.hours else "yr"
-    out_dir = repo_path("results/cases")
-    tasks = build_tasks(cfg, args.sensitivity, tag, repo_path("results/schedules"))
+    out_dir = results_path(cfg, "cases")
+    tasks = build_tasks(cfg, args.sensitivity, tag, results_path(cfg, "schedules"))
     print(f"{len(tasks)} runs on {args.jobs} worker(s)")
     t0 = time.time()
     rows = pd.DataFrame(run_tasks(tasks, args.synthetic, args.hours, args.jobs))
@@ -240,7 +240,7 @@ def main(argv=None):
     base = add_reductions(rows[rows["group"] == "base"])
     out_dir.mkdir(parents=True, exist_ok=True)
     base.to_csv(out_dir / f"cases_summary{tag}.csv", index=False, float_format="%.4g")
-    plot_base(base, repo_path(f"results/figures/cases_comparison{tag}.png"), note, period)
+    plot_base(base, results_path(cfg, f"figures/cases_comparison{tag}.png"), note, period)
     cols = ["label", "co2_kt", "co2_reduction_pct", "fuel_MSm3", "gt_low_load_unit_hours",
             "lost_production_pct", "wind_curtailed_GWh", "co2_intensity_kg_per_Sm3oe", "total_cost_MNOK"]
     print("\n" + base[cols].to_string(index=False, float_format=lambda v: f"{v:,.2f}"))
@@ -249,10 +249,10 @@ def main(argv=None):
     if len(sens):
         sens.to_csv(out_dir / f"sensitivity_summary{tag}.csv", index=False, float_format="%.4g")
         for name in sens["group"].unique():
-            plot_sensitivity(sens, name, repo_path(f"results/figures/sensitivity_{name}{tag}.png"), note, period)
+            plot_sensitivity(sens, name, results_path(cfg, f"figures/sensitivity_{name}{tag}.png"), note, period)
         print("\n" + sens[["group", "case", "overrides", "co2_kt", "fuel_MSm3", "lost_production_pct"]]
               .to_string(index=False, float_format=lambda v: f"{v:,.2f}"))
-    print(f"\nSaved tables in {out_dir} and figures in {repo_path('results/figures')}")
+    print(f"\nSaved tables in {out_dir} and figures in {results_path(cfg, 'figures')}")
     return rows
 
 

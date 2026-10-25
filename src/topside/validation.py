@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from topside.config import load_config, param, repo_path
+from topside.config import load_config, param, repo_path, results_path
 from topside import process, scheduler, style
 
 STATUS_COLOR = {"within": style.PALETTE["blue_main"], "agrees": style.PALETTE["blue_main"],
@@ -179,11 +179,11 @@ def main(argv=None):
 
     dp = process.design_point(cfg)
     wind_W, _ = scheduler.load_wind(cfg, args.synthetic)
-    summary_path = repo_path(f"results/cases/cases_summary{tag}.csv")
+    summary_path = results_path(cfg, f"cases/cases_summary{tag}.csv")
     summary = pd.read_csv(summary_path) if summary_path.exists() else None
     if summary is None:
         print(f"Note: {summary_path} not found; run `python -m topside.cases` for the CO2 checks.")
-    sens_path = repo_path(f"results/cases/sensitivity_summary{tag}.csv")
+    sens_path = results_path(cfg, f"cases/sensitivity_summary{tag}.csv")
     sens = pd.read_csv(sens_path) if sens_path.exists() else None
     metrics = model_metrics(cfg, dp, wind_W.values, summary, sens)
     table = compare(cfg, metrics)
