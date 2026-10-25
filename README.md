@@ -21,7 +21,7 @@ cut fuel gas use and CO2 emissions without large production losses.
 | 2 | `wind.py` – ERA5 → wind farm power | done (needs real ERA5 run) |
 | 3 | `gas_turbine.py` – load → efficiency → fuel → CO2 | done (parameters to verify) |
 | 4 | `process.py` – NeqSim topside model | done (parameters to verify) |
-| 5 | `consumers.py` – flexibility classes | – |
+| 5 | `consumers.py` – flexibility classes | done (limits to verify) |
 | 6 | `scheduler.py` – Pyomo optimisation | – |
 | 7 | `cases.py` – cases 1–4, sensitivity | – |
 | 8 | Validation against public field data | – |
@@ -66,6 +66,7 @@ python -m topside.wind              # re-process files already in data/raw/era5
 python -m topside.wind --synthetic  # demo with fake wind, no download needed
 python -m topside.gas_turbine       # fuel gas properties + part-load curves
 python -m topside.process           # topside design point + power vs rate per consumer
+python -m topside.consumers         # flexibility classes, lever power curves, demand map
 ```
 
 Outputs:

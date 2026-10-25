@@ -32,9 +32,9 @@ wind:
     cut_out_speed: {value: 25.0, unit: m/s, source: "Gaertner et al. (2020)"}
 
   farm:
-    n_turbines: {value: 3, unit: "-", source: "ASSUMPTION: 45 MW farm, sized to the order of platform demand; varied in sensitivity analysis"}
+    n_turbines: {value: 2, unit: "-", source: "ASSUMPTION: 30 MW installed (about 26 MW after losses), matched to the 25 MW design demand from process.py; varied in sensitivity analysis"}
     # Loss factors, applied as multipliers (1 - loss).
-    wake_loss:       {value: 0.05, unit: "-", source: "ASSUMPTION: small cluster of 3 turbines; verify against literature"}
+    wake_loss:       {value: 0.05, unit: "-", source: "ASSUMPTION: small cluster of 2 turbines; verify against literature"}
     electrical_loss: {value: 0.02, unit: "-", source: "ASSUMPTION: short subsea cable to platform; verify against literature"}
     availability:    {value: 0.95, unit: "-", source: "ASSUMPTION: typical offshore availability; verify against literature"}
 
@@ -145,3 +145,36 @@ process:
   output:
     table_file: data/processed/process_power_table.csv
     figure_file: results/figures/process_power_vs_rate.png
+
+flexibility:
+  # Each consumer belongs to one class and is moved by one lever:
+  #   must_run  - fixed power, never reduced
+  #   flexible  - deferrable: energy use can be shifted in time, no loss if caught up
+  #   sheddable - can be reduced, but the reduction is lost production
+  classes:
+    base_load: must_run
+    water_injection_pump: flexible
+    recompression: sheddable
+    export_compressor: sheddable
+    oil_export_pump: sheddable
+    seawater_lift_pump: mixed   # cooling part follows production, make-up part follows injection
+
+  production:
+    # Lever for sheddable consumers: production rate as fraction of design.
+    min_fraction: {value: 0.50, unit: "-", source: "ASSUMPTION: lowest stable production turndown (separator / well limits); verify"}
+    max_fraction: {value: 1.00, unit: "-", source: "Design rate; no over-production to catch up"}
+    ramp_rate:    {value: 0.10, unit: 1/h, source: "ASSUMPTION: max change in production fraction per hour (well choke / process stability); verify"}
+
+  water_injection:
+    # Lever for flexible consumers: injection rate as fraction of pump capacity (design).
+    min_fraction: {value: 0.0,  unit: "-", source: "ASSUMPTION: all injection pumps may stop for short periods"}
+    max_fraction: {value: 1.0,  unit: "-", source: "Installed pump capacity (design point)"}
+    target_fraction: {value: 0.85, unit: "-", source: "ASSUMPTION: average injection needed for voidage replacement, as fraction of pump capacity"}
+    ramp_rate:    {value: 0.34, unit: 1/h, source: "ASSUMPTION: about one of three pumps started/stopped per hour"}
+    # Virtual storage: cumulative injection deficit, in hours of full-rate injection.
+    # Deficit grows when injecting below target and must stay within [0, max_deficit].
+    max_deficit:  {value: 72.0, unit: h, source: "ASSUMPTION: up to 3 days of full-rate injection may be postponed without significant reservoir pressure loss; key sensitivity"}
+
+  output:
+    table_file: results/tables/consumer_classification.csv
+    figure_file: results/figures/consumer_flexibility.png
