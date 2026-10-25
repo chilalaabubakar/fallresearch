@@ -54,7 +54,7 @@ fuel_gas:
 gas_turbine:
   # Hot-climate correction relative to ISO 15 degC (applied to rated power and efficiency)
   ambient:
-    temperature: {value: 27.0, unit: degC, source: "ASSUMPTION: annual mean air temperature offshore southern Tanzania; to be replaced by the ERA5 2 m mean"}
+    temperature: {value: 26.8, unit: degC, source: "ERA5 2023 mean 2 m air temperature at 9.5 S, 40.5 E (range 23.5-29.8 degC)"}
     iso_temperature: {value: 15.0, unit: degC, source: "ISO 3977 reference conditions"}
     power_derate_per_K: {value: 0.007, unit: 1/K, source: "Rule of thumb 0.5-0.9 %/K above ISO for gas turbines (Wartsila; USPE; Power Engineering) - verify with OEM site rating"}
     efficiency_derate_per_K: {value: 0.001, unit: 1/K, source: "Rule of thumb about 1 % efficiency per 10 K above ISO (Wartsila; Power Engineering heat-rate rule) - verify with OEM"}
@@ -92,7 +92,7 @@ process:
   cooling:
     gas_cooler_outlet: {value: 38.0, unit: degC, source: "ASSUMPTION: about 10 K above warm seawater"}
     seawater_temperature_rise: {value: 8.0, unit: K, source: "ASSUMPTION: smaller rise allowed with warm seawater"}
-    seawater_inlet_temperature: {value: 28.0, unit: degC, source: "ASSUMPTION: tropical sea-surface temperature; to be replaced by the ERA5 SST mean"}
+    seawater_inlet_temperature: {value: 28.2, unit: degC, source: "ERA5 2023 mean sea-surface temperature at 9.5 S, 40.5 E (range 25.6-30.3 degC)"}
   heat_demand: {value: 0.5, unit: MW, source: "ASSUMPTION: utility heat; TEG and MEG heat are modelled per lever"}
   consumers:
     condensate_pump:  {n_trains: 1, min_flow: {value: 0.30, unit: "-", source: "ASSUMPTION: pump minimum continuous flow"}}
