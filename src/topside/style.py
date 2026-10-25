@@ -88,4 +88,4 @@ def finalize_figure(fig, out_dir, name, formats=("png", "pdf")):
 
 def bar_kwargs(case):
     """Fill, edge and hatch for one case's bar."""
-    return {"color": CASE_COLOR[case], "edgecolor": "black", "linewidth": 1.2, "hatch": CASE_HATCH[case]}
+    return {"facecolor": CASE_COLOR[case], "edgecolor": "black", "linewidth": 1.2, "hatch": CASE_HATCH[case]}

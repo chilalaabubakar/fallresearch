@@ -81,10 +81,10 @@ def fig_wind_resource(cfg, wind_W, out_dir, note=""):
     monthly = cf.groupby(cf.index.month).mean()
     a1.bar(monthly.index, monthly.values * 100, color=style.PALETTE["blue_secondary"], edgecolor="black", linewidth=1.2, width=0.65)
     a1.axhline(cf.mean() * 100, color=MUTED, lw=1, ls="--")
-    a1.text(12.4, cf.mean() * 100, f"annual {cf.mean():.0%}", va="bottom", ha="right", color=MUTED, fontsize=style.FONT_SIZE - 3)
     a1.set_xticks(range(1, 13), list("JFMAMJJASOND"))
+    a1.set_ylim(0, max(monthly.max() * 100 * 1.12, cf.mean() * 100 + 8))
     a1.set_ylabel("Capacity factor [%]")
-    a1.set_title("Monthly capacity factor", loc="left")
+    a1.set_title(f"Monthly capacity factor (dashed: annual {cf.mean():.0%})", loc="left")
     if note:
         fig.suptitle(note.strip(" ()"), x=0.01, ha="left")
     exceed, v = np.linspace(0, 100, len(cf)), np.sort(wind_W.values)[::-1] / 1e6

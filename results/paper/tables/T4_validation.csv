@@ -1,0 +1,12 @@
+benchmark,model,benchmark_low,benchmark_high,unit,status,source
+platform_power_voldsund,20.29,18,26,MW,within,"Voldsund et al. (2013), Energy 55:716-727: 18-26 MW electrical on a real North Sea platform (via search summary; verify)"
+platform_power_nguyen,20.29,22.6,31.1,MW,differs,"Nguyen et al. (2013), Energy, six North Sea platform cases (via search summary; verify)"
+platform_power_castberg,20.29,25,25,MW,agrees,"Johan Castberg PDO part II impact assessment: about 25 MW average, 50 MW peak (via search summary; verify)"
+platform_power_hywind_tampen,20.29,25.1,25.1,MW,agrees,"Implied: 384 GWh/yr expected from Hywind Tampen covers about 35 % of the electricity of 5 platforms (Snorre A/B, Gullfaks A/B/C) -> 384/0.35/8760/5 = 25.1 MW per platform (SNL; Equinor)"
+wind_capacity_factor_tampen_design,0.5091,0.498,0.498,-,agrees,"Hywind Tampen expected 384 GWh/yr from 88 MW (SNL, Hywind Tampen) -> 0.498"
+wind_capacity_factor_tampen_q1_2025,0.5091,0.584,0.584,-,agrees,Equinor via Norwegian Offshore Wind: 58.4 % capacity factor in Q1 2025 (winter quarter)
+co2_avoided_per_wind_mwh,0.7059,0.52,0.52,t/MWh,differs,Hywind Tampen: about 200 kt CO2/yr avoided (Equinor FID) for 384 GWh/yr expected (SNL) -> 0.52 t/MWh
+co2_avoided_per_wind_mwh_2gt,0.5084,0.52,0.52,t/MWh,agrees,"Same Hywind Tampen benchmark (200 kt / 384 GWh), compared with the model run that keeps 2 GTs online (sensitivity gt_operation_practice)"
+co2_intensity_ncs_2023,3.145,7.3,7.3,kg/boe,differs,Offshore Norge climate and environmental report 2024: NCS average 7.3 kg CO2/boe in 2023
+co2_intensity_non_electrified,3.145,10.5,10.5,kg/boe,differs,Westwood Global Energy (2022 estimate): about 10.5 kg CO2/boe for non-electrified NCS hubs
+leogo_water_injection,8.824,8.99,8.99,kWh/m3,agrees,"LEOGO: 8.97 MW for 0.277 m3/s at 0.7 -> 25 MPa, eta 0.75 (Svendsen et al., 2023; leogo_resultobject.json in Oogeso)"

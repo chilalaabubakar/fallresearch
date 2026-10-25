@@ -18,14 +18,14 @@ cut fuel gas use and CO2 emissions without large production losses.
 | Step | Module | Status |
 |---|---|---|
 | 1 | Repo setup, environment, config | done |
-| 2 | `wind.py` – ERA5 → wind farm power | done (needs real ERA5 run) |
+| 2 | `wind.py` – ERA5 → wind farm power | done (ERA5 2023, CF 50.9 %) |
 | 3 | `gas_turbine.py` – load → efficiency → fuel → CO2 | done (parameters to verify) |
 | 4 | `process.py` – NeqSim topside model | done (parameters to verify) |
 | 5 | `consumers.py` – flexibility classes | done (limits to verify) |
-| 6 | `scheduler.py` – Pyomo optimisation | done (tested on synthetic wind) |
-| 7 | `cases.py` – cases 1–4, sensitivity | done (needs real ERA5 run) |
-| 8 | `validation.py` – benchmarks + field data | done (needs real ERA5 run and field data) |
-| 9 | `figures.py` – paper figures and tables | done (needs real ERA5 run) |
+| 6 | `scheduler.py` – Pyomo optimisation | done |
+| 7 | `cases.py` – cases 1–4, sensitivity | done (real ERA5 results in results/cases) |
+| 8 | `validation.py` – benchmarks + field data | done (Gullfaks, Snorre, Statfjord) |
+| 9 | `figures.py` – paper figures and tables | done (results/paper) |
 
 ## Setup
 
