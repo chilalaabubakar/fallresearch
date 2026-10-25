@@ -370,9 +370,9 @@ def plot_schedule(results, out_path, title_note=""):
     ax.set_ylabel("Rate [% of design]")
     ax.set_ylim(0, 105)
     ax.set_title("Lever positions", loc="left")
-    ax.legend(loc="lower right", frameon=False, fontsize=style.FONT_SIZE - 3, ncol=2)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22), frameon=False,
+              fontsize=style.FONT_SIZE - 3, ncol=2)
     for a in axes:
-        a.grid(alpha=0.25, lw=0.5)
         a.spines[["top", "right"]].set_visible(False)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

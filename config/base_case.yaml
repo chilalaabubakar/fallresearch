@@ -262,6 +262,10 @@ sensitivity:
     cases: [wind_flex]
     runs: [{fleet: {main: 3}}, {fleet: {main: 2, small: 1}}]
     source: "Retrofit (3 existing GTs) vs replacing one by a smaller unit (unverified SGT-500 class data)"
+  gt_operation_practice:
+    cases: [wind_fixed, wind_flex]
+    runs: [{min_gt_online: 2}]
+    source: "Keeps 2 GTs online whatever the wind (redundancy practice); compare CO2 avoided per wind MWh with Hywind Tampen's about 0.52 t/MWh"
 
 validation:
   # Benchmarks from public sources. Each has a value or a [low, high] range.
@@ -312,6 +316,12 @@ validation:
       unit: t/MWh
       source: "Hywind Tampen: about 200 kt CO2/yr avoided (Equinor FID) for 384 GWh/yr expected (SNL) -> 0.52 t/MWh"
       note: "Strongest check: tests wind, GT part-load fuel, CO2 factor and scheduling together"
+    co2_avoided_per_wind_mwh_2gt:
+      metric: co2_avoided_t_per_MWh_2gt
+      value: 0.52
+      unit: t/MWh
+      source: "Same Hywind Tampen benchmark (200 kt / 384 GWh), compared with the model run that keeps 2 GTs online (sensitivity gt_operation_practice)"
+      note: "Like-for-like: Hywind Tampen's estimate assumes the same GTs keep running at lower load"
     co2_intensity_ncs_2023:
       metric: co2_intensity_kg_per_boe
       value: 7.3

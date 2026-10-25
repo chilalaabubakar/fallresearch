@@ -204,7 +204,6 @@ def plot_part_load(gts, fuel, out_path):
         ax.set_xlabel("Load [% of rated]")
         ax.set_xlim(0, 100)
         ax.axvspan(0, min_load * 100, color=INK_MUTED, alpha=0.08, lw=0)
-        ax.grid(alpha=0.25, lw=0.5)
         ax.spines[["top", "right"]].set_visible(False)
     ax1.set_ylim(0, None)
     ax2.set_ylim(0, None)

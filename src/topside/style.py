@@ -41,9 +41,19 @@ FONT_SIZE = 14
 LINE_WIDTH = 2.5
 
 
+FONT_PREFERENCE = ("Arial", "Helvetica", "Liberation Sans", "DejaVu Sans")
+
+
+def _first_available_font():
+    """First installed font from FONT_PREFERENCE (Liberation Sans has Arial's metrics)."""
+    from matplotlib import font_manager
+    installed = {f.name for f in font_manager.fontManager.ttflist}
+    return next((f for f in FONT_PREFERENCE if f in installed), "sans-serif")
+
+
 def apply_publication_style(font_size=FONT_SIZE):
     plt.rcParams.update({
-        "font.family": ["Arial", "Helvetica", "Liberation Sans", "DejaVu Sans", "sans-serif"],
+        "font.family": [_first_available_font()],
         "font.size": font_size,
         "axes.titlesize": font_size,
         "axes.labelsize": font_size,

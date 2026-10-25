@@ -18,6 +18,7 @@ Run from the repository root:
 """
 
 import argparse
+import ast
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -83,7 +84,9 @@ def fig_wind_resource(cfg, wind_W, out_dir, note=""):
     a1.text(12.4, cf.mean() * 100, f"annual {cf.mean():.0%}", va="bottom", ha="right", color=MUTED, fontsize=style.FONT_SIZE - 3)
     a1.set_xticks(range(1, 13), list("JFMAMJJASOND"))
     a1.set_ylabel("Capacity factor [%]")
-    a1.set_title(f"Monthly capacity factor{note}", loc="left")
+    a1.set_title("Monthly capacity factor", loc="left")
+    if note:
+        fig.suptitle(note.strip(" ()"), x=0.01, ha="left")
     exceed, v = np.linspace(0, 100, len(cf)), np.sort(wind_W.values)[::-1] / 1e6
     a2.plot(exceed, v, color=style.PALETTE["blue_main"])
     a2.axhline(installed / 1e6, color=MUTED, lw=0.8, ls="--")
@@ -130,7 +133,9 @@ def fig_gt_load_duration(cfg, sched, out_dir, note=""):
     a1.set_xlim(0, 100)
     a1.set_xlabel("Share of hours [%]")
     a1.set_ylabel("Load per running GT [% of rated]")
-    a1.set_title(f"GT load duration{note}", loc="left")
+    a1.set_title("GT load duration", loc="left")
+    if note:
+        fig.suptitle(note.strip(" ()"), x=0.01, ha="left")
     a1.legend(loc="upper right", frameon=False)
     a2.set_xlim(0, 100)
     a2.set_xlabel("Share of hours [%]")
@@ -150,7 +155,7 @@ def fig_monthly_co2(cfg, sched, out_dir, note=""):
                color=CASE_COLOR[k], label=case_label(cfg, k))
     ax.set_xticks(range(1, 13), list("JFMAMJJASOND"))
     ax.set_ylabel("CO2 emitted [kt/month]")
-    ax.set_title(f"Monthly CO2 emissions{note}", loc="left")
+    ax.set_title(f"Monthly CO2 emissions{note}", loc="left", fontsize=style.FONT_SIZE - 1)
     ax.legend(frameon=False, ncol=2)
     ax.grid(axis="x", visible=False)
     return save(fig, out_dir, "fig07_monthly_co2")
@@ -175,7 +180,9 @@ def fig_injection_mechanism(cfg, sched, out_dir, note=""):
     a1.set_xlabel("Wind power available [MW]")
     a1.set_ylabel("Water injection [% of capacity]")
     a1.set_ylim(0, 105)
-    a1.set_title(f"Injection follows the wind (case 3){note}", loc="left")
+    a1.set_title("Injection vs available wind (case 3)", loc="left")
+    if note:
+        fig.suptitle(note.strip(" ()"), x=0.01, ha="left")
     a1.legend(frameon=False, loc="lower right")
     a2.hist(df["deficit_h"], bins=40, color=style.PALETTE["blue_secondary"], edgecolor="black", linewidth=0.6)
     a2.axvline(param(cfg["flexibility"]["water_injection"]["max_deficit"]), color=MUTED, lw=1, ls="--")
@@ -183,6 +190,25 @@ def fig_injection_mechanism(cfg, sched, out_dir, note=""):
     a2.set_ylabel("Hours")
     a2.set_title("How much injection is postponed", loc="left")
     return save(fig, out_dir, "fig08_injection_mechanism")
+
+
+SENS_TITLES = {"wind_farm_size": "Wind farm size [turbines]", "co2_price": "CO2 price [NOK/kg]",
+               "gas_price": "Gas price [NOK/Sm3]", "battery_size": "Battery [MW / MWh]",
+               "injection_deficit": "Injection deficit limit [h]",
+               "min_gt_online": "Min. GTs online (8 MW battery)", "gt_fleet": "GT fleet",
+               "gt_operation_practice": "Keep 2 GTs online"}
+
+
+def override_label(text):
+    """Short x-label for one sensitivity run, e.g. "{'battery': [8, 16]}" -> "8/16"."""
+    o = ast.literal_eval(text)
+    if "min_gt_online" in o:
+        return str(o["min_gt_online"])
+    if "fleet" in o:
+        return " + ".join(f"{n} {k}" for k, n in o["fleet"].items())
+    if "battery" in o:
+        return "/".join(str(v) for v in o["battery"])
+    return str(next(iter(o.values())))
 
 
 def fig_sensitivity_overview(cfg, sens, out_dir, note=""):
@@ -196,10 +222,9 @@ def fig_sensitivity_overview(cfg, sens, out_dir, note=""):
             x = range(len(dd))
             ax.plot(x, dd["co2_kt"], marker="o", ms=5, lw=2, color=CASE_COLOR[case],
                     label=case_label(cfg, case))
-            ax.set_xticks(list(x), [o.strip("{}").replace("'", "").split(": ", 1)[-1] for o in dd["overrides"]],
-                          fontsize=style.FONT_SIZE - 4)
-        ax.set_title(g.replace("_", " "), loc="left")
-        ax.set_ylim(0, None)
+            ax.set_xticks(list(x), [override_label(o) for o in dd["overrides"]])
+        ax.set_title(SENS_TITLES.get(g, g.replace("_", " ")), loc="left")
+        ax.set_ylim(0, d["co2_kt"].max() * 1.15)   # zero baseline: flat lines stay flat
         ax.set_ylabel("CO2 [kt/yr]")
     for ax in axes.flat[len(groups):]:
         ax.set_visible(False)

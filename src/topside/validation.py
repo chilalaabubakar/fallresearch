@@ -37,7 +37,7 @@ STATUS_COLOR = {"within": style.PALETTE["blue_main"], "agrees": style.PALETTE["b
 # --------------------------------------------------------------------------
 # Model metrics
 # --------------------------------------------------------------------------
-def model_metrics(cfg, dp, wind_W, cases_summary=None):
+def model_metrics(cfg, dp, wind_W, cases_summary=None, sensitivity=None):
     """Model values for every benchmark metric (None if not available)."""
     w = cfg["wind"]
     installed = param(w["farm"]["n_turbines"]) * param(w["turbine"]["rated_power"])
@@ -47,6 +47,7 @@ def model_metrics(cfg, dp, wind_W, cases_summary=None):
         "wind_capacity_factor": float(np.mean(wind_W)) / installed,
         "wi_specific_energy_kWh_per_m3": dp.power["water_injection_pump"] / dp.water_injection_rate / 3.6e6,
         "co2_avoided_t_per_MWh": None,
+        "co2_avoided_t_per_MWh_2gt": None,
         "co2_intensity_kg_per_boe": None,
     }
     if cases_summary is not None:
@@ -55,6 +56,13 @@ def model_metrics(cfg, dp, wind_W, cases_summary=None):
             avoided_t = (c.loc["gt_only", "co2_kt"] - c.loc["wind_fixed", "co2_kt"]) * 1e3
             m["co2_avoided_t_per_MWh"] = avoided_t / (c.loc["wind_fixed", "wind_used_GWh"] * 1e3)
             m["co2_intensity_kg_per_boe"] = c.loc["gt_only", "co2_intensity_kg_per_Sm3oe"] / bbl
+            if sensitivity is not None:
+                r = sensitivity[(sensitivity["group"] == "gt_operation_practice")
+                                & (sensitivity["case"] == "wind_fixed")]
+                if len(r):
+                    r = r.iloc[0]
+                    m["co2_avoided_t_per_MWh_2gt"] = ((c.loc["gt_only", "co2_kt"] - r["co2_kt"]) * 1e3
+                                                      / (r["wind_used_GWh"] * 1e3))
     return m
 
 
@@ -121,11 +129,21 @@ def plot_validation(table, fields, model_intensity, out_path, note=""):
         ax.text(r.model_to_benchmark, i - 0.32, f"{r.model:.3g} vs {r.benchmark_low:.3g}"
                 + (f"-{r.benchmark_high:.3g}" if r.benchmark_high > r.benchmark_low else "") + f" {r.unit}",
                 ha="center", fontsize=style.FONT_SIZE - 4, color=style.PALETTE["grey"])
-    ax.set_yticks(range(len(t)), [b.replace("_", " ") for b in t["benchmark"]], fontsize=style.FONT_SIZE - 3)
-    ax.invert_yaxis()
+    names = {"platform_power_voldsund": "Platform power (Voldsund)",
+             "platform_power_nguyen": "Platform power (Nguyen)",
+             "platform_power_castberg": "Platform power (Castberg PDO)",
+             "platform_power_hywind_tampen": "Platform power (Hywind Tampen)",
+             "wind_capacity_factor_tampen_design": "Wind CF (Tampen design)",
+             "wind_capacity_factor_tampen_q1_2025": "Wind CF (Tampen Q1 2025)",
+             "co2_avoided_per_wind_mwh": "CO2 avoided per wind MWh",
+             "co2_avoided_per_wind_mwh_2gt": "CO2 avoided per wind MWh (2 GTs on)",
+             "co2_intensity_ncs_2023": "CO2 intensity (NCS 2023)",
+             "co2_intensity_non_electrified": "CO2 intensity (non-electrified)",
+             "leogo_water_injection": "Water injection (LEOGO)"}
+    ax.set_yticks(range(len(t)), [names.get(b, b.replace("_", " ")) for b in t["benchmark"]])
+    ax.set_ylim(len(t) - 0.5, -1.0)
     ax.set_xlabel("Model / benchmark (1 = equal; shaded = within ±20 %; grey bar = published range)")
     ax.set_title(f"Model vs published benchmarks{note}", loc="left")
-    ax.grid(alpha=0.25, lw=0.5, axis="x")
     ax.spines[["top", "right"]].set_visible(False)
 
     if has_fields:
@@ -139,7 +157,6 @@ def plot_validation(table, fields, model_intensity, out_path, note=""):
         ax2.set_title("Field data (grey: GT-powered, teal: electrified)", loc="left")
         ax2.invert_yaxis()
         ax2.legend(frameon=False, fontsize=style.FONT_SIZE - 3)
-        ax2.grid(alpha=0.25, lw=0.5, axis="x")
         ax2.spines[["top", "right"]].set_visible(False)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -162,7 +179,9 @@ def main(argv=None):
     summary = pd.read_csv(summary_path) if summary_path.exists() else None
     if summary is None:
         print(f"Note: {summary_path} not found; run `python -m topside.cases` for the CO2 checks.")
-    metrics = model_metrics(cfg, dp, wind_W.values, summary)
+    sens_path = repo_path(f"results/cases/sensitivity_summary{tag}.csv")
+    sens = pd.read_csv(sens_path) if sens_path.exists() else None
+    metrics = model_metrics(cfg, dp, wind_W.values, summary, sens)
     table = compare(cfg, metrics)
     fields = load_field_data(cfg)
 

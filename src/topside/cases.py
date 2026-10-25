@@ -171,6 +171,14 @@ def plot_base(base, out_path, note="", period="yr"):
     keys = base["case"].tolist()
     for ax, (col, title) in zip(axes.flat, metrics):
         vals = base[col].to_numpy()
+        if col == "lost_production_pct" and abs(vals).max() < 0.005:
+            ax.set_title(title, loc="left")
+            ax.text(0.5, 0.5, "No production lost\nin any case", ha="center", va="center",
+                    transform=ax.transAxes, color=style.PALETTE["dark"])
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.spines[["left", "bottom"]].set_visible(False)
+            continue
         for i, (k, v) in enumerate(zip(keys, vals)):
             ax.bar(i, v, width=0.65, **style.bar_kwargs(k))
             ax.text(i, v, f"{v:,.2f}" if abs(v) < 10 else f"{v:,.0f}", ha="center", va="bottom",

@@ -36,6 +36,13 @@ def test_model_metrics(cfg, dp):
     assert m["design_power_MW"] == pytest.approx(sum(dp.power.values()) / 1e6)
 
 
+def test_two_gt_metric_from_sensitivity(cfg, dp):
+    sens = pd.DataFrame({"group": ["gt_operation_practice"], "case": ["wind_fixed"],
+                         "co2_kt": [74.0], "wind_used_GWh": [50.0]})
+    m = validation.model_metrics(cfg, dp, np.zeros(10), fake_summary(), sens)
+    assert m["co2_avoided_t_per_MWh_2gt"] == pytest.approx(0.52)   # (100 - 74) kt / 50 GWh
+
+
 def test_metrics_without_case_results(cfg, dp):
     m = validation.model_metrics(cfg, dp, np.zeros(10), None)
     assert m["co2_avoided_t_per_MWh"] is None

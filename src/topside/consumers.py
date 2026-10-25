@@ -214,7 +214,6 @@ def plot_flexibility(table, flex, out_path):
     ax2.set_ylim(0, None)
     ax2.legend(loc="upper left", frameon=False, fontsize=style.FONT_SIZE - 2)
     for ax in (ax1, ax2):
-        ax.grid(alpha=0.25, lw=0.5, axis="x" if ax is ax1 else "both")
         ax.spines[["top", "right"]].set_visible(False)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
