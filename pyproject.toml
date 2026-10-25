@@ -19,6 +19,7 @@ dependencies = [
     "neqsim",
     "pyomo",
     "highspy",
+    "tabulate",
 ]
 
 [project.optional-dependencies]

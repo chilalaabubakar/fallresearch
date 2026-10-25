@@ -25,7 +25,7 @@ cut fuel gas use and CO2 emissions without large production losses.
 | 6 | `scheduler.py` – Pyomo optimisation | done (tested on synthetic wind) |
 | 7 | `cases.py` – cases 1–4, sensitivity | done (needs real ERA5 run) |
 | 8 | `validation.py` – benchmarks + field data | done (needs real ERA5 run and field data) |
-| 9 | Figures and tables | – |
+| 9 | `figures.py` – paper figures and tables | done (needs real ERA5 run) |
 
 ## Setup
 
@@ -70,6 +70,7 @@ python -m topside.consumers         # flexibility classes, lever power curves, d
 python -m topside.scheduler [--synthetic] [--weeks 2]  # demo: fixed vs flexible demand
 python -m topside.cases [--sensitivity all] [--jobs 4]  # cases 1-4 (+ sensitivities), full year
 python -m topside.validation        # compare with published benchmarks and data/validation/field_data.csv
+python -m topside.figures           # all paper figures (PNG + PDF) and tables -> results/paper/
 ```
 
 Outputs:
