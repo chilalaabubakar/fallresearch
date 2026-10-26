@@ -6,8 +6,8 @@ extends: base_case.yaml
 
 site:
   name: Tanzania deepwater gas blocks (off Lindi / Mtwara)
-  latitude:  {value: -9.5, unit: deg_N, source: "ASSUMPTION: approximate location of the deepwater gas discoveries in Blocks 1, 2 and 4 (water depth 1000-3000 m); ERA5 grid point"}
-  longitude: {value: 40.5, unit: deg_E, source: "ASSUMPTION: approximate location of the deepwater gas discoveries in Blocks 1, 2 and 4; ERA5 grid point"}
+  latitude:  {value: -9.5, unit: deg_N, source: "ERA5 grid point about 80 km off Lindi, where the Block 2 discoveries lie (Equinor 2014: Zafarani-2 in 2400 m water depth, 80 km from the mainland); Block 1/4 wells are in 1600-2600 m (ESRF Discussion Paper 51). Exact well coordinates not public"}
+  longitude: {value: 40.5, unit: deg_E, source: "ERA5 grid point about 80 km off Lindi (Equinor 2014, Zafarani-2); exact well coordinates not public"}
   year:      {value: 2023, unit: "-", source: "Same weather year as the North Sea base case"}
   results_dir: results/tanzania
 
@@ -22,13 +22,13 @@ wind:
     figure_file: results/tanzania/figures/wind_farm_power_tanzania_{year}.png
 
 economics:
-  co2_price: {value: 0.0, unit: NOK/kg_CO2, source: "ASSUMPTION (verify): no carbon tax or emissions trading on Tanzanian upstream petroleum; NOK 2/kg tested as sensitivity"}
+  co2_price: {value: 0.0, unit: NOK/kg_CO2, source: "Base case chosen with zero CO2 price. NOTE: Tanzania Finance Act 2025 (in force 1 July 2025) introduced an excise duty of TZS 22,000 per tonne of carbon emissions from coal and natural gas (about USD 8.4/t, Bloomberg Tax; KPMG Budget Brief 2025/26), about NOK 0.09/kg at 10.5 NOK/USD. Whether it applies to upstream fuel gas is not confirmed; tested as sensitivity"}
 
 sensitivity:
   co2_price:
     cases: [wind_flex]
-    runs: [{co2_price: 0.0}, {co2_price: 0.5}, {co2_price: 1.0}, {co2_price: 2.0}]
-    source: "Sensitivity: no carbon price (base) up to the Norwegian 2030 target of NOK 2/kg"
+    runs: [{co2_price: 0.0}, {co2_price: 0.09}, {co2_price: 0.5}, {co2_price: 1.0}, {co2_price: 2.0}]
+    source: "Sensitivity: no carbon price (base), Tanzanian excise duty of 2025 (TZS 22,000/t, about NOK 0.09/kg), up to the Norwegian 2030 target of NOK 2/kg"
   line_pack:
     cases: [wind_flex]
     runs: [{line_pack_hours: 0.0}, {line_pack_hours: 1.8}, {line_pack_hours: 3.6}, {line_pack_hours: 7.2}]
@@ -56,7 +56,7 @@ gas_turbine:
   ambient:
     temperature: {value: 26.8, unit: degC, source: "ERA5 2023 mean 2 m air temperature at 9.5 S, 40.5 E (range 23.5-29.8 degC)"}
     iso_temperature: {value: 15.0, unit: degC, source: "ISO 3977 reference conditions"}
-    power_derate_per_K: {value: 0.007, unit: 1/K, source: "Rule of thumb 0.5-0.9 %/K above ISO for gas turbines (Wartsila; USPE; Power Engineering) - verify with OEM site rating"}
+    power_derate_per_K: {value: 0.007, unit: 1/K, source: "Literature range 0.5-0.9 %/K above ISO (USPE, Gas turbine derating; hot coastal site at 40 C gives 82-88 % of ISO output, i.e. 0.5-0.7 %/K); upper part of range used for an aeroderivative unit. Replace with OEM site rating when a machine is chosen"}
     efficiency_derate_per_K: {value: 0.001, unit: 1/K, source: "Rule of thumb about 1 % efficiency per 10 K above ISO (Wartsila; Power Engineering heat-rate rule) - verify with OEM"}
   output:
     figure_file: results/tanzania/figures/gas_turbine_part_load.png
@@ -73,22 +73,22 @@ process:
       value: {C7: [0.15, 0.0913, 0.746], C10: [0.10, 0.135, 0.790]}
       unit: "[mol (relative), kg/mol, g/cm3]"
       source: "ASSUMPTION: small condensate fraction"
-    design_gas_rate: {value: 10.0e+6, unit: Sm3/d, source: "ASSUMPTION: one processing platform supplying about a quarter of a 2-train (10 Mtpa) LNG plant"}
+    design_gas_rate: {value: 10.0e+6, unit: Sm3/d, source: "Derived: Tanzania LNG is planned at up to 10 Mtpa (Wikipedia, Tanzania LNG Project; TanzaniaInvest). 10 Mtpa needs about 14 bcm/yr or about 40 MSm3/d of feed gas (about 1.36 bcm per Mt LNG plus plant fuel), so one platform supplying a quarter of it gives 10 MSm3/d. The platform split is a modelling choice"}
     arrival_pressure: {value: 70.0, unit: bara, source: "ASSUMPTION: subsea flowline arrival pressure, mid-life"}
-    arrival_temperature: {value: 15.0, unit: degC, source: "ASSUMPTION: gas cooled towards seabed temperature in deepwater flowlines"}
+    arrival_temperature: {value: 15.0, unit: degC, source: "ASSUMPTION: between seabed temperature (about 2-4 C at 2000+ m, not verified) for long tie-backs and warmer arrival for short ones; depends on where the hypothetical platform sits. Colder arrival lowers compressor power"}
     stabiliser_pressure: {value: 10.0, unit: bara, source: "ASSUMPTION: condensate stabiliser"}
     export_pressure: {value: 150.0, unit: bara, source: "ASSUMPTION: export pipeline inlet pressure"}
     pipeline:
       length: {value: 100.0e+3, unit: m, source: "About 100 km subsea pipeline from the deepwater discoveries to the Lindi LNG site (The EastAfrican; Shell)"}
-      inner_diameter: {value: 0.6, unit: m, source: "ASSUMPTION: 24-inch class export line for about 10 MSm3/d"}
+      inner_diameter: {value: 0.6, unit: m, source: "ASSUMPTION (checked, docs/verification/tanzania_process_check.py): 24-inch class line; at 10 MSm3/d the gas velocity is 2.4 m/s and the friction loss 6.8 bar over 100 km, a normal design. Actual Tanzania LNG pipeline size not public"}
       max_pressure: {value: 150.0, unit: bara, source: "ASSUMPTION: equal to export pressure"}
-      min_pressure: {value: 110.0, unit: bara, source: "ASSUMPTION: lowest pipeline inlet pressure that still meets the shore delivery pressure"}
+      min_pressure: {value: 110.0, unit: bara, source: "ASSUMPTION (checked, docs/verification/tanzania_process_check.py): at 110 bara inlet and full flow the gas still reaches shore at about 75 bara after 6.8 bar friction and 28.6 bar for the 2400 m climb from the seabed. Required LNG plant inlet pressure not public"}
       temperature: {value: 15.0, unit: degC, source: "ASSUMPTION: average gas temperature along the deep and shallow sections"}
-    teg_heat: {value: 1.5, unit: MW, source: "ASSUMPTION: TEG regeneration reboiler duty at design gas rate (order of magnitude from GPSA glycol rules); verify"}
+    teg_heat: {value: 0.5, unit: MW, source: "Calculated (docs/verification/tanzania_process_check.py): NeqSim water content 252-590 mg/Sm3 at 70 bara and 15-30 C, dried to 65 mg/Sm3; TEG circulation 3-7 US gal per lb water (Kimray; Cimarron) gives a reboiler duty of 0.17-0.85 MW; 0.5 MW used (contactor near 30 C). Was 1.5 MW"}
     meg:
-      regeneration_heat: {value: 3.0, unit: MW, source: "ASSUMPTION: MEG regeneration (water boil-off) heat at full regeneration rate"}
-      regeneration_electric: {value: 0.3, unit: MW, source: "ASSUMPTION: MEG regeneration pumps and fans at full rate"}
-      injection_pumps: {value: 0.5, unit: MW, source: "ASSUMPTION: lean MEG injection to subsea wells, must run for hydrate control"}
+      regeneration_heat: {value: 1.0, unit: MW, source: "Calculated (docs/verification/tanzania_process_check.py): water condensed between reservoir and arrival (NeqSim) is 350-1460 kg/h for an assumed reservoir of 60-100 C and 250-350 bara; boiling it off with 30 % reflux and heating 45 wt% rich MEG gives 0.4-1.5 MW. 1.0 MW used (80 C, 300 bara). Formation water, which adds about 1 MW per 25 m3/d, is not included (early field life). Was 3.0 MW"}
+      regeneration_electric: {value: 0.1, unit: MW, source: "ASSUMPTION: feed, reflux and lean MEG pumps and air-cooler fans, about 10 % of the heat duty. Was 0.3 MW"}
+      injection_pumps: {value: 0.05, unit: MW, source: "Calculated (docs/verification/tanzania_process_check.py): 350-1460 kg/h lean MEG (90 wt%) at about 330 bar pump head gives 2-11 kW hydraulic/shaft power even without credit for the 2400 m hydrostatic column; 0.05 MW allows for minimum-flow recirculation. Must run for hydrate control. Was 0.5 MW"}
   cooling:
     gas_cooler_outlet: {value: 38.0, unit: degC, source: "ASSUMPTION: about 10 K above warm seawater"}
     seawater_temperature_rise: {value: 8.0, unit: K, source: "ASSUMPTION: smaller rise allowed with warm seawater"}
