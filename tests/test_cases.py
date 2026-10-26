@@ -86,3 +86,6 @@ def test_run_cache_resumes_and_tracks_config(tmp_path):
     more_runs = copy.deepcopy(cfg)
     more_runs["sensitivity"]["co2_price"]["runs"].append({"co2_price": 9.0})   # run list only
     assert cases.cache_file(more_runs, tmp_path, t) == cases.cache_file(cfg, tmp_path, t)
+    new_source = copy.deepcopy(cfg)
+    new_source["economics"]["gas_price"]["source"] += " (accessed today)"           # citation only
+    assert cases.cache_file(new_source, tmp_path, t) == cases.cache_file(cfg, tmp_path, t)

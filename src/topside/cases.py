@@ -164,12 +164,21 @@ def build_tasks(cfg, sensitivities, tag, schedules_dir, cache_dir=None):
 CACHE_IGNORED_SECTIONS = ("sensitivity", "validation")
 
 
+def _strip_sources(node):
+    """Drop 'source' texts: editing a citation must not invalidate finished runs."""
+    if isinstance(node, dict):
+        return {k: _strip_sources(v) for k, v in node.items() if k != "source"}
+    if isinstance(node, list):
+        return [_strip_sources(v) for v in node]
+    return node
+
+
 def cache_file(cfg, cache_dir, task):
     """One file per run. The name hashes the config and the overrides, so a changed
     parameter never reuses an old result; editing the list of sensitivity runs or the
     benchmarks does not invalidate finished runs."""
     group, case_key, overrides = task[:3]
-    relevant = {k: v for k, v in cfg.items() if k not in CACHE_IGNORED_SECTIONS}
+    relevant = _strip_sources({k: v for k, v in cfg.items() if k not in CACHE_IGNORED_SECTIONS})
     key = json.dumps([relevant, overrides], sort_keys=True, default=str)
     return Path(cache_dir) / f"{group}__{case_key}__{hashlib.sha1(key.encode()).hexdigest()[:12]}.json"
 

@@ -80,7 +80,7 @@ gas_turbine:
     small:
       # Solar Turbines Mars 100 generator set (oil and gas power generation package), ISO rating
       name: Solar Turbines Mars 100
-      rated_power: {value: 11.35e+6, unit: W, source: "Solar Turbines, Mars 100 oil and gas power generation package: 11,350 kWe at ISO conditions (https://www.solarturbines.com/en_US/products/oil-and-gas-power-generation-packages/mars-100.html)"}
+      rated_power: {value: 11.35e+6, unit: W, source: "Solar Turbines, Mars 100 oil and gas power generation package: 11,350 kWe at ISO conditions (https://www.solarturbines.com/en_US/products/oil-and-gas-power-generation-packages/mars-100.html, accessed 27 October 2026)"}
       rated_efficiency: {value: 0.3292, unit: "-", source: "3600/10935 from the ISO heat rate of 10,935 kJ/kWe-h (10,365 Btu/kWe-h) at the generator terminals, Solar Turbines Mars 100 product page"}
       no_load_fuel_fraction: {value: 0.184, unit: "-", source: "ASSUMPTION: same relative part-load shape as the LEOGO turbine (Svendsen et al., 2023); no OEM part-load curve published"}
       min_load: {value: 0.161, unit: "-", source: "ASSUMPTION: same minimum-load fraction as the LEOGO turbine (Svendsen et al., 2023), i.e. 1.8 MW"}
