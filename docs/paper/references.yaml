@@ -65,3 +65,14 @@ sodir_factpages:
 nowind2025:
   text: "Norwegian Offshore Wind. Hywind Tampen capacity factor, first quarter 2025 [news item]. 2025."
   check: true
+zhang_grossmann2016:
+  text: "Zhang Q, Grossmann IE. Enterprise-wide optimization for industrial demand side management: fundamentals, advances, and perspectives. Chem Eng Res Des 2016;116:114–31."
+golmohamadi2022:
+  text: "Golmohamadi H. Demand-side management in industrial sector: a review of heavy industries. Renew Sustain Energy Rev 2022;156:111963."
+  check: true   # article number not confirmed
+sodir2020:
+  text: "Norwegian Petroleum Directorate, Norwegian Water Resources and Energy Directorate, Petroleum Safety Authority Norway, Norwegian Environment Agency. Kraft fra land til norsk sokkel [Power from shore to the Norwegian shelf]. Stavanger; 2020."
+  check: true
+sodir_pfs:
+  text: "Norwegian Offshore Directorate. Power from shore – summary. https://www.sodir.no/en/whats-new/publications/reports/power-from-shore/summary/ [accessed DATE]."
+  check: true
