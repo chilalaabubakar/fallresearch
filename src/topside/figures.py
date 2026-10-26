@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from topside.config import load_config, param, repo_path, results_path
+from topside.config import load_config, param, param_si, repo_path, results_path
 from topside import cases, scheduler, style
 
 CASE_ORDER = ["gt_only", "wind_fixed", "wind_flex", "wind_flex_battery"]
@@ -73,6 +73,81 @@ def case_label(cfg, key):
 # --------------------------------------------------------------------------
 # New figures
 # --------------------------------------------------------------------------
+CLASS_NAMES = {"must_run": "must-run", "flexible": "flexible (deferrable)",
+               "sheddable": "sheddable", "mixed": "mixed"}
+
+
+def _box(ax, x, y, w, h, text, face, edge=INK, fs=None, weight="normal", color=INK):
+    ax.add_patch(plt.Rectangle((x, y), w, h, facecolor=face, edgecolor=edge, linewidth=1.4))
+    ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=fs or style.FONT_SIZE - 3,
+            weight=weight, color=color, linespacing=1.3)
+
+
+def _arrow(ax, x0, y0, x1, y1, ls="-", color=INK):
+    ax.annotate("", (x1, y1), (x0, y0), arrowprops=dict(arrowstyle="-|>", lw=1.4, ls=ls, color=color,
+                                                        shrinkA=0, shrinkB=0))
+
+
+def fig_system(cfg, dp, out_dir):
+    """Schematic of the platform power system: supply, consumers by class, and the scheduler."""
+    from topside import process
+    w, g = cfg["wind"], cfg["gas_turbine"]
+    n_wt, p_wt = param(w["farm"]["n_turbines"]), param(w["turbine"]["rated_power"]) / 1e6
+    n_gt = int(cfg["cases"]["wind_flex"]["fleet"]["main"])
+    p_gt = param(g["units"]["main"]["rated_power"]) / 1e6
+    batt = cfg["cases"]["battery_size"]
+    classes = cfg["flexibility"]["classes"]
+    heat = param_si(cfg["process"]["heat_demand"]) / 1e6
+
+    fig, ax = plt.subplots(figsize=(12, 5.9))
+    ax.set_xlim(0, 12)
+    ax.set_ylim(-0.3, 5.7)
+    ax.axis("off")
+    pal = style.PALETTE
+    # supply side
+    _box(ax, 0.2, 4.1, 2.9, 0.95, f"Wind farm\n{n_wt} × {p_wt:.0f} MW (IEA 15 MW)", pal["blue_secondary"], color="white")
+    _box(ax, 0.2, 2.75, 2.9, 0.95, f"Gas turbines\n{n_gt} × {p_gt:.1f} MW (LEOGO)", pal["red_2"])
+    bat_txt = f"Battery (case 4)\n{param(batt['power']):g} MW / {param(batt['energy']):g} MWh"
+    _box(ax, 0.2, 1.4, 2.9, 0.95, bat_txt, pal["green_2"])
+    ax.text(1.65, 5.35, "ERA5 hourly wind, 2023", ha="center", fontsize=style.FONT_SIZE - 4, color=MUTED)
+    _arrow(ax, 1.65, 5.25, 1.65, 5.05, color=MUTED)
+    # bus
+    ax.add_patch(plt.Rectangle((3.9, 0.9), 0.16, 4.4, facecolor=INK))
+    ax.text(3.98, 0.65, "platform\nAC bus", ha="center", va="top", fontsize=style.FONT_SIZE - 4)
+    for y in (4.575, 3.225, 1.875):
+        _arrow(ax, 3.1, y, 3.9, y)
+    # consumers
+    order = sorted(dp.power, key=lambda k: ["flexible", "sheddable", "mixed", "must_run"].index(classes[k]))
+    y, ypos = 5.0, {}
+    for k in order:
+        c = classes[k]
+        face = style.CLASS_COLOR[c]
+        _box(ax, 5.0, y, 3.6, 0.62, f"{process.LABELS[k]}  {dp.power[k] / 1e6:.2f} MW", face, color="white")
+        ypos[c] = ypos.get(c, []) + [y + 0.31]
+        _arrow(ax, 4.06, y + 0.31, 5.0, y + 0.31)
+        y -= 0.78
+    # heat
+    _box(ax, 5.0, 0.0, 3.6, 0.62, f"Heat {heat:.0f} MW: GT waste heat\n+ electric heater", pal["neutral"],
+         fs=style.FONT_SIZE - 4)
+    # class legend
+    for i, c in enumerate(["flexible", "sheddable", "mixed", "must_run"]):
+        ax.add_patch(plt.Rectangle((9.4, 4.95 - 0.42 * i), 0.3, 0.26, facecolor=style.CLASS_COLOR[c],
+                                   edgecolor=INK))
+        ax.text(9.8, 5.08 - 0.42 * i, CLASS_NAMES[c], va="center", fontsize=style.FONT_SIZE - 4)
+    # scheduler
+    _box(ax, 8.95, 1.05, 2.9, 1.95,
+         "Scheduler (MILP)\nhourly, rolling 1-week\nwindows + 24 h look-ahead\n\ndecides: GT on/off and load,\n"
+         "wind used, battery,\nproduction $f_p$, injection $f_{wi}$", "white", fs=style.FONT_SIZE - 5)
+    ax.text(10.4, 3.1, "minimise fuel value + CO2 cost\n+ lost production + GT starts",
+            ha="center", va="bottom", fontsize=style.FONT_SIZE - 5, color=MUTED)
+    _arrow(ax, 8.95, 2.75, 8.6, ypos["flexible"][0], ls="--", color=pal["blue_main"])
+    _arrow(ax, 8.95, 2.45, 8.6, ypos["sheddable"][1], ls="--", color=pal["red_strong"])
+    ax.text(8.85, 4.3, "$f_{wi}$", color=pal["blue_main"], fontsize=style.FONT_SIZE - 2)
+    ax.text(8.85, 3.05, "$f_p$", color=pal["red_strong"], fontsize=style.FONT_SIZE - 2)
+    ax.plot([10.4, 10.4, 3.4], [1.05, 0.85, 0.85], ls="--", lw=1.2, color=MUTED)
+    _arrow(ax, 3.4, 0.85, 3.4, 2.75, ls="--", color=MUTED)
+    ax.text(3.3, 1.0, "GT on/off\nand load", fontsize=style.FONT_SIZE - 5, color=MUTED, va="bottom", ha="right")
+    return save(fig, out_dir, "fig00_system")
 def fig_wind_resource(cfg, wind_W, out_dir, note=""):
     """Monthly capacity factor and duration curve of wind farm power."""
     installed = param(cfg["wind"]["farm"]["n_turbines"]) * param(cfg["wind"]["turbine"]["rated_power"])
@@ -314,9 +389,11 @@ def main(argv=None):
     if "wind" in inp:
         attempt("fig01", fig_wind_resource, cfg, inp["wind"], out, note)
 
-    # Figures 2-3 come from the model itself (needs NeqSim)
+    # Figures 0 and 2-3 come from the model itself (needs NeqSim)
     from topside import consumers, gas_turbine, process
     dp = process.design_point(cfg)
+    if not process.is_gas_platform(cfg):
+        attempt("fig00", fig_system, cfg, dp, out)
     flex = consumers.build_flexibility(cfg, dp)
     tbl = consumers.classification_table(cfg, dp)
     for ext in ("pdf", "png"):

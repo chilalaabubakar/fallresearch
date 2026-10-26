@@ -1,0 +1,67 @@
+# Reference list for the paper, in Elsevier numbered style.
+# build.py numbers the entries in order of first citation ([@key] in the text).
+# check: true marks an entry whose details were not confirmed against the original.
+
+offshorenorge2024:
+  text: "Offshore Norge. Climate and environmental report 2024. Stavanger: Offshore Norge; 2024."
+norskpetroleum_emissions:
+  text: "Norwegian Ministry of Energy, Norwegian Offshore Directorate. Emissions to air. Norskpetroleum.no. https://www.norskpetroleum.no/en/environment-and-technology/emissions-to-air/ [accessed DATE]."
+  check: true
+he2010:
+  text: "He W, Jacobsen G, Anderson T, Olsen F, Hanson TD, Korpås M, et al. The potential of integrating wind power with offshore oil and gas platforms. Wind Eng 2010;34(2):125–37."
+  check: true   # co-author list after Korpås not confirmed
+marvik2013:
+  text: "Marvik JI, Øyslebø EV, Korpås M. Electrification of offshore petroleum installations with offshore wind integration. Renew Energy 2013;50:558–64. https://doi.org/10.1016/j.renene.2012.07.010."
+riboldi2018:
+  text: "Riboldi L, Nord LO. Offshore power plants integrating a wind farm: design optimisation and techno-economic assessment based on surrogate modelling. Processes 2018;6(12):249. https://doi.org/10.3390/pr6120249."
+equinor2023:
+  text: "Equinor. The world's largest floating offshore wind farm officially opened [press release]. 23 August 2023. https://www.equinor.com/news/20230823-hywind-tampen-officially-opened."
+svendsen2023:
+  text: "Svendsen HG, Vrana TK, Holdyk A, Schümann H. The Low Emission Oil and Gas Open reference platform – an off-grid energy system for renewable integration studies. IET Energy Syst Integr 2023;5(1):66–79. https://doi.org/10.1049/esi2.12085."
+svendsen2022:
+  text: "Svendsen HG. Optimised operation of low-emission offshore oil and gas platform integrated energy systems. arXiv:2202.05072 [preprint]; 2022."
+  check: true   # check whether a journal version exists
+zhang2022:
+  text: "Zhang H, Tomasgard A, Knudsen BR, Svendsen HG, Bakker SJ, Grossmann IE. Modelling and analysis of offshore energy hubs. Energy 2022;261:125219."
+khan2022:
+  text: "Khan KS, Sousa ML, Santos GB, Monaro RM, Salles MBC. Flexibility analysis of O&G platform power system with wind energy integration. J Phys Conf Ser 2022;2362:012021. https://doi.org/10.1088/1742-6596/2362/1/012021."
+  check: true   # author list taken from the conference poster
+nguyen2013:
+  text: "Nguyen T-V, Pierobon L, Elmegaard B, Haglind F, Breuhaus P, Voldsund M. Exergetic assessment of energy systems on North Sea oil and gas platforms. Energy 2013;62:23–36. https://doi.org/10.1016/j.energy.2013.03.011."
+voldsund2013:
+  text: "Voldsund M, Ertesvåg IS, He W, Kjelstrup S. Exergy analysis of the oil and gas processing on a North Sea oil platform a real production day. Energy 2013;55:716–27. https://doi.org/10.1016/j.energy.2013.02.038."
+voldsund2014:
+  text: "Voldsund M, Nguyen T-V, Elmegaard B, Ertesvåg IS, Røsjorde A, Jøssang K, et al. Exergy destruction and losses on four North Sea offshore platforms: a comparative study of the oil and gas processing plants. Energy 2014;74:45–58. https://doi.org/10.1016/j.energy.2014.02.080."
+hersbach2020:
+  text: "Hersbach H, Bell B, Berrisford P, Hirahara S, Horányi A, Muñoz-Sabater J, et al. The ERA5 global reanalysis. Q J R Meteorol Soc 2020;146:1999–2049. https://doi.org/10.1002/qj.3803."
+hsu1994:
+  text: "Hsu SA, Meindl EA, Gilhousen DB. Determining the power-law wind-profile exponent under near-neutral stability conditions at sea. J Appl Meteorol 1994;33:757–65."
+gaertner2020:
+  text: "Gaertner E, Rinker J, Sethuraman L, Zahle F, Anderson B, Barter G, et al. Definition of the IEA 15-megawatt offshore reference wind turbine. Technical Report NREL/TP-5000-75698. Golden, CO: National Renewable Energy Laboratory; 2020."
+neqsim:
+  text: "Solbraa E. NeqSim – Non-Equilibrium Simulator, an open-source library for thermodynamic and process calculations. https://github.com/equinor/neqsim."
+iso6976:
+  text: "ISO 6976:2016. Natural gas – Calculation of calorific values, density, relative density and Wobbe indices from composition. Geneva: International Organization for Standardization; 2016."
+sharqawy2010:
+  text: "Sharqawy MH, Lienhard JH, Zubair SM. Thermophysical properties of seawater: a review of existing correlations and data. Desalin Water Treat 2010;16:354–80. https://doi.org/10.5004/dwt.2010.1079."
+bynum2021:
+  text: "Bynum ML, Hackebeil GA, Hart WE, Laird CD, Nicholson BL, Siirola JD, et al. Pyomo – optimization modeling in Python. 3rd ed. Cham: Springer; 2021."
+huangfu2018:
+  text: "Huangfu Q, Hall JAJ. Parallelizing the dual revised simplex method. Math Program Comput 2018;10:119–42. https://doi.org/10.1007/s12532-017-0130-5."
+klimaplan2021:
+  text: "Norwegian Ministry of Climate and Environment. Meld. St. 13 (2020–2021) Klimaplan for 2021–2030 [Climate plan for 2021–2030]. Oslo; 2021."
+castberg2017:
+  text: "Statoil. Johan Castberg – plan for utbygging og drift, del II: konsekvensutredning [Plan for development and operation, part II: impact assessment]. Stavanger: Statoil; 2017."
+  check: true
+westwood2022:
+  text: "Westwood Global Energy Group. Analysis of electrification and emissions on the Norwegian continental shelf. 2022."
+  check: true
+norskeutslipp:
+  text: "Norwegian Environment Agency. Norskeutslipp – emissions from Gullfaks, Snorre and Statfjord, 2021–2024. https://www.norskeutslipp.no [accessed DATE]."
+  check: true
+sodir_factpages:
+  text: "Norwegian Offshore Directorate. FactPages – field production, yearly. https://factpages.sodir.no [accessed DATE]."
+  check: true
+nowind2025:
+  text: "Norwegian Offshore Wind. Hywind Tampen capacity factor, first quarter 2025 [news item]. 2025."
+  check: true

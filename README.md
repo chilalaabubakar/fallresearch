@@ -27,6 +27,7 @@ cut fuel gas use and CO2 emissions without large production losses.
 | 8 | `validation.py` – benchmarks + field data | done (Gullfaks, Snorre, Statfjord) |
 | 9 | `figures.py` – paper figures and tables | done (results/paper) |
 | 10 | Tanzania site + `compare_sites.py` – North Sea vs Tanzania | done, but not used in the paper (archived draft: docs/tanzania/comparison.md) |
+| 11 | Manuscript for Applied Energy (`docs/paper/`) | draft: paper, supplementary, highlights |
 
 ## Sites
 The North Sea case (`config/base_case.yaml`) is the default. A site config lists
@@ -90,6 +91,7 @@ python -m topside.scheduler [--synthetic] [--weeks 2]  # demo: fixed vs flexible
 python -m topside.cases [--sensitivity all] [--jobs 4]  # cases 1-4 (+ sensitivities), full year
 python -m topside.validation        # compare with published benchmarks and data/validation/field_data.csv
 python -m topside.figures           # all paper figures (PNG + PDF) and tables -> results/paper/
+python docs/paper/build.py          # Applied Energy manuscript, supplementary and highlights (Word)
 ```
 
 Outputs:
@@ -110,6 +112,7 @@ src/topside/            model code
 tests/                  pytest tests
 notebooks/              exploration
 results/                figures and tables
+docs/paper/             manuscript sources (Markdown, references.yaml) and build.py -> Word
 ```
 
 ## Data sources

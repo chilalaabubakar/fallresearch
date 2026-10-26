@@ -54,3 +54,10 @@ def test_new_figures_render(cfg, tmp_path):
 def test_write_table(tmp_path):
     p = figures.write_table(pd.DataFrame({"a": [1.23456, 2.0]}), tmp_path, "T")
     assert p.exists() and (tmp_path / "T.md").read_text().startswith("|")
+
+
+def test_system_schematic_renders(cfg, tmp_path):
+    from topside import process
+    figures.set_style()
+    p = figures.fig_system(cfg, process.design_point(cfg), tmp_path)
+    assert p.exists() and p.with_suffix(".pdf").exists()
