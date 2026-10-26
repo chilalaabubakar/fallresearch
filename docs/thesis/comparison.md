@@ -37,9 +37,9 @@ Chapter 3; CO2 in kt per year).
 | Case 3 – wind, flexible | 57.5 (−54.9 %) | 55.2 (−45.7 %) |
 | Case 4 – case 3 + battery | 57.1 (−55.2 %) | 55.0 (−45.9 %) |
 | Flexibility benefit (case 2 − 3) | 7.1 kt (11.0 %) | 2.6 kt (4.5 %) |
-| Hours with a second GT, case 2 → 3 | 1,702 → 30 | 895 → 13 |
-| GT starts, case 2 → 3 | 149 → 6 | 121 → 2 |
-| GT low-load unit-hours, case 2 → 3 | 9,005 → 5,928 (−34 %) | 6,403 → 4,800 (−25 %) |
+| Hours with a second GT, case 2 → 3 | 1,702 → 30 | 894 → 10 |
+| GT starts, case 2 → 3 | 149 → 6 | 120 → 1 |
+| GT low-load unit-hours, case 2 → 3 | 9,005 → 5,928 (−34 %) | 6,401 → 4,763 (−26 %) |
 | Lost production, case 3 | 0 | 0 |
 
 ## 2 Results of the four cases
@@ -75,20 +75,20 @@ comes mainly from the lower carbon content of the lean gas.
 The flexibility saving comes from the same mechanism at both sites.
 Postponing flexible load lets one gas turbine carry the platform in hours when
 the wind is just too weak, instead of starting a second turbine that idles at
-low load. In Tanzania, the hours with two GTs online fall from 895 to 13, the
-starts from 121 to 2, and the GT low-load hours by 25 % (Table C1). The example
+low load. In Tanzania, the hours with two GTs online fall from 894 to 10, the
+starts from 120 to 1, and the GT low-load hours by 26 % (Table C1). The example
 week (Figure 12) shows how this works on a gas platform. When the wind drops,
 the platform lowers its gas production to about 70 % and pauses MEG
 regeneration. When the wind returns, it produces at 110 % to refill the
-pipeline. Production was above the sales rate in 4,192 hours and below it in
-2,691 hours.
+pipeline. Production was above the sales rate in 4,287 hours and below it in
+2,715 hours.
 
 The saving is smaller for two reasons.
 
 * **Less to avoid.** The Tanzanian design demand (15.4 MW) is only just
   above what one derated GT can carry while holding 5 MW in reserve
   (15.0 MW). Even with fixed demand, a second GT is therefore needed in
-  only 895 hours of the year, about half as often as in the North Sea
+  only 894 hours of the year, about half as often as in the North Sea
   (1,702 h). Flexibility removes almost all of these hours at both sites,
   but in Tanzania there are fewer to remove.
 * **A much smaller energy buffer.** Cutting production to its minimum lowers
@@ -109,7 +109,7 @@ The line-pack sensitivity confirms this (Figure 11, right; Figure 13).
 | Saving vs case 2 | 0.3 % | 4.2 % | 4.5 % | 4.9 % |
 
 With no line pack, only MEG regeneration can be moved, and the benefit almost
-disappears: 121 GT starts remain, as with fixed demand. The first 1.8 h of
+disappears: 122 GT starts remain, as with fixed demand. The first 1.8 h of
 line pack gives most of the benefit. In the North Sea, likewise, 24 h of
 injection deficit gave the full result. Allowing a wider pipeline pressure
 swing would raise the Tanzanian benefit only slowly.
@@ -135,13 +135,13 @@ The other sensitivities behave as in the North Sea (Figure 13):
 * **Operating practice** dominates. Keeping two GTs online removes almost
   all of the benefit of wind (79.2 kt in case 2, 78.4 kt in case 3).
 * **No GT online.** Unlike the North Sea, allowing all GTs to stop with an
-  8 MW / 8 MWh battery is **not feasible** in Tanzania: it leaves 27 MWh of
-  demand unmet over the year and needs 215 GT starts. Long calms and a weak
+  8 MW / 8 MWh battery is **not feasible** in Tanzania: it leaves 52 MWh of
+  demand unmet over the year and needs 217 GT starts. Long calms and a weak
   resource mean that a battery of this size cannot always bridge the start
   of a gas turbine. The result (46.4 kt) is marked in Figure 13 and is not a
   valid design.
 * **Gas turbine fleet.** Replacing one main GT by a smaller unit saves
-  1.1 kt more but needs 45 starts instead of 2.
+  1.1 kt more but needs 43 starts instead of 1.
 
 Results that differ only by solver tolerance (for example the base case
 repeated within a sensitivity group) agree within 0.1 kt.
@@ -163,8 +163,8 @@ repeated within a sensitivity group) agree within 0.1 kt.
    than half as large (4.5 % against 11 % of case 2 emissions).
 3. Wind alone reduces emissions less in Tanzania (−43 % against −49 %), and
    its strong seasonal pattern leaves December almost without wind.
-4. With the small Tanzanian excise duty of 2025 (about NOK 0.09/kg, 4 % of
-   the Norwegian 2030 price), wind and flexibility are justified in Tanzania
+4. With the small Tanzanian excise duty of 2025 (about NOK 0.09/kg, about 5 %
+   of the Norwegian 2030 price), wind and flexibility are justified in Tanzania
    mainly by the gas they save for sale, not by avoided CO2 cost.
 
 **Limitations specific to this case.** The processing platform is
