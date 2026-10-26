@@ -6,7 +6,9 @@
   results/paper/figNN_*.png with the caption below it.
 * Equations ($$ ... $$) become native Word equations (pandoc OMML).
 * Tables get single-line borders (pandoc leaves them borderless).
-Outputs: docs/thesis/methods.docx, results.docx and comparison.docx
+* comparison.md is appended to the results chapter as Section 9 (headings
+  demoted one level, its italic draft note dropped).
+Outputs: docs/thesis/methods.docx and docs/thesis/results.docx
 """
 
 import re
@@ -21,7 +23,9 @@ from docx.oxml.ns import qn
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 FIGURES = ROOT / "results" / "paper"
-CHAPTERS = ["methods", "results", "comparison"]
+CHAPTERS = ["methods", "results"]
+# Markdown files appended to a chapter as numbered sections: chapter -> [(file, section number)]
+SECTIONS = {"results": [("comparison", 9)]}
 # Figures that are not results/paper/figNN_*.png (site comparison chapter)
 FIGURE_FILES = {11: "results/comparison/site_comparison.png",
                 12: "results/tanzania/paper/fig05_example_week.png",
@@ -64,10 +68,21 @@ def add_table_borders(docx_path):
     doc.save(docx_path)
 
 
+def as_section(markdown, number):
+    """Turn a stand-alone chapter into section `number` of another chapter."""
+    markdown = re.sub(r"\A# .*\n+\*[^*]+\*\n+", lambda m: m.group(0).split("\n")[0] + "\n\n",
+                      markdown, count=1)                       # drop the italic draft note
+    markdown = re.sub(r"(?m)^## (\d+) ", lambda m: f"### {number}.{m.group(1)} ", markdown)
+    return re.sub(r"(?m)^# ", f"## {number} ", markdown, count=1)
+
+
 def build(chapter):
     src = HERE / f"{chapter}.md"
     out = HERE / f"{chapter}.docx"
-    md = insert_figures(src.read_text(encoding="utf-8"))
+    md = src.read_text(encoding="utf-8")
+    for name, number in SECTIONS.get(chapter, []):
+        md = md.rstrip() + "\n\n" + as_section((HERE / f"{name}.md").read_text(encoding="utf-8"), number)
+    md = insert_figures(md)
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as tmp:
         tmp.write(md)
     subprocess.run(["pandoc", tmp.name, "-f", "markdown", "-t", "docx", "-o", str(out),

@@ -1,6 +1,6 @@
 # Comparison with a tropical gas platform (Tanzania)
 
-*Draft for the thesis chapter (or a section of the results chapter). The site
+*Draft, built into results.docx as Section 9 by build_word.py. The site
 and platform are described in Methods, Section 10. All values are for the
 ERA5 weather year 2023. Tanzania results are in `results/tanzania/`, the
 side-by-side table and figure in `results/comparison/`.*
@@ -19,7 +19,7 @@ The hot climate costs the gas turbines 8 % of their power, and the lean
 fuel gas emits 17 % less CO2 per Sm³ than Norwegian fuel gas.
 
 **Table C1.** Main inputs and results for the two sites (case numbers as in
-Chapter 3; CO2 in kt per year).
+Section 3; CO2 in kt per year).
 
 | | North Sea (Tampen) | Tanzania (Blocks 1, 2, 4) |
 |---|---|---|
