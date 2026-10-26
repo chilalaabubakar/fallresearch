@@ -270,9 +270,14 @@ stabilisation at 10 bara, and compression of the gas to 150 bara for
 export, with the same isentropic efficiency as the North Sea compressors.
 Gas dehydration with triethylene glycol (TEG) and regeneration of the
 mono-ethylene glycol (MEG) injected into the subsea wells for hydrate
-control are represented by their heat and electric duties (Table T1). The
-design electric demand is 16.0 MW, of which export compression is 11.2 MW
-(70 %).
+control are represented by their heat and electric duties (Table T1). These
+duties were checked against NeqSim water contents of the gas. Drying
+10 MSm³/d needs a TEG reboiler of about 0.5 MW. Regenerating the MEG that
+carries the water condensed between reservoir and platform needs about 1 MW
+of heat, for an assumed reservoir of 80 °C and 300 bara. The MEG injection
+pumps need only about 0.05 MW (`docs/verification/tanzania_process_check.py`).
+The design electric demand is 15.4 MW, of which export compression is
+11.2 MW (73 %).
 
 **Flexibility levers.** A gas platform has no water injection, so the two
 levers are different:
@@ -286,7 +291,7 @@ levers are different:
   Delivered gas, and therefore the LNG plant, is unaffected on average; no
   production is lost.
 * *MEG regeneration.* Rich MEG is buffered in a tank, so the regeneration
-  unit (0.3 MW electric and 3 MW heat at full rate) may pause for up to 48 h
+  unit (0.1 MW electric and 1 MW heat at full rate) may pause for up to 48 h
   of full-rate feed and catch up later, exactly as water injection is
   modelled for the North Sea platform. The MEG injection pumps are must-run.
 
@@ -302,8 +307,10 @@ Coolers use the ERA5 mean sea temperature (28.2 °C).
 **Fuel and CO2 price.** The fuel is the lean export gas. Its lower heating
 value (34.9 MJ/Sm³) is computed with NeqSim to ISO 6976, and its CO2 factor
 (1.945 kg/Sm³) from its carbon content, instead of the Norwegian 2.34
-kg/Sm³. Tanzania has no carbon tax or emission trading for upstream
-petroleum, so the base CO2 price is zero; NOK 0.5–2/kg is tested as a
+kg/Sm³. The base CO2 price is zero. The Tanzanian Finance Act 2025
+introduced an excise duty of TZS 22,000 per tonne of carbon emissions from
+coal and natural gas (about NOK 0.09/kg); whether it applies to fuel gas
+burnt offshore is not confirmed. NOK 0.09–2/kg is therefore tested as a
 sensitivity, together with line-pack sizes of 0, 1.8, 3.6 and 7.2 h.
 
 **Validation.** No published operating data exist for an offshore platform at
@@ -311,8 +318,8 @@ the site. The wind input is checked qualitatively against a study of
 measured winds at coastal Tanzanian stations, which reports the strongest
 winds at Mtwara and a June–July maximum with weak winds from November to
 March, and against the ESMAP offshore-wind potential maps. Of the 115
-parameters in the Tanzania configuration, 50 are still assumptions (Table
-T1).
+parameters in the Tanzania configuration, 43 are still assumptions, 22 of
+them specific to Tanzania (Table T1; `docs/verification/tanzania_assumptions.md`).
 
 ## References
 
