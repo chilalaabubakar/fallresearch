@@ -78,3 +78,11 @@ sodir_pfs:
   check: true
 solar_mars100:
   text: "Solar Turbines. Mars 100 – oil and gas power generation package: ISO rating 11,350 kWe, heat rate 10,935 kJ/kWe-h. https://www.solarturbines.com/en_US/products/oil-and-gas-power-generation-packages/mars-100.html [accessed 27 October 2026]."
+dighe2024:
+  text: "Dighe VV, Huang L-J, Hernandez Montfort J, Serraris J-J. Improving O&M simulations by integrating vessel motions for floating wind farms. J Mar Sci Eng 2024;12(11):1948. https://doi.org/10.3390/jmse12111948."
+npd_abatement:
+  text: "Norwegian Petroleum Directorate. Estimating abatement cost curves for power from shore [conference abstract]. International Association for Energy Economics (IAEE) conference proceedings. https://iaee.org/en/publications/proceedingsabstractpdf.aspx?id=12947 [accessed DATE]."
+  check: true
+sodir2025:
+  text: "Norwegian Offshore Directorate. New report about power from shore [news and report]. 2025. https://www.sodir.no/en/whats-new/news/general-news/2025/new-report-about-power-from-shore [accessed DATE]."
+  check: true   # confirm 'just under NOK 2000 per tonne' in the report

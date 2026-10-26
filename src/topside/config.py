@@ -49,6 +49,27 @@ def load_config(path=None):
     return cfg
 
 
+def parse_years(items):
+    """['2014-2016', '2020'] -> [2014, 2015, 2016, 2020] (sorted, no duplicates)."""
+    years = set()
+    for item in items or []:
+        for part in str(item).split(","):
+            if "-" in part:
+                first, last = (int(x) for x in part.split("-"))
+                years.update(range(first, last + 1))
+            elif part.strip():
+                years.add(int(part))
+    return sorted(years)
+
+
+def with_year(cfg, year):
+    """Copy of cfg for another weather year (site.year)."""
+    import copy
+    out = copy.deepcopy(cfg)
+    out["site"]["year"]["value"] = int(year)
+    return out
+
+
 def results_path(cfg, relative=""):
     """Path inside this site's results folder (results/ for the base case)."""
     return REPO_ROOT / cfg["site"].get("results_dir", "results") / relative

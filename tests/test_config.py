@@ -27,3 +27,13 @@ def test_param_requires_unit_and_source():
     with pytest.raises(ValueError):
         param({"value": 1.0})
     assert param_si({"value": 10.0, "unit": "bara", "source": "x"}) == pytest.approx(1e6)
+
+
+def test_parse_years_and_with_year():
+    from topside.config import parse_years, with_year
+    assert parse_years(["2014-2016", "2020", "2015"]) == [2014, 2015, 2016, 2020]
+    assert parse_years(["2019,2021"]) == [2019, 2021]
+    assert parse_years(None) == []
+    cfg = load_config()
+    other = with_year(cfg, 2019)
+    assert param(other["site"]["year"]) == 2019 and param(cfg["site"]["year"]) == 2023

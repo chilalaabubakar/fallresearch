@@ -92,6 +92,7 @@ python -m topside.scheduler [--synthetic] [--weeks 2]  # demo: fixed vs flexible
 python -m topside.cases [--sensitivity all] [--jobs 4]  # cases 1-4 (+ sensitivities), full year
 python -m topside.validation        # compare with published benchmarks and data/validation/field_data.csv
 python -m topside.figures           # all paper figures (PNG + PDF) and tables -> results/paper/
+python -m topside.economics         # cost per tonne CO2 avoided, break-even investment -> results/paper/tables/T5
 python docs/paper/build.py          # Applied Energy manuscript, supplementary and highlights (Word)
 ```
 
@@ -102,6 +103,19 @@ Outputs:
 
 Synthetic-data outputs get `_synthetic` in the filename and are git-ignored.
 They are for checking the code only, never for results.
+
+### More weather years
+The base case uses 2023. To test other years (outputs are tagged with the year,
+2023 results are not touched):
+
+```bash
+python -m topside.wind --download --year 2014-2022   # ERA5, 12 monthly files per year
+python -m topside.cases --year 2014-2023             # cases 1-4 for each year + multi-year summary
+```
+
+`results/cases/multi_year_summary.csv` then lists the capacity factor, CO2 per
+case and the flexibility benefit for each year, with mean, min and max, and
+`results/figures/multi_year.png` plots them.
 
 ## Repository layout
 ```

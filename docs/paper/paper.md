@@ -477,6 +477,30 @@ centre's processing; they agree within 2 %. A single published value counts
 as agreeing when the model is within ±20 %, and a published range when the
 model lies inside it.
 
+### 2.8 Economic indicators
+
+Two indicators are derived from the annual results, in real NOK. For the
+wind farm, whose investment can be estimated, the abatement cost is
+
+$$ c_{abate} = \frac{I\,\mathrm{CRF}(r, n) + C_{O\&M} - \Delta C_{fuel}}{\Delta m_{CO2}}, \qquad \mathrm{CRF}(r,n) = \frac{r}{1-(1+r)^{-n}}, $$
+
+where $I$ is the investment, $C_{O\&M}$ the annual operation and maintenance
+cost, $\Delta C_{fuel}$ the annual value of the fuel saved and
+$\Delta m_{CO2}$ the CO2 avoided per year. The CO2 price is not counted as a
+saving, because the abatement cost is what is compared with the CO2 price.
+The investment is scaled from Hywind Tampen, about NOK 7.4 billion for 88 MW
+before public support [@equinor2023], which gives 84 MNOK/MW for a
+first-of-a-kind floating farm. Operation and maintenance cost 35–97 EUR/kW
+per year, the range between the cheapest and the most expensive repair
+strategy modelled for floating wind farms [@dighe2024]. The real discount
+rate is 7 %, with 4 % as an alternative, the two rates used in Norwegian
+abatement-cost analyses of power from shore [@npd_abatement], and the economic
+life is 20 years. For flexibility, the battery and a small GT, whose
+investment on an existing platform could not be estimated from published
+data, the break-even investment is given instead: the present value over 20
+years of the annual saving, for the fuel saved alone and for fuel plus CO2
+cost.
+
 ## 3 Results
 
 ### 3.1 Demand map and wind resource
@@ -731,6 +755,38 @@ from the power system model.
 > the Gullfaks, Snorre and Statfjord field centres (grey: GT-powered; teal:
 > receiving Hywind Tampen power) with the model case 1 value (dashed).
 
+### 3.6 Economic indicators
+
+**Table 5.** Economic indicators (real NOK, 20 years; abatement cost range
+from the O&M range of floating wind).
+
+| Measure | CO2 avoided [kt/yr] | Fuel value saved [MNOK/yr] | Abatement cost [NOK/t], 7 % / 4 % | Break-even investment [MNOK], fuel / fuel + CO2 |
+|---|---|---|---|---|
+| Wind farm, fixed demand (case 2 vs 1) | 63.0 | 112.8 | 2,180–2,519 / 1,347–1,686 | – |
+| Wind farm with flexibility (case 3 vs 1) | 70.2 | 125.7 | 1,774–2,078 / 1,026–1,330 | – |
+| Flexibility (case 3 vs 2) | 7.2 | 12.9 | −1,799 before implementation cost | 137 / 288 |
+| Battery 4 MW / 4 MWh (case 4 vs 3) | 0.3 | 0.5 | −1,562 before battery cost | 5 / 13 |
+| Small GT replacing one main GT (flexible) | 9.7 | 17.4 | −1,786 before GT cost | 184 / 391 |
+
+With an investment of 2.5 billion NOK for 30 MW, the wind farm with fixed
+demand avoids CO2 at 2,180–2,519 NOK/t at a 7 % discount rate and
+1,347–1,686 NOK/t at 4 % (Table 5). This is of the same order as the
+abatement cost of the power-from-shore projects most recently approved on
+the Norwegian shelf, just under 2,000 NOK/t [@sodir2025], and close to the
+2,000 NOK/t CO2 price targeted for 2030 [@klimaplan2021]. Scheduling the
+flexible loads lowers the abatement cost of the same wind farm by about
+400 NOK/t, to 1,774–2,078 NOK/t at 7 %, because it avoids 11 % more CO2 and
+saves 11 % more fuel for the same investment.
+
+Flexibility on its own saves money before any implementation cost: the fuel
+saved is worth about 1,800 NOK per tonne of CO2 avoided. An operator could
+spend up to 137 MNOK on control systems and process changes and still break
+even on the fuel saved alone, or 288 MNOK when the avoided CO2 cost is
+included. A 4 MW / 4 MWh battery breaks even only below 5–13 MNOK, which is
+low for an offshore installation of that size. A small GT that replaces one
+main GT breaks even below 184–391 MNOK, before its additional maintenance and
+its 262 starts per year are accounted for.
+
 ## 4 Discussion
 
 ### 4.1 Why load flexibility works
@@ -792,10 +848,12 @@ it requires no investment in power generation, its schedule does not depend
 on prices, and the fuel it saves is worth about 1,800 NOK per tonne of CO2
 avoided at the base-case gas price alone. It therefore pays for itself
 without a carbon price, which makes it attractive also in regions where
-emissions are not priced. The value of the fuel saved is of the same order
-as the abatement cost threshold used for power-from-shore projects in
-Norway [@sodir2020], but power from shore requires large investments while
-the flexibility studied here requires mainly a change in operation.
+emissions are not priced. The wind farm, in contrast, needs a CO2 price of
+about 1,800–2,500 NOK/t to break even at a 7 % discount rate, the same order
+as power from shore [@sodir2020; @sodir2025], and flexibility lowers this
+threshold by about 400 NOK/t. Power from shore and wind both require large
+investments, whereas the flexibility studied here requires mainly a change
+in operation.
 
 Demand-side management in onshore industry is usually motivated by
 electricity prices [@zhang_grossmann2016; @golmohamadi2022]. On an off-grid
@@ -888,9 +946,10 @@ so the savings are an upper bound for real operation with forecast errors;
 because the deficit limit is rarely active, a forecast-based schedule with a
 safety margin on the deficit is expected to retain most of the saving. The
 analysis covers one weather year and a single platform without power import
-or export. Investment and operating costs of the wind farm and battery are
-outside the scope, so the results show the operational value of flexibility
-but not the cost of CO2 abatement of the whole system. Finally, the small GT
+or export. The economic indicators rest on the cost of one first-of-a-kind
+floating wind farm and do not include the cost of implementing flexibility,
+the battery or the small GT on an existing platform, for which break-even
+values are given instead. Finally, the small GT
 in the fleet sensitivity is given the same relative part-load curve as the
 main units, because its manufacturer publishes only the full-load rating.
 
@@ -924,7 +983,9 @@ resolution. The main conclusions are:
    and the saving of flexibility remains 11 % with the small unit installed;
    the two measures are complementary.
 6. Carbon price, gas price and battery size alone have little effect, and
-   the fuel saved pays for the measure without a carbon price.
+   the fuel saved pays for the measure without a carbon price: flexibility
+   breaks even for an implementation cost up to 137 MNOK, and it lowers the
+   abatement cost of the wind farm from 2,180–2,519 to 1,774–2,078 NOK/t.
 7. The model reproduces the CO2 avoided per MWh of wind reported for Hywind
    Tampen within 2 %, and the fuel gas emission factor observed at Gullfaks.
 

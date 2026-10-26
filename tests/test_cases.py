@@ -89,3 +89,17 @@ def test_run_cache_resumes_and_tracks_config(tmp_path):
     new_source = copy.deepcopy(cfg)
     new_source["economics"]["gas_price"]["source"] += " (accessed today)"           # citation only
     assert cases.cache_file(new_source, tmp_path, t) == cases.cache_file(cfg, tmp_path, t)
+
+
+def test_multi_year_summary_and_plot(tmp_path):
+    import pandas as pd
+    cfg = load_config()
+    base = {y: pd.DataFrame({"case": cases.case_keys(cfg), "co2_kt": [100.0, 60.0, 54.0, 53.0]})
+            for y in (2021, 2022)}
+    s = cases.multi_year_summary(cfg, base, synthetic=True)
+    years = s[pd.to_numeric(s["year"], errors="coerce").notna()]
+    assert list(years["year"]) == [2021, 2022]
+    assert years["flex_benefit_kt"].tolist() == [6.0, 6.0]
+    assert abs(years["flex_benefit_pct"].iloc[0] - 10.0) < 1e-9
+    assert set(s["year"]) >= {"mean", "min", "max"}
+    assert cases.plot_multi_year(s, tmp_path / "multi.png").exists()

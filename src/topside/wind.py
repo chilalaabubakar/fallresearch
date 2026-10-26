@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from topside.config import load_config, param, repo_path
+from topside.config import load_config, param, repo_path, parse_years, with_year
 
 COLOR = "#2a78d6"
 INK_MUTED = "#52514e"
@@ -229,9 +229,22 @@ def main(argv=None):
     ap.add_argument("--download", action="store_true", help="Download ERA5 first")
     ap.add_argument("--synthetic", action="store_true",
                     help="Use fake wind data (pipeline demo only, not for results)")
+    ap.add_argument("--year", nargs="+", default=None,
+                    help="Weather year(s) instead of site.year, e.g. 2019 or 2014-2023")
     args = ap.parse_args(argv)
 
     cfg = load_config(args.config) if args.config else load_config()
+    years = parse_years(args.year) or [param(cfg["site"]["year"])]
+    out = None
+    for year in years:
+        if len(years) > 1:
+            print(f"\n=== {year} ===")
+        out = process_year(with_year(cfg, year), args)
+    return out
+
+
+def process_year(cfg, args):
+    """Download (optionally) and process one weather year; returns the hourly frame."""
     site, era5 = cfg["site"], cfg["wind"]["era5"]
     year, lat, lon = param(site["year"]), param(site["latitude"]), param(site["longitude"])
     out_csv = repo_path(cfg["wind"]["output"]["processed_file"].format(year=year))

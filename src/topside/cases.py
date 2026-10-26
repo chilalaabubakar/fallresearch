@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from topside.config import load_config, param, repo_path, results_path
+from topside.config import load_config, param, parse_years, repo_path, results_path, with_year
 from topside import scheduler, style
 
 MW = 1e6
@@ -108,8 +108,8 @@ def summarize_run(cfg, s, df):
 _W = {}
 
 
-def _init_worker(synthetic, hours, window):
-    cfg = load_config()
+def _init_worker(synthetic, hours, window, year=None):
+    cfg = load_config() if year is None else with_year(load_config(), year)
     sys_ = scheduler.build_system(cfg)
     if window:
         sys_.solver.update(window_hours=window[0], lookahead_hours=window[1])
@@ -142,12 +142,12 @@ def _run_one(task):
     return row
 
 
-def run_tasks(tasks, synthetic, hours, jobs, window=None):
+def run_tasks(tasks, synthetic, hours, jobs, window=None, year=None):
     if jobs <= 1:
-        _init_worker(synthetic, hours, window)
+        _init_worker(synthetic, hours, window, year)
         return [_run_one(t) for t in tasks]
     with ProcessPoolExecutor(max_workers=jobs, initializer=_init_worker,
-                             initargs=(synthetic, hours, window)) as ex:
+                             initargs=(synthetic, hours, window, year)) as ex:
         return list(ex.map(_run_one, tasks))
 
 
@@ -161,7 +161,7 @@ def build_tasks(cfg, sensitivities, tag, schedules_dir, cache_dir=None):
 
 
 # Config sections that do not change a single run (lists of runs, benchmarks)
-CACHE_IGNORED_SECTIONS = ("sensitivity", "validation")
+CACHE_IGNORED_SECTIONS = ("sensitivity", "validation", "investment")
 
 
 def _strip_sources(node):
@@ -261,6 +261,61 @@ def plot_sensitivity(sens, name, out_path, note="", period="yr"):
     return style.finalize_figure(fig, out_path.parent, out_path.stem, formats=(out_path.suffix.lstrip("."),))
 
 
+def multi_year_summary(cfg, base_by_year, synthetic=False):
+    """One row per weather year: capacity factor, CO2 per case and the flexibility benefit."""
+    from topside import wind
+    installed = param(cfg["wind"]["farm"]["n_turbines"]) * param(cfg["wind"]["turbine"]["rated_power"])
+    rows = []
+    for year, base in sorted(base_by_year.items()):
+        w, _ = scheduler.load_wind(with_year(cfg, year), synthetic)
+        co2 = base.set_index("case")["co2_kt"]
+        row = {"year": year, "capacity_factor_pct": 100 * w.mean() / installed}
+        row.update({f"co2_kt_{k}": co2.get(k, np.nan) for k in case_keys(cfg)})
+        row["flex_benefit_kt"] = co2["wind_fixed"] - co2["wind_flex"]
+        row["flex_benefit_pct"] = 100 * row["flex_benefit_kt"] / co2["wind_fixed"]
+        rows.append(row)
+    df = pd.DataFrame(rows)
+    stats = df.drop(columns="year").agg(["mean", "min", "max"])
+    stats.insert(0, "year", stats.index)
+    return pd.concat([df, stats], ignore_index=True)
+
+
+def plot_multi_year(summary, out_path, note=""):
+    """Flexibility benefit (bars) and wind capacity factor (line) per weather year."""
+    style.apply_publication_style()
+    d = summary[pd.to_numeric(summary["year"], errors="coerce").notna()]
+    years = d["year"].astype(int).astype(str)
+    fig, ax = plt.subplots(figsize=(9, 4.5))
+    ax.bar(years, d["flex_benefit_pct"], color=CASE_COLOR["wind_flex"], edgecolor="black", width=0.6,
+           label="Flexibility benefit (case 2 - case 3)")
+    ax.set_ylabel("CO2 saving vs case 2 [%]")
+    ax.set_ylim(0, max(d["flex_benefit_pct"].max() * 1.3, 1))
+    ax2 = ax.twinx()
+    ax2.plot(years, d["capacity_factor_pct"], color=style.PALETTE["dark"], marker="o", lw=2,
+             label="Wind capacity factor")
+    ax2.set_ylabel("Capacity factor [%]")
+    ax2.set_ylim(0, 100)
+    h1, l1 = ax.get_legend_handles_labels()
+    h2, l2 = ax2.get_legend_handles_labels()
+    ax.legend(h1 + h2, l1 + l2, loc="upper left", frameon=False)
+    ax.set_title(f"Weather years{note}", loc="left")
+    fig.tight_layout(pad=1.0)
+    out_path = Path(out_path)
+    return style.finalize_figure(fig, out_path.parent, out_path.stem, formats=(out_path.suffix.lstrip("."),))
+
+
+def multi_year_report(cfg, base_by_year, synthetic=False):
+    tag = "_synthetic" if synthetic else ""
+    summary = multi_year_summary(cfg, base_by_year, synthetic)
+    out = results_path(cfg, f"cases/multi_year_summary{tag}.csv")
+    summary.to_csv(out, index=False, float_format="%.4g")
+    plot_multi_year(summary, results_path(cfg, f"figures/multi_year{tag}.png"),
+                    " (SYNTHETIC wind, demo only)" if synthetic else "")
+    print("\n" + summary.to_string(index=False, float_format=lambda v: f"{v:,.2f}"))
+    print(f"Saved {out}")
+    return summary
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Run cases 1-4 and sensitivities")
     ap.add_argument("--sensitivity", nargs="*", default=[],
@@ -269,10 +324,27 @@ def main(argv=None):
     ap.add_argument("--hours", type=int, default=None, help="Only the first N hours (quick test)")
     ap.add_argument("--jobs", type=int, default=4, help="Parallel worker processes")
     ap.add_argument("--fresh", action="store_true", help="Ignore finished runs saved by an earlier, stopped batch")
+    ap.add_argument("--year", nargs="+", default=None,
+                    help="Weather year(s) instead of site.year, e.g. 2019 or 2014-2023 (outputs tagged _<year>)")
     args = ap.parse_args(argv)
 
     cfg = load_config()
+    default_year = param(cfg["site"]["year"])
+    years = parse_years(args.year) or [default_year]
+    results = {}
+    for year in years:
+        if len(years) > 1:
+            print(f"\n=== weather year {year} ===")
+        results[year] = run_year(with_year(cfg, year), args, year if year != default_year else None)
+    if len(years) > 1:
+        multi_year_report(cfg, {y: r[r["group"] == "base"] for y, r in results.items()}, args.synthetic)
+    return results[years[-1]] if len(years) == 1 else results
+
+
+def run_year(cfg, args, year_tag=None):
+    """All runs of one weather year; outputs tagged _<year> unless it is the config year."""
     tag = "_synthetic" if args.synthetic else ""
+    tag += f"_{year_tag}" if year_tag else ""
     tag += f"_{args.hours}h" if args.hours else ""
     note = " (SYNTHETIC wind, demo only)" if args.synthetic else ""
     period = f"{args.hours} h" if args.hours else "yr"
@@ -282,7 +354,8 @@ def main(argv=None):
     done, todo = ({}, list(enumerate(tasks))) if args.fresh else cached_rows(tasks)
     print(f"{len(tasks)} runs ({len(done)} already finished) on {args.jobs} worker(s)")
     t0 = time.time()
-    new = run_tasks([t for _, t in todo], args.synthetic, args.hours, args.jobs) if todo else []
+    new = run_tasks([t for _, t in todo], args.synthetic, args.hours, args.jobs,
+                    year=param(cfg["site"]["year"])) if todo else []
     done.update({i: r for (i, _), r in zip(todo, new)})
     rows = pd.DataFrame([done[i] for i in range(len(tasks))])
     print(f"All runs finished in {(time.time() - t0) / 60:.1f} min")

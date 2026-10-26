@@ -1,0 +1,6 @@
+measure,co2_avoided_kt_per_yr,fuel_value_saved_MNOK_per_yr,co2_cost_saved_MNOK_per_yr,investment_MNOK,abatement_cost_NOK_per_t,abatement_cost_NOK_per_t_low_rate,break_even_investment_fuel_MNOK,break_even_investment_fuel_co2_MNOK
+"Wind farm, fixed demand",63.04,112.8,126.1,2523,"2,180–2,519","1,347–1,686",,
+Wind farm + flexibility,70.21,125.7,140.4,2523,"1,774–2,078","1,026–1,330",,
+Flexibility (case 3 vs 2),7.17,12.9,14.3,,"-1,799 (no investment)",,136.7,288.2
+Battery 4 MW / 4 MWh (case 4 vs 3),0.32,0.5,0.7,,"-1,562 (no investment)",,5.297,12.71
+Small GT replacing one main GT (flexible),9.74,17.4,19.5,,"-1,786 (no investment)",,184.3,390.9
