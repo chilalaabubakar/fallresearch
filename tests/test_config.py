@@ -8,7 +8,7 @@ def test_site_config_inherits_and_overrides():
     tz = load_config("config/tanzania.yaml")
     assert param(tz["site"]["latitude"]) < 0 < param(base["site"]["latitude"])
     assert tz["wind"]["turbine"] == base["wind"]["turbine"]          # inherited
-    assert param(tz["economics"]["co2_price"]) == 0.0                # overridden
+    assert param(tz["economics"]["co2_price"]) == 0.09               # overridden (Tanzanian excise duty)
     assert param(tz["economics"]["gas_price"]) == param(base["economics"]["gas_price"])
     assert "extends" not in tz
 

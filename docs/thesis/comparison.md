@@ -30,7 +30,7 @@ Chapter 3; CO2 in kt per year).
 | Wind capacity factor (2 × 15 MW) | 50.9 % | 29.6 % |
 | GT rating at site (LEOGO) | 21.8 MW, 34.7 % | 20.0 MW, 34.3 % (26.8 °C) |
 | Fuel CO2 factor | 2.34 kg/Sm³ | 1.95 kg/Sm³ |
-| CO2 price | NOK 2.0/kg | zero in the base case |
+| CO2 price | NOK 2.0/kg | NOK 0.09/kg (2025 excise duty) |
 | Flexibility buffer | 72 h of water injection | 3.6 h line pack + 48 h MEG tank |
 | Case 1 – GTs only | 127.7 | 101.7 |
 | Case 2 – wind, fixed demand | 64.7 (−49.4 %) | 57.8 (−43.2 %) |
@@ -127,8 +127,8 @@ The other sensitivities behave as in the North Sea (Figure 13):
   are 64.5, 55.2, 50.3 and 47.3 kt/yr for one to four turbines. The
   flexibility benefit stays at about 2.6–2.8 kt whatever the farm size,
   because it is limited by the line pack, not by the wind.
-* **CO2 price and gas price** have no effect (55.2 kt in all runs, including
-  the Tanzanian carbon excise duty of 2025, about NOK 0.09/kg). The
+* **CO2 price and gas price** have no effect (55.2 kt in all runs, from no
+  carbon price up to NOK 2/kg). The
   scheduler already minimises fuel, so a carbon price changes the cost but
   not the operation. A carbon price is therefore not needed for this
   flexibility to pay off: it saves fuel that can be sold as LNG.
@@ -163,9 +163,9 @@ repeated within a sensitivity group) agree within 0.1 kt.
    than half as large (4.5 % against 11 % of case 2 emissions).
 3. Wind alone reduces emissions less in Tanzania (−43 % against −49 %), and
    its strong seasonal pattern leaves December almost without wind.
-4. With no carbon price, or with the small Tanzanian excise duty of 2025,
-   wind and flexibility are justified in Tanzania by the gas they save for
-   sale, not by avoided CO2 cost.
+4. With the small Tanzanian excise duty of 2025 (about NOK 0.09/kg, 4 % of
+   the Norwegian 2030 price), wind and flexibility are justified in Tanzania
+   mainly by the gas they save for sale, not by avoided CO2 cost.
 
 **Limitations specific to this case.** The processing platform is
 hypothetical: the planned development is subsea-to-shore. The gas composition,

@@ -307,11 +307,12 @@ Coolers use the ERA5 mean sea temperature (28.2 °C).
 **Fuel and CO2 price.** The fuel is the lean export gas. Its lower heating
 value (34.9 MJ/Sm³) is computed with NeqSim to ISO 6976, and its CO2 factor
 (1.945 kg/Sm³) from its carbon content, instead of the Norwegian 2.34
-kg/Sm³. The base CO2 price is zero. The Tanzanian Finance Act 2025
-introduced an excise duty of TZS 22,000 per tonne of carbon emissions from
-coal and natural gas (about NOK 0.09/kg); whether it applies to fuel gas
-burnt offshore is not confirmed. NOK 0.09–2/kg is therefore tested as a
-sensitivity, together with line-pack sizes of 0, 1.8, 3.6 and 7.2 h.
+kg/Sm³. The base CO2 price is the excise duty introduced by the Tanzanian
+Finance Act 2025: TZS 22,000 per tonne of carbon emissions from coal and
+natural gas, about NOK 0.09/kg at 10.5 NOK/USD. Whether it applies to fuel
+gas burnt offshore is not confirmed. CO2 prices of 0–2 NOK/kg are therefore
+tested as a sensitivity, together with line-pack sizes of 0, 1.8, 3.6 and
+7.2 h.
 
 **Validation.** No published operating data exist for an offshore platform at
 the site. The wind input is checked qualitatively against a study of

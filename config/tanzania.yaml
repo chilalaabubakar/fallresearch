@@ -22,13 +22,13 @@ wind:
     figure_file: results/tanzania/figures/wind_farm_power_tanzania_{year}.png
 
 economics:
-  co2_price: {value: 0.0, unit: NOK/kg_CO2, source: "Base case chosen with zero CO2 price. NOTE: Tanzania Finance Act 2025 (in force 1 July 2025) introduced an excise duty of TZS 22,000 per tonne of carbon emissions from coal and natural gas (about USD 8.4/t, Bloomberg Tax; KPMG Budget Brief 2025/26), about NOK 0.09/kg at 10.5 NOK/USD. Whether it applies to upstream fuel gas is not confirmed; tested as sensitivity"}
+  co2_price: {value: 0.09, unit: NOK/kg_CO2, source: "Tanzania Finance Act 2025 (in force 1 July 2025): excise duty of TZS 22,000 per tonne of carbon emissions from coal and natural gas (about USD 8.4/t, Bloomberg Tax; KPMG Budget Brief 2025/26), converted at ASSUMPTION 10.5 NOK/USD and read as per tonne CO2. Whether it applies to fuel gas burnt offshore is not confirmed; zero and up to NOK 2/kg tested as sensitivity"}
 
 sensitivity:
   co2_price:
     cases: [wind_flex]
     runs: [{co2_price: 0.0}, {co2_price: 0.09}, {co2_price: 0.5}, {co2_price: 1.0}, {co2_price: 2.0}]
-    source: "Sensitivity: no carbon price (base), Tanzanian excise duty of 2025 (TZS 22,000/t, about NOK 0.09/kg), up to the Norwegian 2030 target of NOK 2/kg"
+    source: "Sensitivity: no carbon price, Tanzanian excise duty of 2025 (base, about NOK 0.09/kg), up to the Norwegian 2030 target of NOK 2/kg"
   line_pack:
     cases: [wind_flex]
     runs: [{line_pack_hours: 0.0}, {line_pack_hours: 1.8}, {line_pack_hours: 3.6}, {line_pack_hours: 7.2}]
