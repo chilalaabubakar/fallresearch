@@ -98,12 +98,12 @@ and the demand line follows the wind; when wind returns, injection runs at
 100 % to catch up. Over the year, injection is below its 85 % target in
 2,597 hours, stopped completely in 178 hours, and above target in 6,048 hours.
 The mean injection rate stays at 84.9 % of capacity, so the voidage target is
-met (Figure 8). Injection rate and available wind are clearly correlated
+met (Figure 7). Injection rate and available wind are clearly correlated
 (r = 0.61): mean injection rises from 59 % in the calmest hours to 98–99 %
 when more than 16 MW of wind is available.
 
 The injection deficit stays small. It averages 7.5 h of full-rate injection
-and never exceeds 25.2 h, well below the 72 h allowed (Figure 8, right). The
+and never exceeds 25.2 h, well below the 72 h allowed (Figure 7, right). The
 year ends with 6.3 h of injection still to be caught up, equivalent to less
 than 1 % of the annual saving.
 
@@ -118,19 +118,19 @@ while the CO2 and fuel saved are worth a few thousand NOK.
 > **Figure 6.** Duration curves of GT load per running unit (left, shaded:
 > below 50 %) and of the number of GTs running (right).
 
-> **Figure 8.** Left: water-injection rate against available wind in case 3
+> **Figure 7.** Left: water-injection rate against available wind in case 3
 > (mean and 10–90 % range of hours). Right: distribution of the injection
 > deficit (dashed: 72 h limit).
 
 ## 5 Seasonal pattern
 
-Monthly emissions follow the wind (Figure 7). In case 2 they range from
+Monthly emissions follow the wind (Figure 8). In case 2 they range from
 3.8 kt in February to 6.4 kt in June and July. The saving from flexibility is
 present in every month (0.42–0.76 kt/month). It is largest in June (0.76 kt),
 December and July, months in which the wind often falls below the demand and
 a second GT would otherwise be needed.
 
-> **Figure 7.** Monthly CO2 emissions for cases 1–4.
+> **Figure 8.** Monthly CO2 emissions for cases 1–4.
 
 ## 6 Sensitivity analysis
 
@@ -253,3 +253,13 @@ not from the power-system model.
    result.
 6. The model reproduces the CO2 avoided per MWh of wind reported for Hywind
    Tampen within 2 % and the fuel-gas emission factor observed at Gullfaks.
+7. The finding also holds at a tropical gas platform off southern Tanzania
+   (Section 9), where the same wind farm has a capacity factor of only
+   30 %. Wind cuts emissions by 43 % with fixed demand, and flexible
+   scheduling of gas production (using the export pipeline's line pack)
+   and MEG regeneration saves a further 2.6 kt/yr (4.5 %), again with no
+   lost production. The benefit is less than half the North Sea value
+   because one gas turbine almost covers the smaller platform and the line
+   pack stores only 3.6 h of production: the size of the benefit depends
+   on how many hours of load can be postponed. The small Tanzanian carbon
+   duty of 2025 does not change the result.

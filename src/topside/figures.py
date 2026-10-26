@@ -171,7 +171,7 @@ def fig_monthly_co2(cfg, sched, out_dir, note=""):
     ax.set_title(f"Monthly CO2 emissions{note}", loc="left", fontsize=style.FONT_SIZE - 1)
     ax.legend(frameon=False, ncol=2)
     ax.grid(axis="x", visible=False)
-    return save(fig, out_dir, "fig07_monthly_co2")
+    return save(fig, out_dir, "fig08_monthly_co2")
 
 
 def fig_injection_mechanism(cfg, sched, out_dir, note=""):
@@ -203,7 +203,7 @@ def fig_injection_mechanism(cfg, sched, out_dir, note=""):
     a2.set_xlabel(f"{names['deficit']} [h at full rate]")
     a2.set_ylabel("Hours")
     a2.set_title(names["postponed"], loc="left")
-    return save(fig, out_dir, "fig08_injection_mechanism")
+    return save(fig, out_dir, "fig07_injection_mechanism")
 
 
 SENS_TITLES = {"wind_farm_size": "Wind farm size [turbines]", "co2_price": "CO2 price [NOK/kg]",
@@ -344,10 +344,10 @@ def main(argv=None):
     sched = inp["schedules"]
     if {"wind_fixed", "wind_flex"} <= set(sched):
         attempt("fig05", fig_example_week, cfg, sched, out, note)
-        attempt("fig08", fig_injection_mechanism, cfg, sched, out, note)
+        attempt("fig07", fig_injection_mechanism, cfg, sched, out, note)
     if sched:
         attempt("fig06", fig_gt_load_duration, cfg, sched, out, note)
-        attempt("fig07", fig_monthly_co2, cfg, sched, out, note)
+        attempt("fig08", fig_monthly_co2, cfg, sched, out, note)
     else:
         print("skip fig05-08: no hourly schedules; run `python -m topside.cases` first")
 
