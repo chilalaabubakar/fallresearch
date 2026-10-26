@@ -76,3 +76,6 @@ sodir2020:
 sodir_pfs:
   text: "Norwegian Offshore Directorate. Power from shore – summary. https://www.sodir.no/en/whats-new/publications/reports/power-from-shore/summary/ [accessed DATE]."
   check: true
+solar_mars100:
+  text: "Solar Turbines. Mars 100 – oil and gas power generation package: ISO rating 11,350 kWe, heat rate 10,935 kJ/kWe-h. https://www.solarturbines.com/en_US/products/oil-and-gas-power-generation-packages/mars-100.html [accessed DATE]."
+  check: true   # web page; add accessed date

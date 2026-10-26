@@ -13,8 +13,9 @@ wind-powered offshore oil platform**
 
 > **Fig. S2.** Part-load electric efficiency (left) and specific CO2 emission
 > (right) of the gas turbines. Shaded: below minimum stable load. The main
-> units follow the LEOGO reference turbine; the small unit is used only in
-> the GT fleet sensitivity and its data are not verified.
+> units follow the LEOGO reference turbine. The small unit (Solar Turbines
+> Mars 100, 11.35 MW, 32.9 % ISO efficiency) is used only in the GT fleet
+> sensitivity; its part-load shape is assumed equal to that of the main units.
 
 ## S3 Seasonal pattern
 

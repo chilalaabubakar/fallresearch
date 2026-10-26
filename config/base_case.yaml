@@ -78,12 +78,13 @@ gas_turbine:
       n_installed: {value: 3, unit: "-", source: "Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
       heat_recovery_efficiency: {value: 0.5, unit: "-", source: "Share of (fuel - electricity) recovered as useful heat, eta_heat in Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
     small:
-      name: Industrial GT, SGT-500 class
-      rated_power: {value: 19.0e+6, unit: W, source: "ASSUMPTION (verify): SGT-500 class, ISO; check Siemens Energy datasheet"}
-      rated_efficiency: {value: 0.335, unit: "-", source: "ASSUMPTION (verify): SGT-500 class, ISO, LHV; check Siemens Energy datasheet"}
-      no_load_fuel_fraction: {value: 0.184, unit: "-", source: "Same part-load shape as LEOGO turbine (Svendsen et al., 2023)"}
-      min_load: {value: 0.161, unit: "-", source: "Same as LEOGO turbine (Svendsen et al., 2023)"}
-      n_installed: {value: 1, unit: "-", source: "Project definition: one small GT in wind cases"}
+      # Solar Turbines Mars 100 generator set (oil and gas power generation package), ISO rating
+      name: Solar Turbines Mars 100
+      rated_power: {value: 11.35e+6, unit: W, source: "Solar Turbines, Mars 100 oil and gas power generation package: 11,350 kWe at ISO conditions (https://www.solarturbines.com/en_US/products/oil-and-gas-power-generation-packages/mars-100.html)"}
+      rated_efficiency: {value: 0.3292, unit: "-", source: "3600/10935 from the ISO heat rate of 10,935 kJ/kWe-h (10,365 Btu/kWe-h) at the generator terminals, Solar Turbines Mars 100 product page"}
+      no_load_fuel_fraction: {value: 0.184, unit: "-", source: "ASSUMPTION: same relative part-load shape as the LEOGO turbine (Svendsen et al., 2023); no OEM part-load curve published"}
+      min_load: {value: 0.161, unit: "-", source: "ASSUMPTION: same minimum-load fraction as the LEOGO turbine (Svendsen et al., 2023), i.e. 1.8 MW"}
+      n_installed: {value: 1, unit: "-", source: "Fleet sensitivity: one small unit"}
       heat_recovery_efficiency: {value: 0.5, unit: "-", source: "Same as LEOGO turbine (Svendsen et al., 2023)"}
   low_load_threshold: {value: 0.50, unit: "-", source: "ASSUMPTION: load fraction below which a GT hour is counted as low-load (inefficient)"}
   min_units_running: {value: 2, unit: "-", source: "ASSUMPTION: N+1 redundancy common on Norwegian platforms; fixed per case later"}
@@ -260,8 +261,8 @@ sensitivity:
     source: "Tests whether a grid-forming battery (8 MW / 8 MWh) could allow all GTs off"
   gt_fleet:
     cases: [wind_flex]
-    runs: [{fleet: {main: 3}}, {fleet: {main: 2, small: 1}}]
-    source: "Retrofit (3 existing GTs) vs replacing one by a smaller unit (unverified SGT-500 class data)"
+    runs: [{fleet: {main: 3}}, {fleet: {main: 2, small: 1}}, {fleet: {main: 3, small: 1}}]
+    source: "Retrofit (3 existing LEOGO GTs) vs replacing one by a small Solar Mars 100 (11.35 MW), or adding one small unit to the three existing GTs"
   gt_operation_practice:
     cases: [wind_fixed, wind_flex]
     runs: [{min_gt_online: 2}]

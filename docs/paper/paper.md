@@ -198,6 +198,20 @@ but the load is unchanged. The difference between cases 2 and 3 isolates
 the value of demand flexibility, and case 4 tests whether a small battery
 adds to it.
 
+The base case uses the existing main turbines rather than a new, smaller
+GT, for three reasons. First, wind is being added to existing platforms that
+keep their installed turbines; the five platforms supplied by Hywind Tampen
+are an example [@equinor2023]. Second, the mechanism studied here is the
+number of GTs that must be online, which is set by the load, the reserve and
+the wind rather than by the size of the units. Whether a smaller unit adds
+to the saving is tested in the sensitivity analysis with an 11.35 MW Solar
+Turbines Mars 100 [@solar_mars100], either replacing one main unit or added
+to the three. Third, the main turbine is a published reference machine with
+a documented part-load curve [@svendsen2023], whereas manufacturers publish
+only full-load ratings for small units. A small unit alone could not carry
+the 20 MW platform with 5 MW of reserve in calm periods, so it is meaningful
+only as part of a mixed fleet.
+
 Process behaviour is represented by steady-state operating points with ramp
 limits; transient process dynamics are outside the scope. The model is
 written in Python with NeqSim for thermodynamics and process simulation
@@ -420,8 +434,10 @@ Cases 2–4 were rerun with one input changed at a time:
 * injection deficit limit (0, 24, 72 and 168 h);
 * minimum number of GTs online (1 or 0, with an 8 MW / 8 MWh battery that
   must then provide the reserve);
-* GT fleet: three main units, or two main units and one smaller unit
-  (19 MW, data not verified);
+* GT fleet: three main units; two main units and one small unit, a Solar
+  Turbines Mars 100 rated 11.35 MW with 32.9 % ISO efficiency
+  [@solar_mars100] and the same relative part-load curve as the main units;
+  or the three main units with one small unit added;
 * an operating practice that keeps two GTs online whatever the wind, as
   some operators require for redundancy.
 
@@ -858,7 +874,8 @@ analysis covers one weather year and a single platform without power import
 or export. Investment and operating costs of the wind farm and battery are
 outside the scope, so the results show the operational value of flexibility
 but not the cost of CO2 abatement of the whole system. Finally, the small GT
-in the fleet sensitivity relies on unverified performance data.
+in the fleet sensitivity is given the same relative part-load curve as the
+main units, because its manufacturer publishes only the full-load rating.
 
 Future work should test the approach with wind forecast errors and several
 weather years, add pump start costs and a reservoir model for the injection

@@ -4,14 +4,15 @@
 Topside Systems under Variable Renewable Power Supply*
 
 This project models the power system of an offshore oil & gas platform supplied
-by an offshore wind farm plus a smaller gas turbine. It tests how scheduling
+by an offshore wind farm plus its existing gas turbines. It tests how scheduling
 flexible topside consumers (turning them down or off) to follow the wind can
 cut fuel gas use and CO2 emissions without large production losses.
 
 ## Cases
 1. Gas turbines only (baseline)
-2. Wind + small gas turbine, fixed demand
-3. Wind + small gas turbine, flexible scheduling
+2. Wind + existing gas turbines, fixed demand
+3. Wind + existing gas turbines, flexible scheduling
+   (a small gas turbine, Solar Mars 100, is tested as a fleet sensitivity)
 4. Case 3 + battery storage
 
 ## Status
