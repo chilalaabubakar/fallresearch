@@ -106,6 +106,8 @@ flexibility:
     production: [export_compressor, condensate_pump, seawater_lift_pump]
     injection: [meg_regeneration]
   lever_labels: {production: "Gas production (line pack)", injection: "MEG regeneration"}
+  lever_names: {production: "Gas production", injection: "MEG regeneration", deficit: "MEG regeneration backlog",
+                postponed: "How much MEG regeneration is postponed"}
   classes:
     export_compressor: flexible
     condensate_pump: flexible

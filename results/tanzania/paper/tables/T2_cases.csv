@@ -1,0 +1,5 @@
+label,co2_kt,co2_reduction_pct,fuel_MSm3,gt_unit_hours,gt_low_load_unit_hours,gt_starts,lost_production_pct,wind_used_GWh,wind_curtailed_GWh,co2_intensity_kg_per_Sm3oe,total_cost_MNOK
+1 Gas turbines only,104.2,0,53.6,17520,17520,0,0,0,0,28.39,224.6
+"2 Wind, fixed demand",60.7,41.76,31.22,10159,7176,164,0,58.12,19.58,16.54,130.8
+"3 Wind, flexible demand",57.22,45.1,29.42,8879,4720,13,0,59.7,18,15.59,123.3
+"4 Wind, flexible + battery",56.8,45.5,29.21,8760,4622,0,0,60.08,17.62,15.47,122.4

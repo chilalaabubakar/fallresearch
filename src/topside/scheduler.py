@@ -362,8 +362,11 @@ def summarize(df, sys):
 # --------------------------------------------------------------------------
 # Figure and demo
 # --------------------------------------------------------------------------
-def plot_schedule(results, out_path, title_note=""):
-    """Compare schedules (dict label -> DataFrame) over the same period."""
+def plot_schedule(results, out_path, title_note="", lever_names=("Injection", "Production"), rate_max=105):
+    """Compare schedules (dict label -> DataFrame) over the same period.
+
+    lever_names = (second lever, production lever) as shown in the legend; rate_max = top of the
+    lever axis in % (above 100 when production can exceed design, e.g. to refill line pack)."""
     labels = list(results)
     fig, axes = plt.subplots(len(labels) + 1, 1, figsize=(11, 3 * (len(labels) + 1)),
                              sharex=True, constrained_layout=True)
@@ -383,11 +386,11 @@ def plot_schedule(results, out_path, title_note=""):
     for lab, color in zip(labels, [style.CASE_COLOR["wind_fixed"], style.CASE_COLOR["wind_flex"],
                                    style.CASE_COLOR["wind_flex_battery"], style.CASE_COLOR["gt_only"]]):
         ax.plot(results[lab].index, results[lab]["f_wi"] * 100, color=color, lw=1.2,
-                label=f"Injection, {lab}")
+                label=f"{lever_names[0]}, {lab}")
         ax.plot(results[lab].index, results[lab]["f_p"] * 100, color=color, lw=1.2, ls="--",
-                label=f"Production, {lab}")
+                label=f"{lever_names[1]}, {lab}")
     ax.set_ylabel("Rate [% of design]")
-    ax.set_ylim(0, 105)
+    ax.set_ylim(0, rate_max)
     ax.set_title("Lever positions", loc="left")
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22), frameon=False,
               fontsize=style.FONT_SIZE - 3, ncol=2)

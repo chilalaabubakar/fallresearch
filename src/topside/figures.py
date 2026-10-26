@@ -106,14 +106,27 @@ def representative_week(fixed, flexible):
     return int(np.argmin(np.abs(weekly - np.median(weekly))))
 
 
+LEVER_NAMES = {"production": "Production", "injection": "Water injection",
+               "deficit": "Injection deficit", "postponed": "How much injection is postponed"}
+
+
+def lever_names(cfg):
+    """Short lever names for figures; a site config can rename them (flexibility.lever_names)."""
+    return {**LEVER_NAMES, **cfg["flexibility"].get("lever_names", {})}
+
+
 def fig_example_week(cfg, sched, out_dir, note=""):
     w = representative_week(sched["wind_fixed"], sched["wind_flex"])
     sl = slice(w * 168, (w + 1) * 168)
     results = {case_label(cfg, k): sched[k].iloc[sl] for k in ("wind_fixed", "wind_flex")}
+    names = lever_names(cfg)
+    flex = cfg["flexibility"]
+    top = 100 * max(param(flex["production"]["max_fraction"]), param(flex["water_injection"]["max_fraction"]))
+    kw = dict(lever_names=(names["injection"], names["production"]), rate_max=top + 5)
     path = scheduler.plot_schedule(results, out_dir / "fig05_example_week.png",
-                                   f" - week {w + 1} (median fuel saving){note}")
+                                   f" - week {w + 1} (median fuel saving){note}", **kw)
     scheduler.plot_schedule(results, out_dir / "fig05_example_week.pdf",
-                            f" - week {w + 1} (median fuel saving){note}")
+                            f" - week {w + 1} (median fuel saving){note}", **kw)
     return path
 
 
@@ -162,8 +175,9 @@ def fig_monthly_co2(cfg, sched, out_dir, note=""):
 
 
 def fig_injection_mechanism(cfg, sched, out_dir, note=""):
-    """How the flexible case moves water injection with the wind."""
+    """How the flexible case moves the second lever (water injection, or MEG regeneration) with the wind."""
     df = sched["wind_flex"]
+    names = lever_names(cfg)
     target = param(cfg["flexibility"]["water_injection"]["target_fraction"]) * 100
     bins = np.arange(0, df["wind_avail_W"].max() / 1e6 + 2, 2)
     grp = pd.cut(df["wind_avail_W"] / 1e6, bins)
@@ -178,17 +192,17 @@ def fig_injection_mechanism(cfg, sched, out_dir, note=""):
     a1.axhline(target, color=MUTED, lw=1, ls="--")
     a1.text(mids.max(), target + 1.5, f"target {target:.0f} %", ha="right", fontsize=style.FONT_SIZE - 3, color=MUTED)
     a1.set_xlabel("Wind power available [MW]")
-    a1.set_ylabel("Water injection [% of capacity]")
+    a1.set_ylabel(f"{names['injection']} [% of capacity]")
     a1.set_ylim(0, 105)
-    a1.set_title("Injection vs available wind (case 3)", loc="left")
+    a1.set_title(f"{names['injection']} vs available wind (case 3)", loc="left")
     if note:
         fig.suptitle(note.strip(" ()"), x=0.01, ha="left")
     a1.legend(frameon=False, loc="lower right")
     a2.hist(df["deficit_h"], bins=40, color=style.PALETTE["blue_secondary"], edgecolor="black", linewidth=0.6)
     a2.axvline(param(cfg["flexibility"]["water_injection"]["max_deficit"]), color=MUTED, lw=1, ls="--")
-    a2.set_xlabel("Injection deficit [h of full-rate injection]")
+    a2.set_xlabel(f"{names['deficit']} [h at full rate]")
     a2.set_ylabel("Hours")
-    a2.set_title("How much injection is postponed", loc="left")
+    a2.set_title(names["postponed"], loc="left")
     return save(fig, out_dir, "fig08_injection_mechanism")
 
 
@@ -197,6 +211,9 @@ SENS_TITLES = {"wind_farm_size": "Wind farm size [turbines]", "co2_price": "CO2 
                "injection_deficit": "Injection deficit limit [h]",
                "min_gt_online": "Min. GTs online (8 MW battery)", "gt_fleet": "GT fleet",
                "gt_operation_practice": "Keep 2 GTs online", "line_pack": "Line pack buffer [h]"}
+
+
+UNSERVED_FLAG_MWH = 1.0   # runs with more unmet demand than this are marked as not feasible
 
 
 def override_label(text):
@@ -223,7 +240,18 @@ def fig_sensitivity_overview(cfg, sens, out_dir, note=""):
             ax.plot(x, dd["co2_kt"], marker="o", ms=5, lw=2, color=CASE_COLOR[case],
                     label=case_label(cfg, case))
             ax.set_xticks(list(x), [override_label(o) for o in dd["overrides"]])
-        ax.set_title(SENS_TITLES.get(g, g.replace("_", " ")), loc="left")
+            bad = dd["unserved_MWh"].to_numpy() > UNSERVED_FLAG_MWH
+            if bad.any():                                  # infeasible design: demand not met
+                xb = np.arange(len(dd))[bad]
+                ax.plot(xb, dd["co2_kt"].to_numpy()[bad], "o", ms=11, mfc="none", mec=style.PALETTE["red_strong"], mew=2)
+                for xx, u in zip(xb, dd["unserved_MWh"].to_numpy()[bad]):
+                    ax.annotate(f"unmet demand\n{u:,.0f} MWh", (xx, dd["co2_kt"].to_numpy()[xx]), xytext=(0, -38),
+                                textcoords="offset points", ha="right", fontsize=style.FONT_SIZE - 4,
+                                color=style.PALETTE["red_strong"])
+        title = SENS_TITLES.get(g, g.replace("_", " "))
+        if g == "injection_deficit":
+            title = f"{lever_names(cfg)['deficit']} limit [h]"
+        ax.set_title(title, loc="left")
         ax.set_ylim(0, d["co2_kt"].max() * 1.15)   # zero baseline: flat lines stay flat
         ax.set_ylabel("CO2 [kt/yr]")
     for ax in axes.flat[len(groups):]:
