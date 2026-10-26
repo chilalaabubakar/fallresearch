@@ -297,7 +297,7 @@ def override_label(text):
     if "min_gt_online" in o:
         return str(o["min_gt_online"])
     if "fleet" in o:
-        return " + ".join(f"{n} {k}" for k, n in o["fleet"].items())
+        return "\n+ ".join(f"{n} {k}" for k, n in o["fleet"].items())
     if "battery" in o:
         return "/".join(str(v) for v in o["battery"])
     return str(next(iter(o.values())))

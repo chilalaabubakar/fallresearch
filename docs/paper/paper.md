@@ -20,13 +20,13 @@ commitment, wind use and an optional battery for one year hourly with ERA5
 wind data. Postponed water injection is represented as a virtual storage
 that must be caught up. For a 20.3 MW platform with a 30 MW wind farm, wind
 with fixed demand reduces annual CO2 emissions by 49 %. Flexible scheduling
-cuts them by a further 11 % (7.1 kt/yr) without any loss of production,
+cuts them by a further 11 % (7.2 kt/yr) without lost production,
 mainly because it avoids running a second gas turbine: the hours with two
-turbines online fall from 1,702 to 30. About 24 h of deferrable injection
-captures the full benefit; prices do not change the schedule. Operating
+turbines online fall from 1,702 to 28. About 24 h of deferrable injection
+captures the full benefit, and a small added gas turbine saves a similar
+amount on top. Operating
 rules that keep two gas turbines online remove most of the gain. The model
-reproduces the CO2 avoided per MWh of wind reported for Hywind Tampen within
-2 %.
+reproduces Hywind Tampen's reported CO2 avoided per MWh of wind within 2 %.
 
 **Keywords:** offshore oil and gas platform; offshore wind; demand-side
 flexibility; gas turbine part load; unit commitment; water injection
@@ -201,12 +201,12 @@ adds to it.
 The base case uses the existing main turbines rather than a new, smaller
 GT, for three reasons. First, wind is being added to existing platforms that
 keep their installed turbines; the five platforms supplied by Hywind Tampen
-are an example [@equinor2023]. Second, the mechanism studied here is the
-number of GTs that must be online, which is set by the load, the reserve and
-the wind rather than by the size of the units. Whether a smaller unit adds
-to the saving is tested in the sensitivity analysis with an 11.35 MW Solar
-Turbines Mars 100 [@solar_mars100], either replacing one main unit or added
-to the three. Third, the main turbine is a published reference machine with
+are an example [@equinor2023]. Second, load flexibility is an operational
+measure, whereas a new GT is an investment; keeping the fleet fixed isolates
+the value of flexibility. The effect of a smaller unit is quantified
+separately in the sensitivity analysis with an 11.35 MW Solar Turbines
+Mars 100 [@solar_mars100], either replacing one main unit or added to the
+three, with both fixed and flexible demand. Third, the main turbine is a published reference machine with
 a documented part-load curve [@svendsen2023], whereas manufacturers publish
 only full-load ratings for small units. A small unit alone could not carry
 the 20 MW platform with 5 MW of reserve in calm periods, so it is meaningful
@@ -513,16 +513,16 @@ but it also leaves frequent and sometimes long gaps that the GTs must fill.
 
 | | 1 GTs only | 2 Wind, fixed | 3 Wind, flexible | 4 Flexible + battery |
 |---|---|---|---|---|
-| CO2 [kt/yr] | 127.7 | 64.7 | 57.6 | 57.2 |
-| Reduction vs case 1 | – | 49.4 % | 54.9 % | 55.2 % |
+| CO2 [kt/yr] | 127.7 | 64.7 | 57.5 | 57.2 |
+| Reduction vs case 1 | – | 49.4 % | 55.0 % | 55.2 % |
 | Fuel gas [MSm³/yr] | 54.6 | 27.6 | 24.6 | 24.4 |
-| GT running [unit-h/yr] | 17,520 | 10,462 | 8,790 | 8,760 |
-| GT below 50 % load [unit-h/yr] | 17,520 | 9,005 | 5,928 | 6,235 |
-| GT starts [–/yr] | 0 | 149 | 6 | 0 |
-| Wind used [GWh/yr] | 0 | 89.3 | 95.0 | 95.8 |
-| Wind curtailed [GWh/yr] | 0 | 44.5 | 38.8 | 38.0 |
+| GT running [unit-h/yr] | 17,520 | 10,462 | 8,788 | 8,760 |
+| GT below 50 % load [unit-h/yr] | 17,520 | 9,005 | 5,932 | 6,242 |
+| GT starts [–/yr] | 0 | 149 | 3 | 0 |
+| Wind used [GWh/yr] | 0 | 89.3 | 95.1 | 95.7 |
+| Wind curtailed [GWh/yr] | 0 | 44.5 | 38.7 | 38.1 |
 | Lost production | 0 | 0 | 0 | 0 |
-| Fuel value + CO2 cost [MNOK/yr] | 484.0 | 245.1 | 218.1 | 216.6 |
+| Fuel value + CO2 cost [MNOK/yr] | 484.0 | 245.1 | 217.9 | 216.7 |
 
 With GTs only (case 1), two turbines run in every hour to carry the 18.8 MW
 average load and the 5 MW reserve, each at about 43 % load. The platform
@@ -538,20 +538,20 @@ suffices in 7,058 h. Because demand cannot follow the wind, 44.5 GWh, or
 running GTs falls to 32 % of rating. A second GT is still needed in 1,702 h,
 and it is started 149 times.
 
-Flexible scheduling (case 3) reduces CO2 by a further 7.1 kt/yr, 11.0 %
-relative to case 2, to 57.6 kt, without any loss of production. Fuel use
-falls by the same 11 %. GT running hours fall from 10,462 to 8,790 unit-h,
-the low-load unit-hours by 34 % and the GT starts from 149 to 6. Wind covers
-57.6 % of the demand, curtailment falls by 13 % to 38.8 GWh, and the mean
-load of the running GTs rises to 37 %. The combined fuel value and CO2 cost
-falls by 27 MNOK/yr, of which 12.8 MNOK is the value of the fuel saved.
+Flexible scheduling (case 3) reduces CO2 by a further 7.2 kt/yr, 11.1 %
+relative to case 2, to 57.5 kt, without any loss of production. Fuel use
+falls by the same 11 %. GT running hours fall from 10,462 to 8,788 unit-h,
+the low-load unit-hours by 34 % and the GT starts from 149 to 3. Wind covers
+57.6 % of the demand, curtailment falls by 13 % to 38.7 GWh, and the mean
+load of the running GTs rises to 36 %. The combined fuel value and CO2 cost
+falls by 27 MNOK/yr, of which 12.9 MNOK is the value of the fuel saved.
 
-A 4 MW / 4 MWh battery (case 4) adds only 0.4 kt (−0.7 % relative to
+A 4 MW / 4 MWh battery (case 4) adds only 0.3 kt (−0.6 % relative to
 case 3). It removes the remaining starts and the last hours with a second
 GT, but its annual throughput is only 0.8 GWh. With one GT always online it
 cannot remove the main remaining loss, one turbine idling near minimum load
 whenever the wind covers the demand, and the low-load unit-hours even rise
-slightly (5,928 to 6,235).
+slightly (5,932 to 6,242).
 
 > **Fig. 3.** Annual CO2, fuel gas, GT hours below 50 % load and lost
 > production for cases 1–4.
@@ -564,11 +564,11 @@ cannot carry the load while holding 5 MW in reserve, that is, whenever the
 wind supplies less than about 2 MW at the average demand of 18.8 MW. Each
 such hour costs the no-load fuel of a whole extra turbine, 18.4 % of its
 full-load fuel. In case 3 the optimiser postpones water injection in
-exactly these hours, so a second GT runs in only 30 h of the year instead
-of 1,702 (Fig. 4, Fig. 5). The 1,672 avoided hours account for most of the
+exactly these hours, so a second GT runs in only 28 h of the year instead
+of 1,702 (Fig. 4, Fig. 5). The 1,674 avoided hours account for most of the
 3.0 MSm³ of fuel saved.
 
-> **Fig. 4.** Week 29 (16–22 July 2023), the week with the median fuel
+> **Fig. 4.** Week 3 (15–21 January 2023), the week with the median fuel
 > saving. Top and middle: power supplied by GTs and wind with fixed (case 2)
 > and flexible (case 3) demand. Bottom: production and injection rates.
 
@@ -579,16 +579,16 @@ The example week in Fig. 4, the week with the median fuel saving, shows the
 pattern. Whenever the wind drops, injection is cut, sometimes to zero, and
 the demand follows the wind; when the wind returns, injection runs at full
 rate to catch up. Over the year, injection follows the available wind
-(Fig. 6). Its mean rises from 59 % of capacity in the calmest hours to
-98–99 % when more than 16 MW of wind is available, with a correlation
+(Fig. 6). Its mean rises from 57 % of capacity in the calmest hours to
+98–100 % when more than 16 MW of wind is available, with a correlation
 coefficient of 0.61 between injection rate and available wind. Injection is
-below its 85 % target in 2,597 h, stopped completely in 178 h and above the
-target in 6,048 h, and over the year it averages 84.9 % of capacity, so the
+below its 85 % target in 2,563 h, stopped completely in 187 h and above the
+target in 6,129 h, and over the year it averages 84.9 % of capacity, so the
 voidage target is met.
 
-The deficit remains small compared with the limit. It averages 7.5 h of
-full-rate injection, never exceeds 25.2 h and is below 24 h in all but a few
-hours, well within the 72 h allowed. At the end of the year 6.3 h of
+The deficit remains small compared with the limit. It averages 9.0 h of
+full-rate injection, never exceeds 27.5 h and is above 24 h in only 149 h of
+the year, well within the 72 h allowed. At the end of the year 8.2 h of
 injection remain to be caught up, which corresponds to less than 1 % of the
 annual saving. The short duration of the deficits reflects the mechanism:
 the hours in which a second GT would be needed occur in spells of a few
@@ -598,7 +598,7 @@ Production is never reduced in any case. One hour at 50 % rate would lose
 oil and gas worth about 1.5 MNOK, while the fuel and CO2 saved in that hour
 are worth a few thousand NOK, so the optimiser always prefers to defer
 injection. The saving from flexibility is present in every month, between
-0.42 and 0.76 kt (Fig. S3). It is largest in June, December and July, months
+0.43 and 0.77 kt (Fig. S3). It is largest in June, December and July, months
 in which the wind often falls just below the demand.
 
 > **Fig. 6.** Left: water injection rate against available wind in case 3
@@ -611,13 +611,13 @@ in which the wind often falls just below the demand.
 
 | Varied input | Values | Case 2 | Case 3 | Case 4 |
 |---|---|---|---|---|
-| Wind farm size [turbines] | 1 / 2 / 3 / 4 | 77.6 / 64.7 / 60.2 / 57.6 | 72.0 / 57.6 / 53.3 / 50.9 | |
-| CO2 price [NOK/kg] | 0.5 / 1 / 2 / 3 | | 57.5 / 57.5 / 57.6 / 57.5 | |
-| Gas price [NOK/Sm³] | 2 / 4.19 / 8 | | 57.5 / 57.6 / 57.5 | |
-| Battery [MW / MWh] | 0 / 2/2 / 4/4 / 8/8 / 8/16 | | | 57.6 / 57.3 / 57.2 / 56.9 / 56.4 |
-| Injection deficit limit [h] | 0 / 24 / 72 / 168 | | 64.7 / 57.6 / 57.6 / 57.5 | |
+| Wind farm size [turbines] | 1 / 2 / 3 / 4 | 77.6 / 64.7 / 60.2 / 57.6 | 71.9 / 57.5 / 53.4 / 50.9 | |
+| CO2 price [NOK/kg] | 0.5 / 1 / 2 / 3 | | 57.5 / 57.5 / 57.5 / 57.6 | |
+| Gas price [NOK/Sm³] | 2 / 4.19 / 8 | | 57.5 / 57.5 / 57.5 | |
+| Battery [MW / MWh] | 0 / 2/2 / 4/4 / 8/8 / 8/16 | | | 57.5 / 57.3 / 57.2 / 56.9 / 56.4 |
+| Injection deficit limit [h] | 0 / 24 / 72 / 168 | | 64.7 / 57.5 / 57.5 / 57.5 | |
 | Min. GTs online (8 MW battery) | 1 / 0 | | | 56.9 / 38.7 |
-| GT fleet | 3 main / 2 main + 1 small | | 57.6 / 55.6 | |
+| GT fleet | 3 main / 2 main + 1 small / 3 main + 1 small | 64.7 / 53.9 / 53.9 | 57.5 / 47.8 / 47.7 | |
 | Keep two GTs online | | 90.7 | 87.7 | |
 
 Table 3 and Fig. 7 show which inputs matter.
@@ -631,17 +631,17 @@ two orders of magnitude higher than the fuel saved.
 
 **A small deferral capacity is enough.** With no deferral allowed, case 3 is
 identical to case 2 (64.7 kt). A deficit limit of 24 h already gives the
-full saving, with 12 GT starts instead of 6, and allowing 168 h changes
+full saving, with 5 GT starts instead of 3, and allowing 168 h changes
 nothing more. Even a conservative reservoir constraint would therefore
 capture the benefit.
 
 **Wind farm size has diminishing returns.** Doubling the farm from 30 to
-60 MW lowers case 3 emissions only from 57.6 to 50.9 kt, while curtailment
+60 MW lowers case 3 emissions only from 57.5 to 50.9 kt, while curtailment
 grows from 39 to 160 GWh, because one GT must stay online and the platform
 cannot absorb more wind in windy hours. The value of flexibility (case 2
-minus case 3) is largest for the base-case farm (7.1 kt) and smaller for a
-15 MW farm (5.5 kt), where the wind seldom covers the demand, and for a
-45–60 MW farm (6.6–6.9 kt).
+minus case 3) is largest for the base-case farm (7.2 kt) and smaller for a
+15 MW farm (5.6 kt), where the wind seldom covers the demand, and for a
+45–60 MW farm (6.7–6.8 kt).
 
 **Batteries add little on their own.** The largest battery tested
 (8 MW / 16 MWh) reduces case 3 emissions by 1.1 kt, or 2 %, as long as one
@@ -650,7 +650,7 @@ GT must remain online.
 **The minimum number of GTs online dominates.** If an 8 MW / 8 MWh battery
 can provide the reserve and grid stability so that all GTs may stop,
 emissions fall to 38.7 kt, 32 % below the same case with one GT online. The
-GTs then run only 3,809 unit-h, wind covers a much larger share of the
+GTs then run only 3,798 unit-h, wind covers a much larger share of the
 demand with only 11 GWh curtailed, and 15 GWh of heat is supplied by the
 electric heater when no GT runs. The price is 184 GT starts per year.
 
@@ -660,8 +660,17 @@ case 3. Flexibility then saves only 3.1 kt, because its main mechanism,
 avoiding the second GT, is no longer available; the remaining saving comes
 from lower curtailment.
 
-**A smaller third GT** lowers case 3 emissions by 3.4 % to 55.6 kt, but needs
-121 starts per year, and the data for the small unit are not verified.
+**A small GT is as valuable as flexibility, and the two add up.** Replacing
+one main unit by a Solar Mars 100 (11.35 MW) lowers emissions from 64.7 to
+53.9 kt with fixed demand (−17 %) and from 57.5 to 47.8 kt with flexible
+demand. In windy hours the small unit runs alone: its no-load fuel is about
+half that of a main unit, and it can carry up to 6.35 MW while holding the
+5 MW reserve. With the small unit installed, flexibility still saves 6.1 kt
+(11.3 %), the same share as with the main units only, and it reduces the
+starts of the small unit from 465 to 262 per year. Together, the small unit
+and flexibility cut emissions by 26 % compared with case 2. Keeping all three
+main units in addition to the small one changes nothing (47.7 kt), because
+the third main unit is never needed.
 
 > **Fig. 7.** Sensitivity of annual CO2 emissions to wind farm size, CO2 and
 > gas price, battery size, injection deficit limit, minimum number of GTs
@@ -732,7 +741,7 @@ reserve burns a large share of its full-load fuel, so the expensive hours
 are those in which the wind is just too weak for one turbine to carry the
 load with reserve. Deferring water injection in these hours keeps the
 second turbine off. This explains three results of Section 3. Most of the
-saving comes from 1,672 avoided hours with two GTs online. A deficit
+saving comes from 1,674 avoided hours with two GTs online. A deficit
 capacity of about one day captures it all, because these hours occur in
 short spells between windy periods. And the saving largely disappears when
 operating rules keep two GTs online anyway.
@@ -756,6 +765,14 @@ providing reserve lets platform GTs be switched off [@svendsen2022]. The
 present results add that process flexibility gives much of the same benefit
 without new equipment, and that both measures act on the same mechanism:
 they reduce the number of GTs that must be online.
+
+A small GT acts on the other part of the same loss: it does not reduce the
+number of running units, but the no-load fuel of each one. Because the two
+measures address different parts of the loss, their savings add up almost
+fully (Section 3.4). This suggests a staged approach for retrofits: first
+use the flexibility of the existing process, which requires no investment,
+and then consider replacing one main GT by a smaller unit at its next major
+overhaul, where the number of starts of the small unit must be acceptable.
 
 ### 4.2 Comparison with earlier studies
 
@@ -795,13 +812,13 @@ exists on most oil platforms with water injection and can be used without
 new equipment. It does, however, require the power management system to
 coordinate injection with the GTs and the wind forecast, which today are
 usually controlled separately. Second, the reservoir requirement is modest:
-about 24 h of injection deferral, averaging 7.5 h, is small compared with the
+about 24 h of injection deferral, averaging 9.0 h, is small compared with the
 time scale of reservoir pressure support, which is managed on the basis of
 cumulative voidage replacement over months. It should nevertheless be
 confirmed with reservoir engineers for each field, because some reservoirs,
 for example those close to the bubble point, may be sensitive to short
 pressure drops. Third, the schedule changes the duty of the injection pumps.
-In case 3 the number of running injection pumps changes about 720 times per
+In case 3 the number of running injection pumps changes about 730 times per
 year, or about two pump starts per day. The model does not penalise pump
 starts; a start cost or a minimum run time for the pumps could be added at
 little cost to the saving, since the deficit limit is rarely active.
@@ -894,7 +911,7 @@ resolution. The main conclusions are:
 1. A 30 MW wind farm halves the CO2 emissions of the 20 MW platform (−49 %)
    with fixed demand.
 2. Scheduling flexible topside consumers reduces emissions by a further 11 %
-   (7.1 kt/yr) without lost production. GT low-load hours fall by 34 % and
+   (7.2 kt/yr) without lost production. GT low-load hours fall by 34 % and
    GT starts nearly disappear.
 3. Water injection provides all of the useful flexibility; shedding
    production is never worthwhile. A deferral capacity of about 24 h of
@@ -903,9 +920,12 @@ resolution. The main conclusions are:
    shifting energy. It therefore depends on operating practice: keeping two
    GTs online removes most of it, while allowing all GTs to stop, with a
    battery providing reserve, would reduce emissions by a further third.
-5. Carbon price, gas price and battery size alone have little effect, and
+5. Replacing one main GT by a small unit (11.35 MW) saves a further 17 %,
+   and the saving of flexibility remains 11 % with the small unit installed;
+   the two measures are complementary.
+6. Carbon price, gas price and battery size alone have little effect, and
    the fuel saved pays for the measure without a carbon price.
-6. The model reproduces the CO2 avoided per MWh of wind reported for Hywind
+7. The model reproduces the CO2 avoided per MWh of wind reported for Hywind
    Tampen within 2 %, and the fuel gas emission factor observed at Gullfaks.
 
 Load flexibility is thus a low-cost first step for reducing emissions from

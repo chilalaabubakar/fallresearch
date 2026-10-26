@@ -83,3 +83,6 @@ def test_run_cache_resumes_and_tracks_config(tmp_path):
     changed = copy.deepcopy(cfg)
     changed["economics"]["gas_price"]["value"] *= 2                 # any parameter change -> new file
     assert cases.cache_file(changed, tmp_path, t) != cases.cache_file(cfg, tmp_path, t)
+    more_runs = copy.deepcopy(cfg)
+    more_runs["sensitivity"]["co2_price"]["runs"].append({"co2_price": 9.0})   # run list only
+    assert cases.cache_file(more_runs, tmp_path, t) == cases.cache_file(cfg, tmp_path, t)

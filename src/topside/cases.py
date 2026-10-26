@@ -160,11 +160,17 @@ def build_tasks(cfg, sensitivities, tag, schedules_dir, cache_dir=None):
     return [t + (cache_file(cfg, cache_dir, t) if cache_dir else None,) for t in tasks]
 
 
+# Config sections that do not change a single run (lists of runs, benchmarks)
+CACHE_IGNORED_SECTIONS = ("sensitivity", "validation")
+
+
 def cache_file(cfg, cache_dir, task):
-    """One file per run. The name hashes the whole config and the overrides, so a changed
-    parameter never reuses an old result."""
+    """One file per run. The name hashes the config and the overrides, so a changed
+    parameter never reuses an old result; editing the list of sensitivity runs or the
+    benchmarks does not invalidate finished runs."""
     group, case_key, overrides = task[:3]
-    key = json.dumps([cfg, overrides], sort_keys=True, default=str)
+    relevant = {k: v for k, v in cfg.items() if k not in CACHE_IGNORED_SECTIONS}
+    key = json.dumps([relevant, overrides], sort_keys=True, default=str)
     return Path(cache_dir) / f"{group}__{case_key}__{hashlib.sha1(key.encode()).hexdigest()[:12]}.json"
 
 

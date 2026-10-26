@@ -260,7 +260,7 @@ sensitivity:
     runs: [{min_gt_online: 1, battery: [8, 8]}, {min_gt_online: 0, battery: [8, 8]}]
     source: "Tests whether a grid-forming battery (8 MW / 8 MWh) could allow all GTs off"
   gt_fleet:
-    cases: [wind_flex]
+    cases: [wind_fixed, wind_flex]
     runs: [{fleet: {main: 3}}, {fleet: {main: 2, small: 1}}, {fleet: {main: 3, small: 1}}]
     source: "Retrofit (3 existing LEOGO GTs) vs replacing one by a small Solar Mars 100 (11.35 MW), or adding one small unit to the three existing GTs"
   gt_operation_practice:

@@ -21,7 +21,7 @@ wind-powered offshore oil platform**
 
 Monthly emissions follow the wind. With fixed demand (case 2) they range
 from 3.8 kt in February to 6.4 kt in June and July. The saving from
-flexibility (case 2 − case 3) is present in every month (0.42–0.76 kt). It
+flexibility (case 2 − case 3) is present in every month (0.43–0.77 kt). It
 is largest in June, December and July, months in which the wind often falls
 just below the demand and a second GT would otherwise be needed.
 
