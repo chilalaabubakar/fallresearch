@@ -6,7 +6,7 @@
   results/paper/figNN_*.png with the caption below it.
 * Equations ($$ ... $$) become native Word equations (pandoc OMML).
 * Tables get single-line borders (pandoc leaves them borderless).
-Outputs: docs/thesis/methods.docx and docs/thesis/results.docx
+Outputs: docs/thesis/methods.docx, results.docx and comparison.docx
 """
 
 import re
@@ -21,11 +21,17 @@ from docx.oxml.ns import qn
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 FIGURES = ROOT / "results" / "paper"
-CHAPTERS = ["methods", "results"]
+CHAPTERS = ["methods", "results", "comparison"]
+# Figures that are not results/paper/figNN_*.png (site comparison chapter)
+FIGURE_FILES = {11: "results/comparison/site_comparison.png",
+                12: "results/tanzania/paper/fig05_example_week.png",
+                13: "results/tanzania/paper/fig09_sensitivity_overview.png"}
 FIGURE_WIDTH = "16cm"
 
 
 def figure_path(number):
+    if number in FIGURE_FILES:
+        return FIGURE_FILES[number]
     matches = sorted(FIGURES.glob(f"fig{number:02d}_*.png"))
     if not matches:
         raise FileNotFoundError(f"No image for figure {number} in {FIGURES}")

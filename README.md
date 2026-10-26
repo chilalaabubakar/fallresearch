@@ -26,7 +26,7 @@ cut fuel gas use and CO2 emissions without large production losses.
 | 7 | `cases.py` – cases 1–4, sensitivity | done (real ERA5 results in results/cases) |
 | 8 | `validation.py` – benchmarks + field data | done (Gullfaks, Snorre, Statfjord) |
 | 9 | `figures.py` – paper figures and tables | done (results/paper) |
-| 10 | Tanzania site + `compare_sites.py` – North Sea vs Tanzania | in progress (results/comparison) |
+| 10 | Tanzania site + `compare_sites.py` – North Sea vs Tanzania | done (results/tanzania, results/comparison, docs/thesis/comparison.md) |
 
 ## Sites
 The North Sea case (`config/base_case.yaml`) is the default. A site config lists

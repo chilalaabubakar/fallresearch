@@ -244,6 +244,76 @@ published range when the model lies inside it.
   re-injection, which add to real field emissions, are outside the boundary.
 * One weather year (2023).
 
+## 10 Comparison site: deepwater gas off southern Tanzania
+
+To test whether the result depends on the North Sea setting, the same model
+is applied to a second, contrasting site. Only what differs is set in a
+separate configuration (`config/tanzania.yaml`), which inherits every other
+parameter from the base case; the same code, wind turbine, gas turbines,
+scheduler and cases are used.
+
+**Site and weather.** The site is the deepwater gas discoveries in Blocks 1,
+2 and 4 off Lindi and Mtwara (9.5° S, 40.5° E, water depth 1000–3000 m), the
+resource behind the planned Tanzania LNG project. Wind, 2 m air temperature
+and sea-surface temperature for 2023 come from ERA5, processed as in Section
+2. The two IEA 15 MW turbines are assumed to sit on floating foundations, as
+at Hywind Tampen; the power curve is unchanged.
+
+**Platform and process.** The platform is a hypothetical gas processing
+platform that sends 10 MSm³/d of dry gas (about a quarter of a two-train
+LNG plant) through a 100 km, 0.6 m pipeline to shore. The real development
+concept is subsea wells tied back to an onshore plant, so the platform is a
+modelling device that makes the two sites comparable, not a description of
+the project. A lean gas (95.5 mol % methane) arrives at 70 bara and 15 °C.
+NeqSim (Peng–Robinson) models the inlet separation, condensate
+stabilisation at 10 bara, and compression of the gas to 150 bara for
+export, with the same isentropic efficiency as the North Sea compressors.
+Gas dehydration with triethylene glycol (TEG) and regeneration of the
+mono-ethylene glycol (MEG) injected into the subsea wells for hydrate
+control are represented by their heat and electric duties (Table T1). The
+design electric demand is 16.0 MW, of which export compression is 11.2 MW
+(70 %).
+
+**Flexibility levers.** A gas platform has no water injection, so the two
+levers are different:
+
+* *Gas production and line pack.* The export pipeline stores gas. Allowing
+  its inlet pressure to swing between 150 and 110 bara stores
+  3.6 h of full-rate production, computed from NeqSim gas densities at the
+  two pressures and the pipeline volume. The platform may produce between
+  50 % and 110 % of the sales rate, as long as the deficit against the sales
+  rate never exceeds the line pack and is repaid by the end of the horizon.
+  Delivered gas, and therefore the LNG plant, is unaffected on average; no
+  production is lost.
+* *MEG regeneration.* Rich MEG is buffered in a tank, so the regeneration
+  unit (0.3 MW electric and 3 MW heat at full rate) may pause for up to 48 h
+  of full-rate feed and catch up later, exactly as water injection is
+  modelled for the North Sea platform. The MEG injection pumps are must-run.
+
+The TEG and MEG heat duties follow the two levers, so the heat balance of
+Section 6 changes with the schedule.
+
+**Hot climate.** Gas turbine power and efficiency are derated for the ERA5
+mean air temperature (26.8 °C, 11.8 K above ISO conditions) by 0.7 %/K and
+0.1 %/K, rule-of-thumb values that should be replaced by a manufacturer's
+site rating. The LEOGO turbine then delivers 20.0 MW at 34.3 % efficiency.
+Coolers use the ERA5 mean sea temperature (28.2 °C).
+
+**Fuel and CO2 price.** The fuel is the lean export gas. Its lower heating
+value (34.9 MJ/Sm³) is computed with NeqSim to ISO 6976, and its CO2 factor
+(1.945 kg/Sm³) from its carbon content, instead of the Norwegian 2.34
+kg/Sm³. Tanzania has no carbon tax or emission trading for upstream
+petroleum, so the base CO2 price is zero; NOK 0.5–2/kg is tested as a
+sensitivity, together with line-pack sizes of 0, 1.8, 3.6 and 7.2 h.
+
+**Validation.** No published operating data exist for an offshore platform at
+the site. The wind input is checked qualitatively against a study of
+measured winds at coastal Tanzanian stations, which reports the strongest
+winds at Mtwara and a June–July maximum with weak winds from November to
+March, and against the ESMAP offshore-wind potential maps. Of the 115
+parameters in the Tanzania configuration, 50 are still assumptions (Table
+T1).
+
 ## References
 
 Gaertner, E. et al. (2020). *Definition of the IEA 15-Megawatt Offshore
@@ -274,6 +344,14 @@ day. *Energy* 55, 716–727.
 
 Westwood Global Energy (2022). Analysis of electrification and emissions on
 the Norwegian continental shelf.
+
+ESMAP (2020). *Offshore Wind Technical Potential: Analysis and Maps*. World
+Bank Energy Sector Management Assistance Program.
+<https://www.esmap.org/esmap_offshorewind_techpotential_analysis_maps>
+
+*Wind patterns of coastal Tanzania* (University of Dar es Salaam
+repository). <https://repository.udsm.ac.tz/items/2f0fb49f-1275-4710-b7f1-116e2bdf0264>
+(authors and year to be completed from the original).
 
 Data: Copernicus Climate Change Service (ERA5); Norwegian Environment Agency,
 Norskeutslipp (CompanyID 22311, 16791, 16790); Norwegian Offshore Directorate,
