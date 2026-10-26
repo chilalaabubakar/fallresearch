@@ -51,7 +51,10 @@ def test_lean_gas_co2_factor_and_hot_air(cfg):
     assert fuel.co2_factor == pytest.approx(fuel.co2_factor_composition)
     assert 1.8 < fuel.co2_factor < 2.1                      # lean gas: well below Norway's 2.34
     p, e = gas_turbine.ambient_factors(cfg)
-    assert p == pytest.approx(1 - 0.007 * 12) and e == pytest.approx(1 - 0.001 * 12)
+    amb = cfg["gas_turbine"]["ambient"]
+    dT = param_si(amb["temperature"]) - param_si(amb["iso_temperature"])
+    assert dT > 10                                          # tropical site, hotter than ISO 15 degC
+    assert p == pytest.approx(1 - 0.007 * dT) and e == pytest.approx(1 - 0.001 * dT)
     assert gas_turbine.ambient_factors(load_config()) == (1.0, 1.0)
 
 

@@ -66,3 +66,20 @@ def test_zero_deficit_equals_fixed_injection(cfg, sys_, wind):
     s, opt, w = cases.apply_overrides(cfg, sys_, "wind_flex", wind.values, {"max_deficit": 0})
     df = scheduler.run(s, opt, w, verbose=False)
     assert np.allclose(df["f_wi"], s.flex.injection.target_fraction, atol=1e-6)
+
+
+def test_run_cache_resumes_and_tracks_config(tmp_path):
+    import copy
+    import json
+    cfg = load_config()
+    tasks = cases.build_tasks(cfg, ["co2_price"], "", tmp_path / "s", tmp_path / "runs")
+    assert all(t[4] is not None for t in tasks)
+    assert len({t[4] for t in tasks}) == len(tasks)                 # one file per run
+    t = tasks[1]
+    t[4].parent.mkdir(parents=True)
+    t[4].write_text(json.dumps({"co2_kt": 1.0}))
+    done, todo = cases.cached_rows(tasks)
+    assert done == {1: {"co2_kt": 1.0}} and len(todo) == len(tasks) - 1
+    changed = copy.deepcopy(cfg)
+    changed["economics"]["gas_price"]["value"] *= 2                 # any parameter change -> new file
+    assert cases.cache_file(changed, tmp_path, t) != cases.cache_file(cfg, tmp_path, t)

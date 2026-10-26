@@ -22,6 +22,8 @@ Run from the repository root:
 import argparse
 import copy
 import dataclasses
+import hashlib
+import json
 import time
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -118,8 +120,11 @@ def _init_worker(synthetic, hours, window):
 
 
 def _run_one(task):
-    """task = (group, case_key, overrides, save_schedule_path or None) -> summary row."""
-    group, case_key, overrides, save_path = task
+    """task = (group, case_key, overrides, save_schedule_path or None, cache_path or None) -> summary row.
+
+    The row is also written to cache_path as soon as the run finishes, so finished runs
+    survive if the batch is stopped before the end (see cached_rows)."""
+    group, case_key, overrides, save_path, cache_path = task
     cfg, sys_, wind_W = _W["cfg"], _W["sys"], _W["wind"]
     t0 = time.time()
     s, opt, wind = apply_overrides(cfg, sys_, case_key, wind_W.values, overrides)
@@ -130,6 +135,9 @@ def _run_one(task):
     row = {"group": group, "case": case_key, "label": cfg["cases"][case_key]["label"],
            "overrides": str(overrides or {}), **summarize_run(cfg, s, df),
            "runtime_s": round(time.time() - t0, 1)}
+    if cache_path:
+        Path(cache_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(cache_path).write_text(json.dumps(row, default=float))
     print(f"  done: {group:<18} {case_key:<18} {row['overrides']:<40} {row['runtime_s']:6.1f} s", flush=True)
     return row
 
@@ -143,13 +151,32 @@ def run_tasks(tasks, synthetic, hours, jobs, window=None):
         return list(ex.map(_run_one, tasks))
 
 
-def build_tasks(cfg, sensitivities, tag, schedules_dir):
+def build_tasks(cfg, sensitivities, tag, schedules_dir, cache_dir=None):
     tasks = [("base", k, None, schedules_dir / f"schedule_{k}{tag}.csv") for k in case_keys(cfg)]
     names = list(cfg["sensitivity"]) if sensitivities == ["all"] else sensitivities
     for name in names:
         sens = cfg["sensitivity"][name]
         tasks += [(name, k, dict(r), None) for k in sens["cases"] for r in sens["runs"]]
-    return tasks
+    return [t + (cache_file(cfg, cache_dir, t) if cache_dir else None,) for t in tasks]
+
+
+def cache_file(cfg, cache_dir, task):
+    """One file per run. The name hashes the whole config and the overrides, so a changed
+    parameter never reuses an old result."""
+    group, case_key, overrides = task[:3]
+    key = json.dumps([cfg, overrides], sort_keys=True, default=str)
+    return Path(cache_dir) / f"{group}__{case_key}__{hashlib.sha1(key.encode()).hexdigest()[:12]}.json"
+
+
+def cached_rows(tasks):
+    """Split tasks into rows already on disk and tasks still to run."""
+    done, todo = {}, []
+    for i, t in enumerate(tasks):
+        if t[4] and Path(t[4]).exists():
+            done[i] = json.loads(Path(t[4]).read_text())
+        else:
+            todo.append((i, t))
+    return done, todo
 
 
 # --------------------------------------------------------------------------
@@ -226,6 +253,7 @@ def main(argv=None):
     ap.add_argument("--synthetic", action="store_true", help="Synthetic wind (demo only)")
     ap.add_argument("--hours", type=int, default=None, help="Only the first N hours (quick test)")
     ap.add_argument("--jobs", type=int, default=4, help="Parallel worker processes")
+    ap.add_argument("--fresh", action="store_true", help="Ignore finished runs saved by an earlier, stopped batch")
     args = ap.parse_args(argv)
 
     cfg = load_config()
@@ -234,10 +262,14 @@ def main(argv=None):
     note = " (SYNTHETIC wind, demo only)" if args.synthetic else ""
     period = f"{args.hours} h" if args.hours else "yr"
     out_dir = results_path(cfg, "cases")
-    tasks = build_tasks(cfg, args.sensitivity, tag, results_path(cfg, "schedules"))
-    print(f"{len(tasks)} runs on {args.jobs} worker(s)")
+    cache_dir = out_dir / f"runs{tag}"
+    tasks = build_tasks(cfg, args.sensitivity, tag, results_path(cfg, "schedules"), cache_dir)
+    done, todo = ({}, list(enumerate(tasks))) if args.fresh else cached_rows(tasks)
+    print(f"{len(tasks)} runs ({len(done)} already finished) on {args.jobs} worker(s)")
     t0 = time.time()
-    rows = pd.DataFrame(run_tasks(tasks, args.synthetic, args.hours, args.jobs))
+    new = run_tasks([t for _, t in todo], args.synthetic, args.hours, args.jobs) if todo else []
+    done.update({i: r for (i, _), r in zip(todo, new)})
+    rows = pd.DataFrame([done[i] for i in range(len(tasks))])
     print(f"All runs finished in {(time.time() - t0) / 60:.1f} min")
 
     base = add_reductions(rows[rows["group"] == "base"])

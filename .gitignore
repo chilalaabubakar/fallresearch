@@ -19,3 +19,5 @@ data/processed/*synthetic*
 .DS_Store
 .vscode/
 .idea/
+# Per-run cache of cases.py (lets a stopped batch resume)
+results/**/cases/runs*/
