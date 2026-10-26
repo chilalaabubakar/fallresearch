@@ -38,8 +38,8 @@ one marked "verify in original" against the paper before submission.
 
 | Parameter | Before | Now | Source |
 |---|---|---|---|
-| Separator pressures | 3 stages, 60/10/2 bara | 4 stages, 70/29.2/7.9/1.8 bara | Voldsund et al. (verify in original) |
-| Gas export pressure | 180 bara | 180 bara (kept) | about 175–180 bar, Nguyen/Voldsund et al. (2014); LEOGO 200 bar → sensitivity |
+| Separator pressures | 3 stages, 60/10/2 bara | 4 stages, 70/29/7.2/1.8 bara | Nguyen et al. (2013), Table 1 (checked in original); last stage 1.7–2.8 bar on four real platforms, Voldsund et al. (2014), Table 2 |
+| Gas export pressure | 180 bara | 180 bara (kept) | 179 bar on platform D, Voldsund et al. (2014), Table 2; 18.5 MPa in Nguyen et al. (2013) (checked in original); LEOGO 200 bar → sensitivity |
 | Oil export pressure | 100 bara | 50 bara | LEOGO |
 | Water injection pressure | 250 bara | 250 bara (confirmed) | LEOGO |
 | WI pump suction | 5 bara | 7 bara | LEOGO |
@@ -70,8 +70,8 @@ one marked "verify in original" against the paper before submission.
 | Source | Electric demand |
 |---|---|
 | This model, design point | 20.3 MW (+ 3 MW heat) |
-| Voldsund et al. (2013), real North Sea platform | 18–26 MW electrical |
-| Nguyen et al. (2013), modelled North Sea platforms | 22.6–31.1 MW |
+| Voldsund et al. (2013, 2014), three real North Sea oil platforms | 17–30 MW processing-plant power (checked in original; whole platform A about 34 MW) |
+| Nguyen et al. (2013), modelled North Sea platforms | 22.6–31.1 MW (checked in original) |
 | Johan Castberg PDO | about 25 MW average, 50 MW peak |
 | LEOGO (gas-lift platform, higher GOR) | about 47 MW |
 

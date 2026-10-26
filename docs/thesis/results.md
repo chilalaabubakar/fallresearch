@@ -185,7 +185,7 @@ The results (Table 3, Figure 9) show which inputs matter:
 
 | Benchmark | Model | Published | Status |
 |---|---|---|---|
-| Platform power, real North Sea platform (Voldsund et al., 2013) | 20.3 MW | 18–26 MW | within |
+| Platform power, three real North Sea oil platforms (Voldsund et al., 2013, 2014) | 20.3 MW | 17–30 MW | within |
 | Platform power, modelled platforms (Nguyen et al., 2013) | 20.3 MW | 22.6–31.1 MW | below range |
 | Platform power, Johan Castberg PDO | 20.3 MW | 25 MW | within 20 % |
 | Platform power implied by Hywind Tampen | 20.3 MW | 25.1 MW | within 20 % |
@@ -253,13 +253,3 @@ not from the power-system model.
    result.
 6. The model reproduces the CO2 avoided per MWh of wind reported for Hywind
    Tampen within 2 % and the fuel-gas emission factor observed at Gullfaks.
-7. The finding also holds at a tropical gas platform off southern Tanzania
-   (Section 9), where the same wind farm has a capacity factor of only
-   30 %. Wind cuts emissions by 43 % with fixed demand, and flexible
-   scheduling of gas production (using the export pipeline's line pack)
-   and MEG regeneration saves a further 2.6 kt/yr (4.5 %), again with no
-   lost production. The benefit is less than half the North Sea value
-   because one gas turbine almost covers the smaller platform and the line
-   pack stores only 3.6 h of production: the size of the benefit depends
-   on how many hours of load can be postponed. The small Tanzanian carbon
-   duty of 2025 does not change the result.

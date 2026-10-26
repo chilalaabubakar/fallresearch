@@ -116,8 +116,8 @@ process:
     well_temperature: {value: 70.0,  unit: degC, source: "ASSUMPTION: arrival temperature at the inlet separator"}
 
   pressures:
-    separators: {value: [70.0, 29.2, 7.9, 1.8], unit: bara, source: "Voldsund et al. North Sea platform separation train, 7 / 2.92 / 0.79 / 0.18 MPa (HYSYS model; as reported in Nguyen, Voldsund et al. 2014 four-platform comparison, last stage 1.7-2.8 bar on all four) - verify in original"}
-    gas_export:     {value: 180.0, unit: bara, source: "About 175-180 bar export/lift pressure on North Sea platform D in Nguyen, Voldsund et al. (2014); LEOGO uses 200 bar (sensitivity)"}
+    separators: {value: [70.0, 29.0, 7.2, 1.8], unit: bara, source: "Nguyen et al. (2013), Energy 62:23-36, Table 1: separation train at 7 / 2.9 / 0.72 / 0.18 MPa (generic North Sea platform). Last stage 1.7-2.8 bar on four real North Sea platforms (Voldsund et al. (2014), Energy 74:45-58, Table 2)"}
+    gas_export:     {value: 180.0, unit: bara, source: "Voldsund et al. (2014), Energy 74:45-58, Table 2: treated gas at 179 bar on platform D (236, 118 and 184 bar on A-C); Nguyen et al. (2013), Table 1: gas export 18.5 MPa. LEOGO uses 200 bar (sensitivity)"}
     oil_export:     {value: 50.0,  unit: bara, source: "5 MPa oil export pressure, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
     water_injection: {value: 250.0, unit: bara, source: "25 MPa injection pressure, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
     wi_suction:     {value: 7.0,   unit: bara, source: "0.7 MPa water deck pressure, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)"}
@@ -276,15 +276,15 @@ validation:
   benchmarks:
     platform_power_voldsund:
       metric: design_power_MW
-      value: [18.0, 26.0]
+      value: [17.0, 30.0]
       unit: MW
-      source: "Voldsund et al. (2013), Energy 55:716-727: 18-26 MW electrical on a real North Sea platform (via search summary; verify)"
+      source: "Voldsund et al. (2014), Energy 74:45-58, Table 5: power input to the processing plants of three real North Sea oil platforms, 25 / 30 / 17 MW (A, C, D; B is a gas-condensate platform, 5.5 MW). Platform A is the platform of Voldsund et al. (2013), Energy 55:716-727: about 24 MW for processing and about 34 MW for the whole platform"
       note: "Real platform with different production rates"
     platform_power_nguyen:
       metric: design_power_MW
       value: [22.6, 31.1]
       unit: MW
-      source: "Nguyen et al. (2013), Energy, six North Sea platform cases (via search summary; verify)"
+      source: "Nguyen et al. (2013), Energy 62:23-36, Table 6 and text: platform power consumption 22.6-31.1 MW over six North Sea reservoir-fluid cases"
       note: "Modelled platforms; upper end includes gas lift / injection"
     platform_power_castberg:
       metric: design_power_MW

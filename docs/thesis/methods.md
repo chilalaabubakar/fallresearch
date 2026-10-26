@@ -84,8 +84,9 @@ for hydrocarbons and the CPA equation of state for water, which reproduces
 liquid-water density and therefore pump power (SRK overestimated water-pump
 power by about 30 % in a test). The flowsheet is:
 
-* four-stage separation at 70 / 29.2 / 7.9 / 1.8 bara (Voldsund et al., 2013,
-  and related North Sea platform studies);
+* four-stage separation at 70 / 29 / 7.2 / 1.8 bara (Nguyen et al., 2013;
+  the last stage lies within the 1.7–2.8 bar found on four real North Sea
+  platforms by Voldsund et al., 2014);
 * three recompression stages lifting gas from each separator to the next
   stage, each followed by a cooler (30 °C) and a scrubber;
 * gas export compression to 180 bara (isentropic efficiency 0.75);
@@ -212,8 +213,9 @@ an operating practice that keeps two GTs online regardless of wind.
 Model results were compared with independent published values and field
 data:
 
-* **Platform power** against measured and modelled North Sea platforms
-  (Voldsund et al., 2013; Nguyen et al., 2013), the Johan Castberg plan for
+* **Platform power** against the processing-plant power of three real
+  North Sea oil platforms (Voldsund et al., 2013, 2014) and six modelled
+  platforms (Nguyen et al., 2013), the Johan Castberg plan for
   development and operation, and the average demand implied by Hywind Tampen
   (384 GWh/yr covering about 35 % of five platforms' electricity).
 * **Wind capacity factor** against Hywind Tampen (expected 384 GWh/yr from
@@ -244,84 +246,6 @@ published range when the model lies inside it.
   re-injection, which add to real field emissions, are outside the boundary.
 * One weather year (2023).
 
-## 10 Comparison site: deepwater gas off southern Tanzania
-
-To test whether the result depends on the North Sea setting, the same model
-is applied to a second, contrasting site. Only what differs is set in a
-separate configuration (`config/tanzania.yaml`), which inherits every other
-parameter from the base case; the same code, wind turbine, gas turbines,
-scheduler and cases are used.
-
-**Site and weather.** The site is the deepwater gas discoveries in Blocks 1,
-2 and 4 off Lindi and Mtwara (9.5° S, 40.5° E, water depth 1000–3000 m), the
-resource behind the planned Tanzania LNG project. Wind, 2 m air temperature
-and sea-surface temperature for 2023 come from ERA5, processed as in Section
-2. The two IEA 15 MW turbines are assumed to sit on floating foundations, as
-at Hywind Tampen; the power curve is unchanged.
-
-**Platform and process.** The platform is a hypothetical gas processing
-platform that sends 10 MSm³/d of dry gas (about a quarter of a two-train
-LNG plant) through a 100 km, 0.6 m pipeline to shore. The real development
-concept is subsea wells tied back to an onshore plant, so the platform is a
-modelling device that makes the two sites comparable, not a description of
-the project. A lean gas (95.5 mol % methane) arrives at 70 bara and 15 °C.
-NeqSim (Peng–Robinson) models the inlet separation, condensate
-stabilisation at 10 bara, and compression of the gas to 150 bara for
-export, with the same isentropic efficiency as the North Sea compressors.
-Gas dehydration with triethylene glycol (TEG) and regeneration of the
-mono-ethylene glycol (MEG) injected into the subsea wells for hydrate
-control are represented by their heat and electric duties (Table T1). These
-duties were checked against NeqSim water contents of the gas. Drying
-10 MSm³/d needs a TEG reboiler of about 0.5 MW. Regenerating the MEG that
-carries the water condensed between reservoir and platform needs about 1 MW
-of heat, for an assumed reservoir of 80 °C and 300 bara. The MEG injection
-pumps need only about 0.05 MW (`docs/verification/tanzania_process_check.py`).
-The design electric demand is 15.4 MW, of which export compression is
-11.2 MW (73 %).
-
-**Flexibility levers.** A gas platform has no water injection, so the two
-levers are different:
-
-* *Gas production and line pack.* The export pipeline stores gas. Allowing
-  its inlet pressure to swing between 150 and 110 bara stores
-  3.6 h of full-rate production, computed from NeqSim gas densities at the
-  two pressures and the pipeline volume. The platform may produce between
-  50 % and 110 % of the sales rate, as long as the deficit against the sales
-  rate never exceeds the line pack and is repaid by the end of the horizon.
-  Delivered gas, and therefore the LNG plant, is unaffected on average; no
-  production is lost.
-* *MEG regeneration.* Rich MEG is buffered in a tank, so the regeneration
-  unit (0.1 MW electric and 1 MW heat at full rate) may pause for up to 48 h
-  of full-rate feed and catch up later, exactly as water injection is
-  modelled for the North Sea platform. The MEG injection pumps are must-run.
-
-The TEG and MEG heat duties follow the two levers, so the heat balance of
-Section 6 changes with the schedule.
-
-**Hot climate.** Gas turbine power and efficiency are derated for the ERA5
-mean air temperature (26.8 °C, 11.8 K above ISO conditions) by 0.7 %/K and
-0.1 %/K, rule-of-thumb values that should be replaced by a manufacturer's
-site rating. The LEOGO turbine then delivers 20.0 MW at 34.3 % efficiency.
-Coolers use the ERA5 mean sea temperature (28.2 °C).
-
-**Fuel and CO2 price.** The fuel is the lean export gas. Its lower heating
-value (34.9 MJ/Sm³) is computed with NeqSim to ISO 6976, and its CO2 factor
-(1.945 kg/Sm³) from its carbon content, instead of the Norwegian 2.34
-kg/Sm³. The base CO2 price is the excise duty introduced by the Tanzanian
-Finance Act 2025: TZS 22,000 per tonne of carbon emissions from coal and
-natural gas, about NOK 0.09/kg at 10.5 NOK/USD. Whether it applies to fuel
-gas burnt offshore is not confirmed. CO2 prices of 0–2 NOK/kg are therefore
-tested as a sensitivity, together with line-pack sizes of 0, 1.8, 3.6 and
-7.2 h.
-
-**Validation.** No published operating data exist for an offshore platform at
-the site. The wind input is checked qualitatively against a study of
-measured winds at coastal Tanzanian stations, which reports the strongest
-winds at Mtwara and a June–July maximum with weak winds from November to
-March, and against the ESMAP offshore-wind potential maps. Of the 115
-parameters in the Tanzania configuration, 43 are still assumptions, 22 of
-them specific to Tanzania (Table T1; `docs/verification/tanzania_assumptions.md`).
-
 ## References
 
 Gaertner, E. et al. (2020). *Definition of the IEA 15-Megawatt Offshore
@@ -334,8 +258,9 @@ Hsu, S. A., Meindl, E. A. & Gilhousen, D. B. (1994). Determining the
 power-law wind-profile exponent under near-neutral stability conditions at
 sea. *Journal of Applied Meteorology* 33, 757–765.
 
-Nguyen, T.-V. et al. (2013). Exergetic assessment of energy systems on North
-Sea oil and gas platforms. *Energy*.
+Nguyen, T.-V., Pierobon, L., Elmegaard, B., Haglind, F., Breuhaus, P. &
+Voldsund, M. (2013). Exergetic assessment of energy systems on North Sea oil
+and gas platforms. *Energy* 62, 23–36. doi:10.1016/j.energy.2013.03.011.
 
 Offshore Norge (2024). *Climate and environmental report 2024*.
 
@@ -348,23 +273,21 @@ platform – an off-grid energy system for renewable integration studies.
 
 Voldsund, M., Ertesvåg, I. S., He, W. & Kjelstrup, S. (2013). Exergy analysis
 of the oil and gas processing on a North Sea oil platform a real production
-day. *Energy* 55, 716–727.
+day. *Energy* 55, 716–727. doi:10.1016/j.energy.2013.02.038.
+
+Voldsund, M., Nguyen, T.-V., Elmegaard, B., Ertesvåg, I. S., Røsjorde, A.,
+Jøssang, K. & Kjelstrup, S. (2014). Exergy destruction and losses on four
+North Sea offshore platforms: a comparative study of the oil and gas
+processing plants. *Energy* 74, 45–58. doi:10.1016/j.energy.2014.02.080.
 
 Westwood Global Energy (2022). Analysis of electrification and emissions on
 the Norwegian continental shelf.
-
-ESMAP (2020). *Offshore Wind Technical Potential: Analysis and Maps*. World
-Bank Energy Sector Management Assistance Program.
-<https://www.esmap.org/esmap_offshorewind_techpotential_analysis_maps>
-
-*Wind patterns of coastal Tanzania* (University of Dar es Salaam
-repository). <https://repository.udsm.ac.tz/items/2f0fb49f-1275-4710-b7f1-116e2bdf0264>
-(authors and year to be completed from the original).
 
 Data: Copernicus Climate Change Service (ERA5); Norwegian Environment Agency,
 Norskeutslipp (CompanyID 22311, 16791, 16790); Norwegian Offshore Directorate,
 FactPages (field production, yearly).
 
-*Check before submission: references marked "verify" in
-`docs/parameter_verification.md` were obtained from search summaries and
-should be confirmed against the original documents.*
+*Check before submission: Voldsund et al. (2013, 2014) and Nguyen et al.
+(2013) have been checked against the original papers. The Johan Castberg
+PDO and the other items marked "verify" in `docs/parameter_verification.md`
+were obtained from search summaries and should still be confirmed.*

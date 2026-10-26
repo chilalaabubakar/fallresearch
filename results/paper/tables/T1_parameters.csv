@@ -38,8 +38,8 @@ process.design.oil_rate,15000.0,Sm3/d,"ASSUMPTION: mid-size North Sea platform, 
 process.design.water_cut,0.4,-,ASSUMPTION: water fraction of produced liquid at standard conditions,True
 process.design.water_injection_rate,25000.0,Sm3/d,ASSUMPTION: roughly voidage replacement,True
 process.design.well_temperature,70.0,degC,ASSUMPTION: arrival temperature at the inlet separator,True
-process.pressures.separators,"[70.0, 29.2, 7.9, 1.8]",bara,"Voldsund et al. North Sea platform separation train, 7 / 2.92 / 0.79 / 0.18 MPa (HYSYS model; as reported in Nguyen, Voldsund et al. 2014 four-platform comparison, last stage 1.7-2.8 bar on all four) - verify in original",False
-process.pressures.gas_export,180.0,bara,"About 175-180 bar export/lift pressure on North Sea platform D in Nguyen, Voldsund et al. (2014); LEOGO uses 200 bar (sensitivity)",False
+process.pressures.separators,"[70.0, 29.0, 7.2, 1.8]",bara,"Nguyen et al. (2013), Energy 62:23-36, Table 1: separation train at 7 / 2.9 / 0.72 / 0.18 MPa (generic North Sea platform). Last stage 1.7-2.8 bar on four real North Sea platforms (Voldsund et al. (2014), Energy 74:45-58, Table 2)",False
+process.pressures.gas_export,180.0,bara,"Voldsund et al. (2014), Energy 74:45-58, Table 2: treated gas at 179 bar on platform D (236, 118 and 184 bar on A-C); Nguyen et al. (2013), Table 1: gas export 18.5 MPa. LEOGO uses 200 bar (sensitivity)",False
 process.pressures.oil_export,50.0,bara,"5 MPa oil export pressure, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)",False
 process.pressures.water_injection,250.0,bara,"25 MPa injection pressure, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)",False
 process.pressures.wi_suction,7.0,bara,"0.7 MPa water deck pressure, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)",False
@@ -89,8 +89,8 @@ cases.battery_size.power,4.0,MW,"LEOGO battery option 4 MW / 4 MWh (Svendsen et 
 cases.battery_size.energy,4.0,MWh,"LEOGO battery option 4 MW / 4 MWh (Svendsen et al., 2023)",False
 validation.tolerance,0.2,-,Modelling choice: +/-20 % counts as agreement for single published values,False
 validation.bbl_per_Sm3,6.2898,bbl/Sm3,"Standard conversion, 1 Sm3 = 6.2898 bbl (Norwegian Offshore Directorate)",False
-validation.benchmarks.platform_power_voldsund,"[18.0, 26.0]",MW,"Voldsund et al. (2013), Energy 55:716-727: 18-26 MW electrical on a real North Sea platform (via search summary; verify)",False
-validation.benchmarks.platform_power_nguyen,"[22.6, 31.1]",MW,"Nguyen et al. (2013), Energy, six North Sea platform cases (via search summary; verify)",False
+validation.benchmarks.platform_power_voldsund,"[17.0, 30.0]",MW,"Voldsund et al. (2014), Energy 74:45-58, Table 5: power input to the processing plants of three real North Sea oil platforms, 25 / 30 / 17 MW (A, C, D; B is a gas-condensate platform, 5.5 MW). Platform A is the platform of Voldsund et al. (2013), Energy 55:716-727: about 24 MW for processing and about 34 MW for the whole platform",False
+validation.benchmarks.platform_power_nguyen,"[22.6, 31.1]",MW,"Nguyen et al. (2013), Energy 62:23-36, Table 6 and text: platform power consumption 22.6-31.1 MW over six North Sea reservoir-fluid cases",False
 validation.benchmarks.platform_power_castberg,25.0,MW,"Johan Castberg PDO part II impact assessment: about 25 MW average, 50 MW peak (via search summary; verify)",False
 validation.benchmarks.platform_power_hywind_tampen,25.1,MW,"Implied: 384 GWh/yr expected from Hywind Tampen covers about 35 % of the electricity of 5 platforms (Snorre A/B, Gullfaks A/B/C) -> 384/0.35/8760/5 = 25.1 MW per platform (SNL; Equinor)",False
 validation.benchmarks.wind_capacity_factor_tampen_design,0.498,-,"Hywind Tampen expected 384 GWh/yr from 88 MW (SNL, Hywind Tampen) -> 0.498",False

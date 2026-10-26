@@ -1,7 +1,9 @@
 # Comparison with a tropical gas platform (Tanzania)
 
-*Draft, built into results.docx as Section 9 by build_word.py. The site
-and platform are described in Methods, Section 10. All values are for the
+*Archived: the Tanzania comparison was dropped from the paper. This draft
+and the Tanzania model (config/tanzania.yaml, results/tanzania/) are kept for
+possible later use; the method description was in Methods Section 10 (see git
+history). All values are for the
 ERA5 weather year 2023. Tanzania results are in `results/tanzania/`, the
 side-by-side table and figure in `results/comparison/`.*
 

@@ -26,7 +26,7 @@ cut fuel gas use and CO2 emissions without large production losses.
 | 7 | `cases.py` – cases 1–4, sensitivity | done (real ERA5 results in results/cases) |
 | 8 | `validation.py` – benchmarks + field data | done (Gullfaks, Snorre, Statfjord) |
 | 9 | `figures.py` – paper figures and tables | done (results/paper) |
-| 10 | Tanzania site + `compare_sites.py` – North Sea vs Tanzania | done (results/tanzania, results/comparison, docs/thesis/comparison.md) |
+| 10 | Tanzania site + `compare_sites.py` – North Sea vs Tanzania | done, but not used in the paper (archived draft: docs/tanzania/comparison.md) |
 
 ## Sites
 The North Sea case (`config/base_case.yaml`) is the default. A site config lists
@@ -121,7 +121,7 @@ results/                figures and tables
 - Fuel gas heating value: computed with NeqSim to ISO 6976 from the composition in the config.
 - LEOGO reference platform: Svendsen et al. (2023), IET Energy Syst. Integr., doi:10.1049/esi2.12085
   (gas turbines, efficiencies, export/injection pressures, base load, CO2 factor).
-- Separator pressures: Voldsund et al. North Sea platform studies (Energy 55:716–727, 2013, and related).
+- Separator pressures: Nguyen et al. (2013), Energy 62:23–36; real-platform checks from Voldsund et al. (2013), Energy 55:716–727, and (2014), Energy 74:45–58.
 - See `docs/parameter_verification.md` for what was verified and what is still assumed.
 - Seawater properties: Sharqawy, Lienhard & Zubair (2010), Desalin. Water Treat. 16:354–380.
 - Wind shear exponent at sea: Hsu, Meindl & Gilhousen (1994), J. Appl. Meteorol. 33:757–765.

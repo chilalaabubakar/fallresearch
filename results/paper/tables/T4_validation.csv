@@ -1,6 +1,6 @@
 benchmark,model,benchmark_low,benchmark_high,unit,status,source
-platform_power_voldsund,20.29,18,26,MW,within,"Voldsund et al. (2013), Energy 55:716-727: 18-26 MW electrical on a real North Sea platform (via search summary; verify)"
-platform_power_nguyen,20.29,22.6,31.1,MW,differs,"Nguyen et al. (2013), Energy, six North Sea platform cases (via search summary; verify)"
+platform_power_voldsund,20.29,17,30,MW,within,"Voldsund et al. (2014), Energy 74:45-58, Table 5: power input to the processing plants of three real North Sea oil platforms, 25 / 30 / 17 MW (A, C, D; B is a gas-condensate platform, 5.5 MW). Platform A is the platform of Voldsund et al. (2013), Energy 55:716-727: about 24 MW for processing and about 34 MW for the whole platform"
+platform_power_nguyen,20.29,22.6,31.1,MW,differs,"Nguyen et al. (2013), Energy 62:23-36, Table 6 and text: platform power consumption 22.6-31.1 MW over six North Sea reservoir-fluid cases"
 platform_power_castberg,20.29,25,25,MW,agrees,"Johan Castberg PDO part II impact assessment: about 25 MW average, 50 MW peak (via search summary; verify)"
 platform_power_hywind_tampen,20.29,25.1,25.1,MW,agrees,"Implied: 384 GWh/yr expected from Hywind Tampen covers about 35 % of the electricity of 5 platforms (Snorre A/B, Gullfaks A/B/C) -> 384/0.35/8760/5 = 25.1 MW per platform (SNL; Equinor)"
 wind_capacity_factor_tampen_design,0.5091,0.498,0.498,-,agrees,"Hywind Tampen expected 384 GWh/yr from 88 MW (SNL, Hywind Tampen) -> 0.498"

@@ -6,8 +6,6 @@
   results/paper/figNN_*.png with the caption below it.
 * Equations ($$ ... $$) become native Word equations (pandoc OMML).
 * Tables get single-line borders (pandoc leaves them borderless).
-* comparison.md is appended to the results chapter as Section 9 (headings
-  demoted one level, its italic draft note dropped).
 Outputs: docs/thesis/methods.docx and docs/thesis/results.docx
 """
 
@@ -25,11 +23,9 @@ ROOT = HERE.parents[1]
 FIGURES = ROOT / "results" / "paper"
 CHAPTERS = ["methods", "results"]
 # Markdown files appended to a chapter as numbered sections: chapter -> [(file, section number)]
-SECTIONS = {"results": [("comparison", 9)]}
-# Figures that are not results/paper/figNN_*.png (site comparison chapter)
-FIGURE_FILES = {11: "results/comparison/site_comparison.png",
-                12: "results/tanzania/paper/fig05_example_week.png",
-                13: "results/tanzania/paper/fig09_sensitivity_overview.png"}
+SECTIONS = {}
+# Figures that are not results/paper/figNN_*.png: figure number -> path
+FIGURE_FILES = {}
 FIGURE_WIDTH = "16cm"
 
 

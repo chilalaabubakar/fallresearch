@@ -1,5 +1,9 @@
 # Source checklist: claims to confirm in the original documents
 
+**Status:** sections 1 and 2 checked against the original papers (see the
+notes in each). Sections 4–6 are not needed any more: the Tanzania case was
+dropped from the paper. Section 3 (Johan Castberg PDO) is still open.
+
 These values were taken from search-result summaries because the originals
 could not be opened from the cloud session. For each document: find the
 statement, tick it, and write down the page, table or section. If the
@@ -17,6 +21,13 @@ real production day*, Energy 55, 716–727. doi:10.1016/j.energy.2013.03.017
 | Electric power demand of the platform | 18–26 MW | `validation.benchmarks.platform_power_voldsund`; Results §7 |
 | Gas export pressure (if stated) | about 175–180 bar | `process.pressures.gas_export` |
 
+**Checked.** The DOI is 10.1016/j.energy.2013.02.038. The real platform
+has 3 stages at 70.4 / 8.50 / 2.80 bar (Table A), not 4 stages. Power:
+about 34 MW for the whole platform and about 24 MW for processing (23.8 MW
+electric). The 18–26 MW range was wrong. The benchmark is now 17–30 MW:
+processing-plant power of the three oil platforms in Voldsund et al. (2014),
+Table 5 (25, 30 and 17 MW). Platform A is the 2013 platform.
+
 Notes:
 * The pressures may be given in MPa or bar (gauge or absolute); record which.
 * If the 18–26 MW is heat plus power, or gas turbine shaft power rather than
@@ -30,6 +41,14 @@ Notes:
 * (b) The 2014 four-platform comparison by Nguyen, Voldsund et al. (title,
   journal, volume and pages to add). Our separator pressures are cited
   "as reported in" this paper.
+
+**Checked.** (a) is Energy 62, 23–36, doi:10.1016/j.energy.2013.03.011. Its
+Table 1 gives the separation train at 7 / 2.9 / 0.72 / 0.18 MPa, which is the
+real source of our 4-stage pressures; the config now uses 70 / 29 / 7.2 /
+1.8 bara (design power changes by less than 0.01 %). Its gas export is
+18.5 MPa. (b) is Voldsund et al. (2014), Energy 74, 45–58,
+doi:10.1016/j.energy.2014.02.080. It confirms the last stage at 1.7–2.8 bar
+and treated gas at 179 bar on platform D (Table 2).
 
 | Claim to check | Value used | Used in |
 |---|---|---|
