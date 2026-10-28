@@ -1,169 +1,148 @@
 # Scheduling flexible topside loads to reduce gas turbine emissions on a wind-powered offshore oil platform
 
-[Author names and affiliations]
+[Author 1]^a^, [Author 2]^b^
+
+^a^ *[Affiliation a]*
+
+^b^ *[Affiliation b]*
 
 Corresponding author: [name, e-mail]
 
 ## Abstract
 
 Gas turbines on offshore oil and gas platforms are a major source of CO2
-emissions, and wind power integrated into these off-grid systems saves less
-fuel than expected because the turbines must stay online at inefficient part
-load. Studies of wind-powered platforms usually treat the topside load as
-fixed. This paper maps the electric demand of a generic North Sea oil
-platform from a process model, classifies each consumer as must-run,
-flexible or sheddable, and schedules the flexible consumers together with
-the gas turbines. A steady-state process model gives the power of each
-consumer as a function of its operating lever. A mixed-integer linear
-program then schedules production rate, water injection rate, gas turbine
-commitment, wind use and an optional battery for one year hourly with ERA5
-wind data, with postponed water injection as a virtual storage. For a 20.3 MW platform with a 30 MW wind farm, wind
-with fixed demand reduces annual CO2 emissions by 49 %. Flexible scheduling
-cuts them by a further 11 % (7.2 kt/yr) without lost production,
-mainly because it avoids running a second gas turbine: the hours with two
-turbines online fall from 1,702 to 28. Over ten weather years the benefit
-is 10.5–11.7 %. About 24 h of deferrable injection captures it, and a
-small added gas turbine is complementary. Operating
-rules that keep two gas turbines online remove most of the gain. The model
-reproduces Hywind Tampen's reported CO2 avoided per MWh of wind within 2 %.
+emissions, and the fuel saved by wind power integrated into these off-grid
+systems is smaller than expected, since the turbines must remain online at
+inefficient part load to provide reserve. Studies of wind-powered platforms
+usually consider the topside load as fixed. In this study, the electric demand
+of a generic North Sea oil platform was mapped with a steady-state process
+model, and each consumer was classified as must-run, flexible or sheddable. A
+mixed-integer linear program was then used to schedule production rate, water
+injection rate, gas turbine commitment, wind use and an optional battery for
+one year at hourly resolution with ERA5 wind data, with postponed water
+injection represented as a virtual storage. For a 20.3 MW platform supplied by
+a 30 MW wind farm, wind with fixed demand reduces the annual CO2 emissions by
+49 %. Flexible scheduling cuts them by a further 11 % (7.2 kt/yr) without lost
+production, mainly because the operation of a second gas turbine is avoided:
+the hours with two turbines online fall from 1,702 to 28. Over ten weather
+years the benefit ranges from 10.5 to 11.7 %. About 24 h of deferrable
+injection captures it, and a small added gas turbine is complementary, whereas
+operating rules that keep two gas turbines online remove most of the gain. The
+model reproduces the CO2 avoided per MWh of wind reported for Hywind Tampen
+within 2 %.
 
 **Keywords:** offshore oil and gas platform; offshore wind; demand-side
 flexibility; gas turbine part load; unit commitment; water injection
 
-## Nomenclature
-
-| Symbol | Description | Unit |
-|---|---|---|
-| *Sets and indices* | | |
-| $t \in T$ | hours of a scheduling window | – |
-| $g \in G$ | gas turbines | – |
-| *Variables* | | |
-| $f_{p,t}$ | production rate, fraction of design | – |
-| $f_{wi,t}$ | water injection rate, fraction of pump capacity | – |
-| $D_t$ | water injection deficit | h of full-rate injection |
-| $u_{g,t}$ | on/off state of gas turbine $g$ | – |
-| $s_{g,t}$ | start-up indicator of gas turbine $g$ | – |
-| $P_{g,t}$ | electric power of gas turbine $g$ | W |
-| $Q_{g,t}$ | fuel energy input of gas turbine $g$ (LHV) | W |
-| $P^{w}_t$, $P^{c}_t$ | wind power used and curtailed | W |
-| $P^{h}_t$ | electric heater power | W |
-| $P^{ch}_t$, $P^{dis}_t$, $E_t$ | battery charge, discharge and stored energy | W, J |
-| $P^{dem}_t$ | platform electric demand | W |
-| *Parameters* | | |
-| $P^{avail}_t$ | available wind farm power | W |
-| $P_{rated}$, $P_{min}$ | rated and minimum stable gas turbine power | W |
-| $\eta_{rated}$ | gas turbine electric efficiency at rated load | – |
-| $a$ | no-load fuel fraction of the Willans line | – |
-| $\phi$ | fraction of gas turbine waste heat recovered | – |
-| $f_{wi}^{target}$ | voidage-replacement target for $f_{wi}$ | – |
-| $D_{max}$ | maximum injection deficit | h |
-| $R$ | spinning reserve requirement | W |
-| $H$ | process heat demand | W |
-| $v_{100}$, $v_{hub}$ | wind speed at 100 m and at hub height | m/s |
-| $\alpha$ | wind shear exponent | – |
-| *Abbreviations* | | |
-| GT | gas turbine | |
-| LHV | lower heating value | |
-| MILP | mixed-integer linear program | |
-
 ## 1 Introduction
 
-Petroleum activities account for about a quarter of Norway's greenhouse gas
-emissions [@offshorenorge2024]. Most of these emissions come from gas
-turbines (GTs) that generate power and drive compressors offshore
-[@norskpetroleum_emissions]. Power from shore removes them where a cable is
-feasible; the electrification projects planned in 2020 had abatement costs
-below NOK 1,500 per tonne of CO2 [@sodir2020], and the CO2 cost paid by
-operators has since risen from about NOK 860 to NOK 1,860 per tonne
-[@sodir_pfs]. Many installations are too far from shore or too small for a
-cable, however, or depend on onshore grid capacity that is needed elsewhere.
-Operators have judged the alternatives to power from shore to be more costly
-or less effective [@sodir_pfs]. For those installations, the efficiency of
-the offshore power plant still decides the emissions.
+The oil and gas extraction sector accounts for about a quarter of the
+greenhouse gas emissions of Norway [@offshorenorge2024]. Most of these
+emissions originate from the gas turbines (GTs) that generate power and drive
+compressors on the offshore installations [@norskpetroleum_emissions]. Power
+from shore eliminates them where a cable connection is feasible: the
+electrification projects planned in 2020 had abatement costs below NOK 1,500
+per tonne of CO2 [@sodir2020], and the CO2 cost paid by the operators has
+since increased from about NOK 860 to NOK 1,860 per tonne [@sodir_pfs].
+However, many installations are located too far from shore or are too small to
+justify a cable, or they depend on onshore grid capacity that is required by
+other users, and the operators have judged the alternatives to power from
+shore to be more costly or less effective [@sodir_pfs]. For these
+installations, the emissions are still determined by the efficiency of the
+offshore power plant.
 
-Wind power connected directly to the platform grid has been studied for more
+The integration of wind power into the platform grid has been studied for more
 than a decade. He et al. [@he2010] assessed the potential of integrating wind
 power with offshore oil and gas platforms, and Marvik et al. [@marvik2013]
-studied the transient stability of a cluster of North Sea installations with
-an integrated wind farm. Riboldi and Nord [@riboldi2018] optimised an
-offshore combined-cycle plant with a wind farm and found that its economics
-depend on gas and CO2 prices. Hywind Tampen, an 88 MW floating wind farm that
-supplies five platforms, has operated since 2023; it is expected to cover
-about 35 % of their electricity demand and to avoid about 200 kt of CO2 per
-year [@equinor2023].
+studied the transient stability of a cluster of North Sea installations
+connected to a wind farm. Riboldi and Nord [@riboldi2018] optimised an
+offshore combined-cycle plant integrating a wind farm and found that its
+economic performance depends on the gas and CO2 prices. The first large
+application is Hywind Tampen, an 88 MW floating wind farm that supplies five
+platforms and has been in operation since 2023; it is expected to cover about
+35 % of their electricity demand and to avoid about 200 kt of CO2 per year
+[@equinor2023].
 
-The fuel saved per MWh of wind is smaller on such a platform than on a large
-grid. The wind turbines follow the grid frequency rather than set it, so at
-least one GT must stay online, and the running GTs must hold enough spare
-capacity to cover the loss of wind or of a generator. When wind supplies part
-of the demand, the GTs run at part load. That is where they are least
-efficient: the LEOGO reference turbine falls from about 35 % electric
-efficiency at full load to below 20 % near its minimum stable load
-[@svendsen2023]. Exergy analyses of North Sea platforms attribute 62–65 % of
-the exergy destroyed on a platform to the gas turbines [@nguyen2013].
+The fuel saved per MWh of wind is, however, smaller on such a platform than in
+a large grid. Since the wind turbines follow the grid frequency rather than
+set it, at least one GT must remain online, and the running GTs must hold
+sufficient spare capacity to cover the loss of the wind farm or of a
+generator. When wind supplies part of the demand, the GTs therefore operate at
+part load, where they are least efficient: the electric efficiency of the
+LEOGO reference turbine decreases from about 35 % at full load to below 20 %
+near its minimum stable load [@svendsen2023]. Exergy analyses of North Sea
+platforms attribute 62–65 % of the exergy destroyed on a platform to the gas
+turbines [@nguyen2013].
 
-Operational optimisation recovers part of this loss. The open-source tool
-Oogeso optimises GT commitment, wind use and storage; with a battery
-providing reserve, one turbine can be switched off and the others run at
-higher load [@svendsen2022]. The LEOGO reference platform gives a common data
-set for such studies [@svendsen2023]. Zhang et al. [@zhang2022] plan
-investments in offshore energy hubs under emission targets, and Khan et al.
-[@khan2022] show that relaxing GT operating constraints lets a platform grid
-absorb more wind. In all of these, the platform load is an input. Svendsen
-[@svendsen2022] names demand-side flexibility as a way to reduce the need for
-storage but leaves it for future work.
+Part of this loss can be recovered by operational optimisation. The
+open-source tool Oogeso optimises the GT commitment, the wind use and the
+storage; with a battery providing reserve, one turbine can be switched off and
+the remaining ones operated at higher load [@svendsen2022]. The LEOGO
+reference platform provides a common data set for such studies
+[@svendsen2023]. Zhang et al. [@zhang2022] planned investments in offshore
+energy hubs under emission targets, and Khan et al. [@khan2022] showed that
+relaxing the GT operating constraints allows a platform grid to absorb more
+wind power. In all of these studies the platform load is an input. Svendsen
+[@svendsen2022] pointed out demand-side flexibility as a means of reducing the
+need for storage, but left it for future work.
 
-Onshore, moving industrial loads in time is an established subject. Zhang and
-Grossmann [@zhang_grossmann2016] review how energy-intensive production can
-be scheduled around electricity prices, and Golmohamadi [@golmohamadi2022]
-reviews demand-side management in heavy industries such as cement and
-aluminium. These studies respond to price signals in a large grid. An
-off-grid platform has no price signal. Moving a load is worth something only
-through the platform's own power plant, and the value is highly non-linear:
-it depends on whether the change lets a GT stop, or avoids starting one.
+In onshore industry, the shifting of loads in time is an established subject.
+Zhang and Grossmann [@zhang_grossmann2016] reviewed how energy-intensive
+production can be scheduled according to electricity prices, and Golmohamadi
+[@golmohamadi2022] reviewed demand-side management in heavy industries such as
+cement and aluminium production. These studies consider the response to price
+signals in a large grid. An off-grid platform has no such price signal: the
+value of moving a load arises only through the platform's own power plant, and
+it is strongly non-linear, as it depends on whether the change allows a GT to
+be stopped or avoids the start of one.
 
-Platform loads are not fixed either. Water injection is one of the largest
-consumers; on the platforms studied by Nguyen et al. [@nguyen2013] only gas
-compression used more power. Injection can be postponed for hours as long as
-the cumulative volume meets the reservoir's needs, because reservoir pressure
-responds slowly. Production can also be cut, but the lost revenue is large.
-Utilities and safety systems must run at all times. How much of this
-flexibility is usable depends on details that a fixed load profile hides:
-parallel trains, minimum-flow recycle on compressors and pumps, ramp limits,
+The platform loads are not fixed either. Water injection is one of the largest
+consumers, and on the platforms studied by Nguyen et al. [@nguyen2013] only
+gas compression required more power. Injection can be postponed for hours as
+long as the cumulative volume meets the requirements of the reservoir, since
+the reservoir pressure responds slowly. Production can also be reduced,
+although at a large loss of revenue, whereas utilities and safety systems must
+run at all times. The share of this flexibility that can actually be used
+depends on details that a fixed load profile does not capture, such as
+parallel trains, minimum-flow recycle on compressors and pumps, ramp limits
 and the need to catch up postponed injection.
 
-This paper asks how much fuel and CO2 a wind-powered oil platform can save by
-scheduling these loads, which consumers provide the saving and through which
-mechanism, and which assumptions decide its size. It contributes:
+To the authors' knowledge, no study of wind-powered platforms has scheduled
+the topside consumers together with the power plant. The goal of this study is
+to help address this gap, by quantifying how much fuel and CO2 a wind-powered
+oil platform can save by scheduling its flexible loads, which consumers
+provide the saving and through which mechanism, and which assumptions
+determine its magnitude. Four main steps were followed in this study:
 
-1. a demand map of a generic North Sea oil platform from a steady-state
-   process model, with the power of each consumer as a function of its
-   operating lever, including train switching and minimum-flow recycle;
-2. a classification of the consumers as must-run, flexible (deferrable) or
-   sheddable, in which postponed water injection is a virtual storage that
-   must be emptied again;
-3. a mixed-integer linear program that schedules the flexible consumers
-   together with GT commitment, wind use and an optional battery, hour by hour
-   over full years;
-4. results for four cases and ten weather years, with sensitivity analysis,
+1. development of a demand map of a generic North Sea oil platform with a
+   steady-state process model, giving the power of each consumer as a function
+   of its operating lever, including train switching and minimum-flow recycle;
+2. classification of the consumers as must-run, flexible (deferrable) or
+   sheddable, with postponed water injection represented as a virtual storage
+   that must be emptied again;
+3. formulation of a mixed-integer linear program that schedules the flexible
+   consumers together with the GT commitment, the wind use and an optional
+   battery, hour by hour over full years;
+4. simulation of four cases and ten weather years, with sensitivity analysis,
    validation against Hywind Tampen and field data, and economic indicators.
 
-Section 2 describes the platform, models and cases, and Section 3 the
-results. Section 4 discusses the mechanism, its practical use and the
-limitations, and Section 5 concludes. The code, input data and all
-parameters with their sources are openly available (see Data availability).
+The methodology and the models are described in Section 2. Section 3 reports
+the results obtained for the four cases, which are discussed in Section 4.
+Concluding remarks are outlined in Section 5. The code, the input data and all
+parameters with their sources are openly available (see Data and Code
+Availability).
 
 ## 2 Methods
 
 ### 2.1 System and cases
 
-The study models the electric power system of a generic oil platform in the
-northern North Sea (Tampen area, 61.0° N, 2.0° E) for the year 2023 at
-hourly resolution (Fig. 1), with cases 1–4 repeated for the weather years
-2014–2022. The platform produces oil with associated gas,
-exports both, and injects water for pressure support. Power is supplied by
-three GTs and, in the wind cases, by a nearby two-turbine offshore wind farm
-connected to the platform's AC system. Four cases are compared:
+The electric power system of a generic oil platform in the northern North Sea
+(Tampen area, 61.0° N, 2.0° E) was modelled for the year 2023 at hourly
+resolution (Fig. 1), and Cases 1–4 were repeated for the weather years
+2014–2022. The platform produces oil with associated gas, exports both and
+injects water for pressure support. Power is supplied by three GTs and, in the
+wind cases, by a nearby offshore wind farm of two turbines connected to the AC
+system of the platform. Four cases were compared:
 
 1. **GTs only**, fixed demand (baseline).
 2. **Wind + GTs, fixed demand**: production and water injection at their
@@ -175,8 +154,8 @@ connected to the platform's AC system. Four cases are compared:
 The platform keeps its three GTs in all cases, as a retrofit would; the
 optimiser decides how many run in each hour. Case 2 corresponds to the
 usual assumption in platform–wind studies, in which wind displaces GT power
-but the load is unchanged. The difference between cases 2 and 3 isolates
-the value of demand flexibility, and case 4 tests whether a small battery
+but the load is unchanged. The difference between Cases 2 and 3 isolates
+the value of demand flexibility, and Case 4 tests whether a small battery
 adds to it.
 
 The base case uses the existing main turbines rather than a new, smaller
@@ -407,12 +386,12 @@ low-load hour for a unit when this shared load is below 50 % of rating.
 
 ### 2.7 Weather years, sensitivity analysis and validation
 
-To test whether 2023 is representative, cases 1–4 were also run for each
+To test whether 2023 is representative, Cases 1–4 were also run for each
 weather year from 2014 to 2022 with ERA5 data at the same grid point and all
 other inputs unchanged. The injection deficit limit was varied for 2016 and
 2017 as well, the years in which the deficit reached its highest values.
 
-For the base year 2023, cases 2–4 were rerun with one input changed at a
+For the base year 2023, Cases 2–4 were rerun with one input changed at a
 time:
 
 * wind farm size (1–4 turbines, 15–60 MW);
@@ -457,7 +436,7 @@ deficit limit reproduces fixed injection, and that neither flexibility nor
 a battery ever increases fuel use compared with fixed demand.
 
 The CO2 avoided per MWh of wind is computed as the difference in annual CO2
-between case 1 and a wind case, divided by the wind energy used in that
+between Case 1 and a wind case, divided by the wind energy used in that
 case. For the field data, the system boundary was checked by comparing the
 reported oil volumes of the fields assigned to each centre with the
 centre's processing; they agree within 2 %. A single published value counts
@@ -492,31 +471,34 @@ cost.
 
 ### 3.1 Demand map and wind resource
 
-Water injection is the largest consumer (9.2 MW, 45 % of the design
-demand) and the only large deferrable one (Table 1, Fig. 2). Stopping
-injection at full production lowers the demand from 20.3 MW to 10.7 MW, a
-swing of 9.6 MW that costs no production as long as the injection is caught
-up. The sheddable consumers tied to production account for 7.2 MW and the
-must-run base load for 3.5 MW. Both lever curves are far from proportional.
-The injection lever jumps to 0.9 MW as soon as one pump runs, because the
-pump recycles below 30 % of its flow, and rises linearly from there. The
-production lever has a step just above 50 % rate, where the second export
-compressor train must start at its surge limit and adds 0.75 MW. Reducing
-production from 100 % to 50 % therefore saves only 3.2 MW, a third of what
-the injection lever offers.
+The process model was first used to obtain the electric power of each consumer
+at the design point (Table 1) and its variation with the lever positions (Fig.
+2). Water injection is the largest consumer, with 9.2 MW or 45 % of the design
+demand, and the only large deferrable one. Stopping injection at full
+production lowers the demand from 20.3 MW to 10.7 MW, a swing of 9.6 MW that
+costs no production as long as the injection is caught up. The sheddable
+consumers tied to production and the must-run base load account for 7.2 MW and
+3.5 MW, respectively. Neither lever curve is proportional to the lever
+position. The power of the injection lever jumps to 0.9 MW as soon as one pump
+runs, since the pump recycles below 30 % of its flow, and increases linearly
+from there. The production lever shows a step just above a rate of 50 %, where
+the second export compressor train must start at its surge limit and adds 0.75
+MW. Reducing production from 100 % to 50 % therefore saves only 3.2 MW, about
+a third of the reduction offered by the injection lever.
 
 > **Fig. 2.** Demand map. Left: electric power at design by consumer,
 > coloured by flexibility class. Right: power of the production (sheddable)
 > and injection (flexible) levers against lever position.
 
-ERA5 gives a mean wind speed of 9.4 m/s at 100 m and 9.8 m/s at hub height,
-and a capacity factor of 50.9 % for the 30 MW farm in 2023 (Fig. S1). Output
-is seasonal, with monthly capacity factors of 63–68 % in January and
-February and 36–37 % from June to August. The farm delivers its maximum of
-26.5 MW in 40 % of the hours and nothing in 9.6 % of the hours, mainly calm
-periods, and available wind power exceeds the design demand of 20.3 MW in
-4,017 h. The farm can cover the whole platform for long periods,
-but it also leaves frequent and sometimes long gaps that the GTs must fill.
+The ERA5 data give a mean wind speed of 9.4 m/s at 100 m and 9.8 m/s at hub
+height, and a capacity factor of 50.9 % for the 30 MW farm in 2023 (Fig. S1).
+The output is seasonal, with monthly capacity factors of 63–68 % in January
+and February and 36–37 % from June to August. The farm delivers its maximum of
+26.5 MW in 40 % of the hours and nothing in 9.6 % of the hours, mainly during
+calm periods, and the available wind power exceeds the design demand of 20.3
+MW in 4,017 h. The farm can thus cover the whole platform demand for long
+periods, but it also leaves frequent and sometimes long gaps that must be
+filled by the GTs.
 
 ### 3.2 Comparison of the four cases
 
@@ -525,7 +507,7 @@ but it also leaves frequent and sometimes long gaps that the GTs must fill.
 | | 1 GTs only | 2 Wind, fixed | 3 Wind, flexible | 4 Flexible + battery |
 |---|---|---|---|---|
 | CO2 [kt/yr] | 127.7 | 64.7 | 57.5 | 57.2 |
-| Reduction vs case 1 | – | 49.4 % | 55.0 % | 55.2 % |
+| Reduction vs Case 1 | – | 49.4 % | 55.0 % | 55.2 % |
 | Fuel gas [MSm³/yr] | 54.6 | 27.6 | 24.6 | 24.4 |
 | GT running [unit-h/yr] | 17,520 | 10,462 | 8,788 | 8,760 |
 | GT below 50 % load [unit-h/yr] | 17,520 | 9,005 | 5,932 | 6,242 |
@@ -535,84 +517,89 @@ but it also leaves frequent and sometimes long gaps that the GTs must fill.
 | Lost production | 0 | 0 | 0 | 0 |
 | Fuel value + CO2 cost [MNOK/yr] | 484.0 | 245.1 | 217.9 | 216.7 |
 
-With GTs only (case 1), two turbines run in every hour to carry the 18.8 MW
-average load and the 5 MW reserve, each at about 43 % load. The platform
-burns 54.6 MSm³ of fuel gas and emits 127.7 kt CO2 per year (Table 2,
-Fig. 3), and all 17,520 GT unit-hours are low-load hours. This illustrates
-the reserve problem of off-grid platforms: even without wind, the platform
-operates its turbines far from their best efficiency.
+The annual results of the four cases are summarised in Table 2 and Fig. 3.
+With GTs only (Case 1), two turbines run in every hour in order to carry the
+average load of 18.8 MW and the reserve of 5 MW, each at about 43 % load. The
+platform burns 54.6 MSm³ of fuel gas and emits 127.7 kt CO2 per year, and all
+17,520 GT unit-hours are low-load hours. This result illustrates the reserve
+problem of off-grid platforms: even without wind, the turbines are operated
+far from their best efficiency.
 
-A 30 MW wind farm with fixed demand (case 2) halves the emissions to
-64.7 kt (−49.4 %). Wind covers 54 % of the electricity demand, and one GT
-suffices in 7,058 h. Because demand cannot follow the wind, 44.5 GWh, or
+A 30 MW wind farm with fixed demand (Case 2) halves the emissions, to 64.7 kt
+(−49.4 %). Wind covers 54 % of the electricity demand, and one GT is
+sufficient in 7,058 h. Since the demand cannot follow the wind, 44.5 GWh, or
 33 % of the available wind energy, is curtailed, and the mean load of the
-running GTs falls to 32 % of rating. A second GT is still needed in 1,702 h,
-and it is started 149 times.
+running GTs decreases to 32 % of rating. A second GT is still required in
+1,702 h and is started 149 times.
 
-Flexible scheduling (case 3) reduces CO2 by a further 7.2 kt/yr, 11.1 %
-relative to case 2, to 57.5 kt, without any loss of production. Fuel use
-falls by the same 11 %. GT running hours fall from 10,462 to 8,788 unit-h,
-the low-load unit-hours by 34 % and the GT starts from 149 to 3. Wind covers
-57.6 % of the demand, curtailment falls by 13 % to 38.7 GWh, and the mean
-load of the running GTs rises to 36 %. The combined fuel value and CO2 cost
-falls by 27 MNOK/yr, of which 12.9 MNOK is the value of the fuel saved.
+Flexible scheduling (Case 3) reduces the CO2 emissions by a further 7.2 kt/yr,
+or 11.1 % relative to Case 2, to 57.5 kt, without any loss of production, and
+the fuel use decreases by the same 11 %. The GT running hours fall from 10,462
+to 8,788 unit-h, the low-load unit-hours by 34 % and the number of GT starts
+from 149 to 3. Wind covers 57.6 % of the demand, the curtailment decreases by
+13 % to 38.7 GWh, and the mean load of the running GTs increases to 36 %. The
+combined fuel value and CO2 cost is reduced by 27 MNOK/yr, of which 12.9 MNOK
+is the value of the fuel saved.
 
-A 4 MW / 4 MWh battery (case 4) adds only 0.3 kt (−0.6 % relative to
-case 3). It removes the remaining starts and the last hours with a second
-GT, but its annual throughput is only 0.8 GWh. With one GT always online it
-cannot remove the main remaining loss, one turbine idling near minimum load
-whenever the wind covers the demand, and the low-load unit-hours even rise
-slightly (5,932 to 6,242).
+The 4 MW / 4 MWh battery (Case 4) gives an additional reduction of only 0.3
+kt, or 0.6 % relative to Case 3. It removes the remaining starts and the last
+hours with a second GT, but its annual throughput is only 0.8 GWh. As one GT
+must always be online, the battery cannot remove the main remaining loss,
+which is one turbine idling near minimum load whenever the wind covers the
+demand, and the low-load unit-hours even increase slightly, from 5,932 to
+6,242.
 
 > **Fig. 3.** Annual CO2, fuel gas, GT hours below 50 % load and lost
-> production for cases 1–4.
+> production for Cases 1–4.
 
 ### 3.3 How flexible scheduling saves fuel
 
-The saving comes almost entirely from avoiding a second GT. With fixed
-demand, a second turbine must start whenever the wind drops and one GT
-cannot carry the load while holding 5 MW in reserve, that is, whenever the
-wind supplies less than about 2 MW at the average demand of 18.8 MW. Each
-such hour costs the no-load fuel of a whole extra turbine, 18.4 % of its
-full-load fuel. In case 3 the optimiser postpones water injection in
-exactly these hours, so a second GT runs in only 28 h of the year instead
-of 1,702 (Fig. 4, Fig. 5). The 1,674 avoided hours account for most of the
-3.0 MSm³ of fuel saved.
+Results indicate that the saving is obtained almost entirely by avoiding the
+operation of a second GT. With fixed demand, a second turbine must be started
+whenever the wind drops and one GT cannot carry the load while holding 5 MW in
+reserve, i.e. whenever the wind supplies less than about 2 MW at the average
+demand of 18.8 MW. Each such hour costs the no-load fuel of a whole additional
+turbine, which amounts to 18.4 % of its full-load fuel. In Case 3 the
+optimiser postpones water injection in exactly these hours, so that a second
+GT runs in only 28 h of the year instead of 1,702 h (Fig. 4, Fig. 5). The
+1,674 avoided hours account for most of the 3.0 MSm³ of fuel saved.
 
 > **Fig. 4.** Week 3 (15–21 January 2023), the week with the median fuel
-> saving. Top and middle: power supplied by GTs and wind with fixed (case 2)
-> and flexible (case 3) demand. Bottom: production and injection rates.
+> saving. Top and middle: power supplied by GTs and wind with fixed (Case 2)
+> and flexible (Case 3) demand. Bottom: production and injection rates.
 
 > **Fig. 5.** Duration curves of GT load per running unit (left; shaded:
 > below 50 %) and of the number of GTs running (right).
 
-The example week in Fig. 4, the week with the median fuel saving, shows the
-pattern. Whenever the wind drops, injection is cut, sometimes to zero, and
-the demand follows the wind; when the wind returns, injection runs at full
-rate to catch up. Over the year, injection follows the available wind
-(Fig. 6). Its mean rises from 57 % of capacity in the calmest hours to
-98–100 % when more than 16 MW of wind is available, with a correlation
-coefficient of 0.61 between injection rate and available wind. Injection is
-below its 85 % target in 2,563 h, stopped completely in 187 h and above the
-target in 6,129 h, and over the year it averages 84.9 % of capacity, so the
-voidage target is met.
+The pattern is illustrated by the example week in Fig. 4, which is the week
+with the median fuel saving. Whenever the wind drops, injection is reduced,
+sometimes to zero, so that the demand follows the wind, and when the wind
+returns, injection runs at full rate in order to catch up. Over the year, the
+injection rate follows the available wind (Fig. 6): its mean increases from 57
+% of capacity in the calmest hours to 98–100 % when more than 16 MW of wind
+power is available, and the correlation coefficient between injection rate and
+available wind is 0.61. Injection is below its 85 % target in 2,563 h, stopped
+completely in 187 h and above the target in 6,129 h. Over the year it averages
+84.9 % of capacity, and the voidage target is thus met.
 
 The deficit remains small compared with the limit. It averages 9.0 h of
 full-rate injection, never exceeds 27.5 h and is above 24 h in only 149 h of
-the year, well within the 72 h allowed. At the end of the year 8.2 h of
-injection remain to be caught up, which corresponds to less than 1 % of the
-annual saving. The short duration of the deficits reflects the mechanism:
-the hours in which a second GT would be needed occur in spells of a few
-hours to about a day, between periods of sufficient wind.
+the year, which is well within the 72 h allowed. At the end of the year, 8.2 h
+of injection remain to be caught up, corresponding to less than 1 % of the
+annual saving. The short duration of the deficits is a consequence of the
+mechanism described above, since the hours in which a second GT would be
+required occur in spells of a few hours to about a day, between periods of
+sufficient wind.
 
-Production is never reduced in any case. One hour at 50 % rate would lose
-oil and gas worth about 1.5 MNOK, while the fuel and CO2 saved in that hour
-are worth a few thousand NOK, so the optimiser always prefers to defer
-injection. The saving from flexibility is present in every month, between
-0.43 and 0.77 kt (Fig. S3). It is largest in June, December and July, months
-in which the wind often falls just below the demand.
+Production is not reduced in any of the cases. One hour at a rate of 50 %
+would lose oil and gas worth about 1.5 MNOK, whereas the fuel and CO2 saved in
+that hour are worth a few thousand NOK, and the optimiser therefore always
+prefers to defer injection. The saving from flexibility is obtained in every
+month and ranges from 0.43 to 0.77 kt (Fig. S3). It is largest in June,
+December and July, which are the months in which the wind often falls just
+below the demand.
 
-> **Fig. 6.** Left: water injection rate against available wind in case 3
+> **Fig. 6.** Left: water injection rate against available wind in Case 3
 > (mean and 10–90 % range of hours). Right: distribution of the injection
 > deficit (dashed: 72 h limit).
 
@@ -631,46 +618,50 @@ in which the wind often falls just below the demand.
 | GT fleet | 3 main / 2 main + 1 small / 3 main + 1 small | 64.7 / 53.9 / 53.9 | 57.5 / 47.8 / 47.7 | |
 | Keep two GTs online | | 90.7 | 87.7 | |
 
-Table 3 and Fig. 7 show which inputs matter, and several do not. Across CO2
-prices of 0.5–3 NOK/kg and gas prices of 2–8 NOK/Sm³, emissions change by less
-than 0.1 %. Prices scale the cost of every option alike, so the cheapest
-schedule stays the cheapest. Deferring injection saves fuel at any price, and
-shedding production never pays: lost oil and gas are worth about a hundred
-times more than the fuel saved.
+The results of the sensitivity runs are given in Table 3 and Fig. 7. Several
+inputs have little effect. Across CO2 prices of 0.5–3 NOK/kg and gas prices of
+2–8 NOK/Sm³, the emissions change by less than 0.1 %, since the prices scale
+the cost of every option alike and the cheapest schedule remains the cheapest.
+Deferring injection saves fuel at any price, and shedding production is never
+profitable, as the lost oil and gas are worth about a hundred times more than
+the fuel saved.
 
-The deferral capacity needed is small. With no deferral allowed, case 3 is
-identical to case 2 (64.7 kt). A limit of 24 h already gives the full saving,
-with 5 GT starts instead of 3; 168 h changes nothing. A conservative reservoir
-constraint would still capture the benefit.
+The deferral capacity required is small. With no deferral allowed, Case 3 is
+identical to Case 2 (64.7 kt). A limit of 24 h already gives the full saving,
+with 5 GT starts instead of 3, and a limit of 168 h changes nothing. The
+benefit would thus still be captured under a conservative reservoir
+constraint.
 
-A larger wind farm helps less than its size suggests. Doubling the farm from
-30 to 60 MW lowers case 3 emissions only from 57.5 to 50.9 kt, while
-curtailment grows from 39 to 160 GWh: one GT must stay online, and in windy
-hours the platform cannot use more wind. The value of flexibility (case 2
-minus case 3) peaks at the base-case size (7.2 kt). It is 5.6 kt for a 15 MW
-farm, where the wind seldom covers the demand, and 6.7–6.8 kt for 45–60 MW.
-Batteries add little as long as one GT must stay online. The largest one
-tested, 8 MW / 16 MWh, saves 1.1 kt (2 %).
+A larger wind farm gives a smaller improvement than its size suggests.
+Doubling the farm from 30 to 60 MW reduces the Case 3 emissions only from 57.5
+to 50.9 kt, while the curtailment increases from 39 to 160 GWh, since one GT
+must remain online and the platform cannot use more wind in windy hours. The
+value of flexibility (Case 2 minus Case 3) is highest at the base-case size
+(7.2 kt). It is 5.6 kt for a 15 MW farm, where the wind seldom covers the
+demand, and 6.7–6.8 kt for 45–60 MW. Batteries add little as long as one GT
+must remain online; the largest one tested, 8 MW / 16 MWh, saves 1.1 kt (2 %).
 
-Two assumptions about GT operation matter more than any of these. If an
-8 MW / 8 MWh battery could provide reserve and grid stability, so that all
-GTs may stop, emissions would fall to 38.7 kt, 32 % below the same case with
-one GT online. The GTs would then run only 3,798 unit-h and start 184 times a
-year; only 11 GWh of wind would be curtailed, and the electric heater would
-supply 15 GWh of heat in hours with no GT running. The opposite rule, two GTs
-online whatever the wind, raises emissions to 90.7 kt in case 2 and 87.7 kt
-in case 3. Flexibility then saves only 3.1 kt, all of it from lower
-curtailment, because there is no second GT left to avoid.
+Two assumptions on GT operation have a larger effect than any of these inputs.
+If an 8 MW / 8 MWh battery could provide reserve and grid stability, so that
+all GTs may be stopped, the emissions would decrease to 38.7 kt, which is 32 %
+below the same case with one GT online. The GTs would then run only 3,798
+unit-h and start 184 times a year, only 11 GWh of wind would be curtailed, and
+the electric heater would supply 15 GWh of heat in the hours with no GT
+running. The opposite rule, with two GTs online whatever the wind, increases
+the emissions to 90.7 kt in Case 2 and 87.7 kt in Case 3. Flexibility then
+saves only 3.1 kt, all of it from lower curtailment, since there is no second
+GT left to avoid.
 
-The fleet itself matters too. Replacing one main unit by a Solar Mars 100
-(11.35 MW) lowers emissions from 64.7 to 53.9 kt with fixed demand (−17 %)
-and from 57.5 to 47.8 kt with flexible demand. In windy hours the small unit
-runs alone. Its no-load fuel is about half that of a main unit, and it can
-carry up to 6.35 MW while holding the 5 MW reserve. Flexibility still saves
-6.1 kt (11.3 %) with the small unit installed, and it cuts the small unit's
-starts from 465 to 262 per year. Combined, the small unit and flexibility
-reduce emissions by 26 % relative to case 2. Adding the small unit to all
-three main units instead gives 47.7 kt; the third main unit is never used.
+The composition of the GT fleet also matters. Replacing one main unit by a
+Solar Mars 100 (11.35 MW) reduces the emissions from 64.7 to 53.9 kt with
+fixed demand (−17 %) and from 57.5 to 47.8 kt with flexible demand. The small
+unit runs alone in windy hours; its no-load fuel is about half that of a main
+unit, and it can carry up to 6.35 MW while holding the 5 MW reserve.
+Flexibility still saves 6.1 kt (11.3 %) with the small unit installed and
+reduces the starts of the small unit from 465 to 262 per year. Combined, the
+small unit and flexibility reduce the emissions by 26 % relative to Case 2.
+When the small unit is instead added to the three main units, the emissions
+are 47.7 kt, and the third main unit is never used.
 
 > **Fig. 7.** Sensitivity of annual CO2 emissions to wind farm size, CO2 and
 > gas price, battery size, injection deficit limit, minimum number of GTs
@@ -692,44 +683,47 @@ three main units instead gives 47.7 kt; the third main unit is never used.
 | Water injection specific energy [@svendsen2023] | 8.8 kWh/m³ | 9.0 kWh/m³ | agrees |
 | CO2 intensity, Norwegian shelf 2023 [@offshorenorge2024] | 3.1 kg/boe | 7.3 kg/boe | lower |
 
-Platform power, wind resource and pump energy agree with the published
-values (Table 4, Fig. 8). The platform power lies within the processing-plant
-power of three real oil platforms and within 20 % of the other references.
-It is below the range of the six modelled platforms of Nguyen et al.
-[@nguyen2013], in which gas compression alone takes 42–56 % of a 22.6–31.1 MW
-demand, compared with 28 % of 20.3 MW here. The ERA5 capacity factor is within 2 % of the 49.8 % expected for
-Hywind Tampen, although that farm uses smaller floating turbines.
+The model results are compared with the published benchmarks in Table 4 and
+Fig. 8. The platform power, the wind resource and the pump energy agree with
+the published values. The platform power lies within the range of
+processing-plant power of three real oil platforms and within 20 % of the
+other references. It is, however, below the range of the six platforms
+modelled by Nguyen et al. [@nguyen2013], in which gas compression alone
+accounts for 42–56 % of a demand of 22.6–31.1 MW, compared with 28 % of 20.3
+MW in the present model. The capacity factor obtained with ERA5 is within 2 %
+of the 49.8 % expected for Hywind Tampen, although that farm uses smaller
+floating turbines.
 
-The strongest check is the CO2 avoided per MWh of wind, because it tests the
-wind, the part-load fuel model, the CO2 factor and the scheduling together.
-When the model keeps two GTs online and only lowers their load, as assumed
-in the Hywind Tampen estimate, it avoids 0.51 t/MWh against the published
-0.52 t/MWh. When a GT may stop in windy hours, as in case 2, it avoids
-0.71 t/MWh, because the no-load fuel of the stopped unit is saved as well.
-The difference shows how much of the benefit of wind depends on operating
-practice rather than on the wind farm itself.
+The CO2 avoided per MWh of wind is the most demanding check, as it tests the
+wind model, the part-load fuel model, the CO2 factor and the scheduling
+together. When the model keeps two GTs online and only reduces their load, as
+assumed in the Hywind Tampen estimate, it avoids 0.51 t/MWh, against the
+published value of 0.52 t/MWh. When a GT may be stopped in windy hours, as in
+Case 2, it avoids 0.71 t/MWh, since the no-load fuel of the stopped unit is
+saved as well. The difference shows to what extent the benefit of wind depends
+on the operating practice rather than on the wind farm itself.
 
 The field data support the fuel and emission model (Fig. 8, right). The
-Gullfaks field centre emits 2.32–2.40 kg CO2 per Sm³ of fuel gas in
-2021–2024, consistent with the 2.34 kg/Sm³ used here. After Hywind Tampen
-started supplying power, fuel gas use fell by 30 % at Gullfaks (2021–2023)
-and by 11 % at Snorre (2021–2024), and Snorre's diesel use fell from 15.6 kt
-to about 3 kt. At Statfjord, which receives no wind power, fuel use was
-unchanged. Production also declined over the period, so not all of the
-reduction can be attributed to the wind farm. The model's CO2 intensity is
-lower than the shelf average and the field values (9–14 kg/boe at Gullfaks
-and Snorre, 55–78 kg/boe at late-life Statfjord), as expected from the
-system boundary: the model covers only power generation on an efficient
-platform at plateau rate, whereas the field values include flaring, diesel,
-gas re-injection compression and the lower production of mature fields.
-The like-for-like checks, the fuel gas factor and the CO2 avoided per MWh,
-agree, which indicates that the difference stems from the boundary and not
-from the power system model.
+Gullfaks field centre emitted 2.32–2.40 kg CO2 per Sm³ of fuel gas in
+2021–2024, which is consistent with the 2.34 kg/Sm³ used here. After Hywind
+Tampen started supplying power, the fuel gas use decreased by 30 % at Gullfaks
+(2021–2023) and by 11 % at Snorre (2021–2024), and the diesel use at Snorre
+fell from 15.6 kt to about 3 kt, whereas the fuel use was unchanged at
+Statfjord, which receives no wind power. Since production also declined over
+the period, not all of the reduction can be attributed to the wind farm. The
+CO2 intensity of the model is lower than the shelf average and the field
+values (9–14 kg/boe at Gullfaks and Snorre, 55–78 kg/boe at the late-life
+Statfjord), as expected from the system boundary: the model covers only power
+generation on an efficient platform at plateau rate, whereas the field values
+include flaring, diesel, gas re-injection compression and the lower production
+of mature fields. The like-for-like checks, i.e. the fuel gas factor and the
+CO2 avoided per MWh, agree, which indicates that the difference originates
+from the boundary and not from the power system model.
 
 > **Fig. 8.** Left: model results divided by published benchmarks (1 =
 > equal; shaded: ±20 %; grey bars: published ranges). Right: CO2 intensity of
 > the Gullfaks, Snorre and Statfjord field centres (grey: GT-powered; teal:
-> receiving Hywind Tampen power) with the model case 1 value (dashed).
+> receiving Hywind Tampen power) with the model Case 1 value (dashed).
 
 ### 3.6 Economic indicators
 
@@ -738,30 +732,31 @@ from the O&M range of floating wind).
 
 | Measure | CO2 avoided [kt/yr] | Fuel value saved [MNOK/yr] | Abatement cost [NOK/t], 7 % / 4 % | Break-even investment [MNOK], fuel / fuel + CO2 |
 |---|---|---|---|---|
-| Wind farm, fixed demand (case 2 vs 1) | 63.0 | 112.8 | 2,180–2,519 / 1,347–1,686 | – |
-| Wind farm with flexibility (case 3 vs 1) | 70.2 | 125.7 | 1,774–2,078 / 1,026–1,330 | – |
-| Flexibility (case 3 vs 2) | 7.2 | 12.9 | −1,799 before implementation cost | 137 / 288 |
-| Battery 4 MW / 4 MWh (case 4 vs 3) | 0.3 | 0.5 | −1,562 before battery cost | 5 / 13 |
+| Wind farm, fixed demand (Case 2 vs 1) | 63.0 | 112.8 | 2,180–2,519 / 1,347–1,686 | – |
+| Wind farm with flexibility (Case 3 vs 1) | 70.2 | 125.7 | 1,774–2,078 / 1,026–1,330 | – |
+| Flexibility (Case 3 vs 2) | 7.2 | 12.9 | −1,799 before implementation cost | 137 / 288 |
+| Battery 4 MW / 4 MWh (Case 4 vs 3) | 0.3 | 0.5 | −1,562 before battery cost | 5 / 13 |
 | Small GT replacing one main GT (flexible) | 9.7 | 17.4 | −1,786 before GT cost | 184 / 391 |
 
-With an investment of 2.5 billion NOK for 30 MW, the wind farm with fixed
-demand avoids CO2 at 2,180–2,519 NOK/t at a 7 % discount rate and
-1,347–1,686 NOK/t at 4 % (Table 5). This is of the same order as the
-abatement cost of the power-from-shore projects most recently approved on
-the Norwegian shelf, just under 2,000 NOK/t [@sodir2025], and close to the
-2,000 NOK/t CO2 price targeted for 2030 [@klimaplan2021]. Scheduling the
-flexible loads lowers the abatement cost of the same wind farm by about
-400 NOK/t, to 1,774–2,078 NOK/t at 7 %, because it avoids 11 % more CO2 and
-saves 11 % more fuel for the same investment.
+The economic indicators are given in Table 5. With an investment of 2.5
+billion NOK for 30 MW, the wind farm with fixed demand avoids CO2 at
+2,180–2,519 NOK/t at a 7 % discount rate and at 1,347–1,686 NOK/t at 4 %.
+These values are of the same order as the abatement cost of the
+power-from-shore projects most recently approved on the Norwegian shelf, just
+under 2,000 NOK/t [@sodir2025], and close to the CO2 price of 2,000 NOK/t
+targeted for 2030 [@klimaplan2021]. Scheduling the flexible loads lowers the
+abatement cost of the same wind farm by about 400 NOK/t, to 1,774–2,078 NOK/t
+at 7 %, since 11 % more CO2 is avoided and 11 % more fuel is saved for the
+same investment.
 
-Flexibility on its own saves money before any implementation cost: the fuel
-saved is worth about 1,800 NOK per tonne of CO2 avoided. An operator could
-spend up to 137 MNOK on control systems and process changes and still break
-even on the fuel saved alone, or 288 MNOK when the avoided CO2 cost is
-included. A 4 MW / 4 MWh battery breaks even only below 5–13 MNOK, which is
-low for an offshore installation of that size. A small GT that replaces one
-main GT breaks even below 184–391 MNOK, before its additional maintenance and
-its 262 starts per year are accounted for.
+Flexibility on its own gives a net saving before any implementation cost, as
+the fuel saved is worth about 1,800 NOK per tonne of CO2 avoided. An operator
+could spend up to 137 MNOK on control systems and process modifications and
+still break even on the fuel saved alone, or up to 288 MNOK when the avoided
+CO2 cost is included. The 4 MW / 4 MWh battery breaks even only at an
+investment below 5–13 MNOK, which is low for an offshore installation of that
+size. A small GT replacing one main GT breaks even below 184–391 MNOK, before
+its additional maintenance and its 262 starts per year are taken into account.
 
 ### 3.7 Weather years
 
@@ -770,252 +765,311 @@ its 262 starts per year are accounted for.
 | | Mean | Range | 2023 |
 |---|---|---|---|
 | Wind capacity factor | 54.2 % | 50.3–59.8 % | 50.9 % |
-| CO2 reduction, case 2 vs 1 | 51.8 % | 48.5–55.6 % | 49.4 % |
-| CO2 reduction, case 3 vs 1 | 57.1 % | 54.5–60.3 % | 55.0 % |
-| Flexibility benefit, case 2 − 3 | 6.8 kt (11.0 %) | 5.9–7.7 kt (10.5–11.7 %) | 7.2 kt (11.1 %) |
-| Hours with two GTs, case 2 / case 3 | | 1,082–1,889 / 4–66 | 1,702 / 28 |
-| Battery benefit, case 3 − 4 | 0.35 kt | 0.25–0.42 kt | 0.32 kt |
+| CO2 reduction, Case 2 vs 1 | 51.8 % | 48.5–55.6 % | 49.4 % |
+| CO2 reduction, Case 3 vs 1 | 57.1 % | 54.5–60.3 % | 55.0 % |
+| Flexibility benefit, Case 2 − 3 | 6.8 kt (11.0 %) | 5.9–7.7 kt (10.5–11.7 %) | 7.2 kt (11.1 %) |
+| Hours with two GTs, Case 2 / Case 3 | | 1,082–1,889 / 4–66 | 1,702 / 28 |
+| Battery benefit, Case 3 − 4 | 0.35 kt | 0.25–0.42 kt | 0.32 kt |
 | Maximum injection deficit | | 25.8–59.3 h | 27.5 h |
 
-The weather year changes the benefit of wind more than the benefit of
-flexibility (Table 6, Fig. 9). Over the ten years the capacity factor of the
-wind farm ranges from 50.3 % to 59.8 %, and 2023 is one of the calmer years.
-The reduction with fixed demand (case 2) ranges from 48.5 % to 55.6 %. The
-additional saving from flexibility is remarkably stable at 10.5–11.7 % of
-case 2 emissions, or 5.9–7.7 kt/yr, and averages 11.0 %, almost exactly the
-2023 value. In absolute terms it is largest in the calm years 2016, 2021 and
-2023, in which a second GT is needed most often with fixed demand, and
+The results for the ten weather years are summarised in Table 6 and Fig. 9.
+The weather year affects the benefit of wind more than the benefit of
+flexibility. Over the ten years, the capacity factor of the wind farm ranges
+from 50.3 % to 59.8 %, and 2023 is one of the calmer years. The reduction with
+fixed demand (Case 2) ranges from 48.5 % to 55.6 %, whereas the additional
+saving from flexibility is remarkably stable at 10.5–11.7 % of the Case 2
+emissions, or 5.9–7.7 kt/yr, with a mean of 11.0 %, almost exactly the 2023
+value. In absolute terms, the saving is largest in the calm years 2016, 2021
+and 2023, in which a second GT is needed most often with fixed demand, and
 smallest in the windy year 2022. Flexibility removes 96–100 % of the hours
-with two GTs online in every year, and no year loses production or leaves
-demand unmet.
+with two GTs online in every year, and in no year is production lost or demand
+left unmet.
 
-The injection deficit varies more between years than the saving does. Its
-maximum ranges from 26 to 59 h, below the 72 h limit in every year, and up
-to 28 h remain to be caught up at the end of a year. In 2016 and 2017, the
-years with the largest deficits, a limit of 24 h still captures 98 % of the
-saving obtained with 72 h (58.4 against 58.3 kt in 2016, 52.7 against
-52.6 kt in 2017). The conclusion that about one day of deferral is enough
-holds for all weather years tested.
+The injection deficit varies more between the years than the saving does. Its
+maximum ranges from 26 to 59 h, which is below the 72 h limit in every year,
+and up to 28 h remain to be caught up at the end of a year. In 2016 and 2017,
+the years with the largest deficits, a limit of 24 h still captures 98 % of
+the saving obtained with 72 h (58.4 against 58.3 kt in 2016 and 52.7 against
+52.6 kt in 2017). The conclusion that about one day of deferral is sufficient
+thus holds for all the weather years tested.
 
-> **Fig. 9.** Flexibility benefit (case 2 − case 3, bars) and wind capacity
+> **Fig. 9.** Flexibility benefit (Case 2 − Case 3, bars) and wind capacity
 > factor (line) for the weather years 2014–2023.
 
 ## 4 Discussion
 
+The results presented above show that the benefit of flexible scheduling is
+obtained through the unit commitment of the GTs. This mechanism is discussed
+in Section 4.1, and the results are compared with earlier studies in Section
+4.2. The practical implementation, the robustness of the conclusions and the
+limitations of the study are discussed in Sections 4.3–4.5.
+
 ### 4.1 Why load flexibility works
 
-Flexible demand saves fuel through unit commitment, not through energy
-shifting. A GT held at low load for reserve still burns a large share of its
-full-load fuel, so the costly hours are those in which the wind is just too
-weak for one turbine to carry the load with 5 MW in reserve. Deferring
-injection in those hours keeps the second turbine off. Three results of
-Section 3 follow from this. Most of the saving comes from the 1,674 avoided
-hours with two GTs online. About one day of deficit capacity captures almost
-all of it, since these hours come in short spells between windy periods. And
-the saving largely disappears under rules that keep two GTs online anyway.
+Flexible demand saves fuel through the unit commitment of the GTs rather than
+through energy shifting. A GT held at low load for reserve still burns a large
+share of its full-load fuel, and the costly hours are therefore those in which
+the wind is just too weak for one turbine to carry the load with 5 MW in
+reserve. Deferring injection in these hours keeps the second turbine off.
+Three of the results of Section 3 follow from this mechanism: most of the
+saving comes from the 1,674 avoided hours with two GTs online; about one day
+of deficit capacity captures almost all of it, since these hours occur in
+short spells between windy periods; and the saving largely disappears under
+operating rules that keep two GTs online in any case.
 
-Shifting energy alone does little. Curtailment falls by only 13 %: one GT
-must stay online, and a 30 MW farm often produces more than the platform can
-use even with injection at full rate. The same reason explains why the value
-of flexibility does not grow with the wind farm. A larger farm covers the
-demand more often, so a second GT is needed in fewer hours, and the extra
-wind in windy hours cannot be absorbed. Flexibility is worth most when the
-wind farm is of the same order as the platform demand, as in the base case
-and at Hywind Tampen.
+Energy shifting alone has a small effect. The curtailment decreases by only 13
+%, since one GT must remain online and a 30 MW farm often produces more power
+than the platform can use, even with injection at full rate. For the same
+reason, the value of flexibility does not increase with the size of the wind
+farm: a larger farm covers the demand more often, so that a second GT is
+needed in fewer hours, and the additional wind in windy hours cannot be
+absorbed. Flexibility is thus most valuable when the wind farm capacity is of
+the same order as the platform demand, as in the base case and at Hywind
+Tampen.
 
-The small effect of the battery in case 4 has the same cause. With one GT
-always online, a battery cannot remove the main remaining loss, a turbine
-idling near minimum load. The large saving (38.7 kt, −32 %) appears only
-when the battery, or grid-forming wind turbines, can replace the last running
-GT. Svendsen [@svendsen2022] found the same for a battery that provides
-reserve. What the present results add is that process flexibility gives much
-of this benefit without new equipment, because both measures reduce the
-number of GTs that must be online.
+The small effect of the battery in Case 4 has the same cause. With one GT
+always online, a battery cannot remove the main remaining loss, which is a
+turbine idling near minimum load. The large saving (38.7 kt, −32 %) is
+obtained only when the battery, or grid-forming wind turbines, can replace the
+last running GT. Svendsen [@svendsen2022] found the same for a battery
+providing reserve. The present results show in addition that process
+flexibility gives much of this benefit without new equipment, since both
+measures reduce the number of GTs that must be online.
 
-A small GT works on a different part of the loss. It does not reduce the
-number of running units; it reduces the no-load fuel of the one that runs.
-That is why its saving adds almost fully to that of flexibility (Section 3.4).
-A retrofit could proceed in stages: use the flexibility of the existing
-process first, at no investment, and consider replacing one main GT by a
-smaller unit at its next major overhaul, if the small unit tolerates about
-260 starts a year.
+A small GT acts on a different part of the loss: it does not reduce the number
+of running units, but the no-load fuel of the unit that runs. Its saving
+therefore adds almost fully to that of flexibility (Section 3.4). A retrofit
+could thus proceed in stages, by first using the flexibility of the existing
+process at no investment, and then considering the replacement of one main GT
+by a smaller unit at its next major overhaul, provided that the small unit
+tolerates about 260 starts a year.
 
 ### 4.2 Comparison with earlier studies
 
 Most studies of wind-powered platforms report the benefit of wind at fixed
-demand, which is case 2 here. That understates what the same wind farm can
-do: with fixed demand, emissions are 12 % higher than when the platform
-schedules its flexible loads. The CO2 avoided per MWh of wind, the usual
-metric for wind integration, is 0.71 t/MWh in case 2, 0.74 t/MWh in case 3,
-and 0.51 t/MWh if two GTs are kept online. Values reported for different
-platforms can only be compared if the GT operating practice behind them is
-stated.
+demand, which corresponds to Case 2 in the present study. This understates the
+potential of the same wind farm, as the emissions with fixed demand are 12 %
+higher than when the platform schedules its flexible loads. The CO2 avoided
+per MWh of wind, which is the usual metric for wind integration, is 0.71 t/MWh
+in Case 2, 0.74 t/MWh in Case 3 and 0.51 t/MWh if two GTs are kept online.
+Values reported for different platforms can therefore only be compared if the
+GT operating practice behind them is stated.
 
-The economics also differ from those of wind. Riboldi and Nord
-[@riboldi2018] found that integrating wind pays only with favourable gas and
-CO2 prices. Flexibility needs no investment in power generation, its schedule
-does not depend on prices, and the fuel it saves is worth about 1,800 NOK per
-tonne of CO2 avoided at the base-case gas price alone. It pays without any
-carbon price, which matters in regions where emissions are not priced. The
-wind farm, by comparison, needs about 1,800–2,500 NOK/t at a 7 % discount
-rate to break even, the same order as power from shore
-[@sodir2020; @sodir2025]; flexibility lowers this by about 400 NOK/t.
+The economic performance of flexibility also differs from that of wind
+integration. Riboldi and Nord [@riboldi2018] found that integrating wind is
+profitable only with favourable gas and CO2 prices. Flexibility, in contrast,
+requires no investment in power generation, its schedule does not depend on
+prices, and the fuel it saves is worth about 1,800 NOK per tonne of CO2
+avoided at the base-case gas price alone. It is thus profitable without any
+carbon price, which is relevant in regions where emissions are not priced. The
+wind farm, by comparison, requires about 1,800–2,500 NOK/t at a 7 % discount
+rate to break even, which is of the same order as power from shore
+[@sodir2020; @sodir2025], and flexibility lowers this value by about 400
+NOK/t.
 
-The comparison with onshore demand response is less direct than it may seem.
-Industrial studies respond to electricity prices
-[@zhang_grossmann2016; @golmohamadi2022]. On an off-grid platform the value of
-a load shift comes from discrete decisions of the platform's own power
-plant, whether a GT must start or can stop. The value therefore depends on
-the state of the system hour by hour, and a model of energy shifting alone,
-without unit commitment, would miss most of it.
+The comparison with onshore demand response is less direct than it may appear.
+Industrial studies consider the response to electricity prices
+[@zhang_grossmann2016; @golmohamadi2022], whereas on an off-grid platform the
+value of a load shift arises from discrete decisions of the platform's own
+power plant, i.e. whether a GT must be started or can be stopped. This value
+depends on the state of the system hour by hour, and a model of energy
+shifting alone, without unit commitment, would not capture most of it.
 
 ### 4.3 Practical implementation
 
-For operators, the first point is that this flexibility already exists on
-most oil platforms with water injection. Using it needs no new equipment, but
-it does need a power management system that coordinates injection with the
-GTs and a wind forecast; today these are usually controlled separately.
+This flexibility already exists on most oil platforms with water injection.
+Its use requires no new equipment, but it requires a power management system
+that coordinates the injection with the GTs and a wind forecast, whereas these
+are usually controlled separately today.
 
-The reservoir requirement is modest. About 24 h of deferral, averaging 9.0 h,
-is short compared with the months over which voidage replacement is normally
-managed. It still has to be confirmed for each field. A reservoir close to
-its bubble point, for example, may not accept even short pressure drops.
+The requirement on the reservoir is modest. A deferral of about 24 h, with an
+average of 9.0 h, is short compared with the months over which voidage
+replacement is normally managed. It must nevertheless be confirmed for each
+field, since a reservoir close to its bubble point, for example, may not
+accept even short pressure drops.
 
-The schedule also changes the duty of the injection pumps. In case 3 the
-number of running pumps changes about 730 times a year, roughly two starts
-per day, and the model does not penalise this. A start cost or a minimum run
-time would probably cost little of the saving, because the deficit limit is
-rarely reached; this has not been tested.
+The schedule also changes the duty of the injection pumps. In Case 3, the
+number of running pumps changes about 730 times a year, i.e. roughly two
+starts per day, and this is not penalised in the model. A start cost or a
+minimum run time would probably reduce the saving only slightly, since the
+deficit limit is rarely reached, but this has not been tested.
 
-Operating practice deserves at least as much attention as hardware. How many
-GTs must be online, and what counts as reserve, affects emissions more than
-any price or the battery size. Rules that keep two GTs online for redundancy
-raise emissions by 40 % with fixed demand and by 53 % with flexible demand,
-and they remove most of the value of flexibility. Such rules exist for good
-reasons of safety and regularity. Changing them requires a technical case,
-for instance grid-forming batteries that can provide reserve and stability
-without a running GT, and that is the logical next step after demand
-flexibility.
+Operating practice deserves at least as much attention as hardware. The number
+of GTs that must be online, and the definition of reserve, affect the
+emissions more than any price or the battery size. Rules that keep two GTs
+online for redundancy increase the emissions by 40 % with fixed demand and by
+53 % with flexible demand, and they remove most of the value of flexibility.
+Such rules exist for good reasons of safety and regularity, and changing them
+requires a technical justification, for instance grid-forming batteries that
+can provide reserve and stability without a running GT. This is the logical
+next step after demand flexibility.
 
-The approach should transfer to other installations, with caveats. A
-platform gains most when it has a large deferrable consumer, an average
-demand close to the capacity of one GT minus the reserve, and a wind supply
-of the same order as its demand. On other installation types, gas export
-compression, electric heating and the regeneration of glycol or other
-process chemicals could be deferrable, but only where buffer storage such as
-line pack or tank volume exists.
+The approach should be transferable to other installations, with some
+reservations. A platform gains most when it has a large deferrable consumer,
+an average demand close to the capacity of one GT minus the reserve, and a
+wind supply of the same order as its demand. On other types of installations,
+gas export compression, electric heating and the regeneration of glycol or
+other process chemicals could be deferrable, but only where buffer storage
+such as line pack or tank volume is available.
 
 ### 4.4 Robustness of the conclusions
 
-Not every assumption was varied, so it helps to trace how the untested ones
-act through the mechanism above. What decides the saving is the number of
-hours in which, at fixed demand, the platform runs one GT more than its load
-requires. That number rises with the reserve requirement, with the demand
-relative to the capacity of one GT, and with the time the wind spends just
-below the demand. A reserve larger than 5 MW, or a platform whose demand is
-closer to one GT's rating, should make flexibility more valuable. Much spare
-GT capacity, or a wind farm far larger than the demand, should make it less
-valuable; the wind farm sensitivity shows the latter.
+Not all assumptions were varied in the sensitivity analysis, and the effect of
+the untested ones can be traced through the mechanism described above. The
+saving is determined by the number of hours in which, at fixed demand, the
+platform runs one GT more than its load requires. This number increases with
+the reserve requirement, with the demand relative to the capacity of one GT
+and with the time that the wind spends just below the demand. A reserve larger
+than 5 MW, or a platform whose demand is closer to the rating of one GT,
+should thus increase the value of flexibility. A large spare GT capacity, or a
+wind farm much larger than the demand, should reduce it, as the wind farm
+sensitivity shows for the latter.
 
-The flexible load matters less than its size suggests. Injection is cut by
-stopping whole pumps, so the assumed minimum pump flow changes the cost of
-running one pump at low rate but hardly the saving. The injection target
-matters more. A lower target leaves more room for catching up; at a 100 %
-target, deferred injection could never be caught up and the flexibility
-would vanish. The heat balance never bound in the base cases, since the waste
-heat of the running GT always covered the 3 MW demand. A platform with a
-larger heat demand, or one that relies on the heat of the GTs to be stopped,
-would save less unless its heat can be scheduled too.
+The assumptions on the flexible load have less effect than might be expected.
+Since injection is reduced by stopping whole pumps, the assumed minimum pump
+flow changes the cost of running one pump at low rate but hardly affects the
+saving. The injection target has a larger effect: a lower target leaves more
+room for catching up, and at a target of 100 % deferred injection could never
+be caught up and the flexibility would vanish. The heat balance was never
+binding in the base cases, since the waste heat of the running GT always
+covered the heat demand of 3 MW. A platform with a larger heat demand, or one
+that relies on the heat of the GTs to be stopped, would save less unless its
+heat demand can be scheduled as well.
 
-That production should never be shed is the most robust result. Lost oil and
-gas are worth about a hundred times more than the fuel saved; no plausible
-change in prices or efficiencies reverses that.
+The result that production should never be shed is the most robust one, since
+the lost oil and gas are worth about a hundred times more than the fuel saved,
+and no plausible change in prices or efficiencies reverses this.
 
 ### 4.5 Limitations and future work
 
-The platform is generic: fluid composition, minimum-flow limits, injection
-target and deficit limit are assumed, although the result is insensitive to
-the deficit limit, the prices and the battery size. The process is
-represented by steady states. Transient compressor behaviour, start-up times
-of pumps and GTs beyond a start cost, and the reservoir response to deferred
-injection are not modelled. The GT part-load curve is a Willans line from
-LEOGO; a real machine's curve, including its emissions at very low load, may
-differ.
+The platform is generic, and the fluid composition, the minimum-flow limits,
+the injection target and the deficit limit were assumed, although the results
+are insensitive to the deficit limit, the prices and the battery size. The
+process is represented by steady states, and the transient compressor
+behaviour, the start-up times of pumps and GTs beyond a start cost, and the
+reservoir response to deferred injection are not modelled. The GT part-load
+curve is a Willans line derived from LEOGO, and the curve of a real machine,
+including its emissions at very low load, may differ.
 
-The scheduler knows the wind a week ahead, so the savings are an upper bound.
-Because the deficit limit is rarely reached, a forecast-based schedule that
-keeps a margin on the deficit should retain most of them, but that remains
-to be shown. The ten weather years cover one site and one platform, without
-power import or export. The economic indicators rest on the cost of a single
-first-of-a-kind floating wind farm and leave out the cost of implementing
-flexibility, the battery or the small GT, for which only break-even values
-are given. The small GT uses the main units' relative part-load curve,
-because its manufacturer publishes only the full-load rating.
+The scheduler knows the wind one week ahead, and the savings are therefore an
+upper bound. Since the deficit limit is rarely reached, a forecast-based
+schedule that keeps a margin on the deficit should retain most of them, but
+this remains to be demonstrated. The ten weather years cover one site and one
+platform, without power import or export. The economic indicators are based on
+the cost of a single first-of-a-kind floating wind farm and exclude the cost
+of implementing flexibility, the battery or the small GT, for which only
+break-even values are given. The small GT uses the relative part-load curve of
+the main units, since its manufacturer publishes only the full-load rating.
 
-The next steps are concrete. Rolling schedules with forecast errors would
-show how much of the saving survives without perfect foresight. Pump start
-costs and a simple reservoir pressure model would test the injection
-schedule against operational limits. Data from a platform with wind supply,
-such as those served by Hywind Tampen, would allow the model to be
-calibrated. Finally, combining load flexibility with grid-forming storage and
-the investment cost of the whole system would show how far an off-grid
-platform can be decarbonised before power from shore is needed.
+Several directions for further work follow from these limitations. Rolling
+schedules with forecast errors would show how much of the saving is retained
+without perfect foresight. Pump start costs and a simple reservoir pressure
+model would test the injection schedule against operational limits. Data from
+a platform with wind supply, such as those served by Hywind Tampen, would
+allow the model to be calibrated. Finally, combining load flexibility with
+grid-forming storage and the investment cost of the whole system would show to
+what extent an off-grid platform can be decarbonised before power from shore
+is required.
 
 ## 5 Conclusions
 
-The electric demand of a generic North Sea oil platform was mapped from a
-process model, the consumers were classified by flexibility, and the
-flexible ones were scheduled together with the gas turbines and a 30 MW wind
-farm, hour by hour, for ten weather years. The main conclusions are:
+The electric demand of a generic North Sea oil platform was mapped with a
+process model, the consumers were classified according to their flexibility,
+and the flexible consumers were scheduled together with the gas turbines and a
+30 MW wind farm, hour by hour, for ten weather years. Four cases were
+investigated in order to separate the effect of the wind farm from that of
+demand flexibility and of a battery, and the model was validated against
+published data for Hywind Tampen and three North Sea field centres.
 
-1. With fixed demand, the wind farm halves the CO2 emissions of the 20 MW
-   platform (−49 %).
-2. Scheduling the flexible consumers cuts emissions by a further 11 %
-   (7.2 kt/yr), without lost production. Across the ten weather years the
-   saving stays between 10.5 % and 11.7 %. GT low-load hours fall by 34 %,
-   and GT starts nearly disappear.
-3. All of the useful flexibility comes from water injection. Shedding
-   production never pays, and about 24 h of deferral is enough.
-4. The saving comes from avoiding a second running GT, not from shifting
-   energy. Rules that keep two GTs online remove most of it; allowing all GTs
-   to stop, with a battery for reserve, would cut emissions by a further
-   third.
-5. A small GT (11.35 MW) replacing one main unit saves another 17 %, and
-   flexibility still saves 11 % with it installed.
-6. Prices and battery size alone change little. Flexibility pays for itself
-   from fuel savings, breaks even for an implementation cost of up to
-   137 MNOK, and lowers the abatement cost of the wind farm from 2,180–2,519
-   to 1,774–2,078 NOK/t.
-7. The model reproduces the CO2 avoided per MWh of wind reported for Hywind
-   Tampen within 2 %, and the fuel gas emission factor observed at Gullfaks.
+With fixed demand, the wind farm halves the CO2 emissions of the 20 MW
+platform (−49 %). Scheduling the flexible consumers reduces the emissions by a
+further 11 % (7.2 kt/yr) without lost production, and the saving remains
+between 10.5 % and 11.7 % across the ten weather years. The GT low-load hours
+decrease by 34 %, and the GT starts nearly disappear. All of the useful
+flexibility is provided by water injection: shedding production is never
+profitable, and a deferral of about 24 h is sufficient. The saving is obtained
+by avoiding the operation of a second GT rather than by shifting energy.
+Operating rules that keep two GTs online therefore remove most of it, whereas
+allowing all GTs to stop, with a battery providing reserve, would reduce the
+emissions by a further third. A small GT (11.35 MW) replacing one main unit
+saves another 17 %, and flexibility still saves 11 % with this unit installed.
 
-Three questions remain open: how much of the saving survives realistic wind
-forecasts, what limits pump starts and reservoir pressure place on the
-injection schedule, and whether grid-forming storage can remove the last
-running GT safely.
+Prices and battery size alone have little effect on the results. Flexibility
+pays for itself through fuel savings, breaks even for an implementation cost
+of up to 137 MNOK and lowers the abatement cost of the wind farm from
+2,180–2,519 to 1,774–2,078 NOK/t. The model reproduces the CO2 avoided per MWh
+of wind reported for Hywind Tampen within 2 %, as well as the fuel gas
+emission factor observed at Gullfaks. Although the exact values would differ
+from one platform to another, it is suggested that the scheduling of topside
+loads is a low-cost measure that should be considered together with any
+integration of wind power on off-grid platforms. Three questions remain open:
+how much of the saving is retained with realistic wind forecasts, which limits
+the pump starts and the reservoir pressure place on the injection schedule,
+and whether grid-forming storage can safely remove the last running GT.
 
-## Declarations
+## Nomenclature
 
-**CRediT authorship contribution statement.** [Author 1]: Conceptualization,
-Methodology, Software, Formal analysis, Writing – original draft. [Author 2]:
-Supervision, Writing – review & editing.
+| Symbol | Description | Unit |
+|---|---|---|
+| *Sets and indices* | | |
+| $t \in T$ | hours of a scheduling window | – |
+| $g \in G$ | gas turbines | – |
+| *Variables* | | |
+| $f_{p,t}$ | production rate, fraction of design | – |
+| $f_{wi,t}$ | water injection rate, fraction of pump capacity | – |
+| $D_t$ | water injection deficit | h of full-rate injection |
+| $u_{g,t}$ | on/off state of gas turbine $g$ | – |
+| $s_{g,t}$ | start-up indicator of gas turbine $g$ | – |
+| $P_{g,t}$ | electric power of gas turbine $g$ | W |
+| $Q_{g,t}$ | fuel energy input of gas turbine $g$ (LHV) | W |
+| $P^{w}_t$, $P^{c}_t$ | wind power used and curtailed | W |
+| $P^{h}_t$ | electric heater power | W |
+| $P^{ch}_t$, $P^{dis}_t$, $E_t$ | battery charge, discharge and stored energy | W, J |
+| $P^{dem}_t$ | platform electric demand | W |
+| *Parameters* | | |
+| $P^{avail}_t$ | available wind farm power | W |
+| $P_{rated}$, $P_{min}$ | rated and minimum stable gas turbine power | W |
+| $\eta_{rated}$ | gas turbine electric efficiency at rated load | – |
+| $a$ | no-load fuel fraction of the Willans line | – |
+| $\phi$ | fraction of gas turbine waste heat recovered | – |
+| $f_{wi}^{target}$ | voidage-replacement target for $f_{wi}$ | – |
+| $D_{max}$ | maximum injection deficit | h |
+| $R$ | spinning reserve requirement | W |
+| $H$ | process heat demand | W |
+| $v_{100}$, $v_{hub}$ | wind speed at 100 m and at hub height | m/s |
+| $\alpha$ | wind shear exponent | – |
 
-**Declaration of competing interest.** The authors declare that they have no
-known competing financial interests or personal relationships that could
-have appeared to influence the work reported in this paper.
+## List of Acronyms
 
-**Declaration of generative AI and AI-assisted technologies in the
-manuscript preparation process.** During the preparation of this work the
-author(s) used [tool name] in order to [purpose]. After using this tool, the
-author(s) reviewed and edited the content as needed and take(s) full
-responsibility for the content of the published article.
+| Acronym | Meaning |
+|---|---|
+| GT | gas turbine |
+| LHV | lower heating value |
+| MILP | mixed-integer linear program |
 
-**Data availability.** The model code, configuration with all parameters and
-sources, and the processed results are available at [repository URL]. ERA5
-data are available from the Copernicus Climate Change Service.
+## Funding
 
-**Acknowledgements.** This work contains modified Copernicus Climate Change
-Service information (2014–2023). [Funding.]
+[Funding.]
+
+## Acknowledgements
+
+This work contains modified Copernicus Climate Change Service information (2014–2023).
+
+## Declaration of generative AI use
+
+During the preparation of this work the author(s) used [tool name] in order to [purpose]. After using this tool, the author(s) reviewed and edited the content as needed and take(s) full responsibility for the content of the published article.
+
+## Data and Code Availability
+
+The model code, configuration with all parameters and sources, and the processed results are available at [repository URL]. ERA5 data are available from the Copernicus Climate Change Service.
+
+## Conflict of interest
+
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+## CRediT authorship contribution statement
+
+[Author 1]: Conceptualization, Methodology, Software, Formal analysis, Writing – original draft. [Author 2]: Supervision, Writing – review & editing.
 
 ## References
 

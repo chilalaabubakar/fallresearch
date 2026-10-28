@@ -19,13 +19,13 @@ wind-powered offshore oil platform**
 
 ## S3 Seasonal pattern
 
-Monthly emissions follow the wind. With fixed demand (case 2) they range
+Monthly emissions follow the wind. With fixed demand (Case 2) they range
 from 3.8 kt in February to 6.4 kt in June and July. The saving from
-flexibility (case 2 − case 3) is present in every month (0.43–0.77 kt). It
+flexibility (Case 2 − Case 3) is present in every month (0.43–0.77 kt). It
 is largest in June, December and July, months in which the wind often falls
 just below the demand and a second GT would otherwise be needed.
 
-> **Fig. S3.** Monthly CO2 emissions for cases 1–4.
+> **Fig. S3.** Monthly CO2 emissions for Cases 1–4.
 
 ## S4 Model parameters
 
