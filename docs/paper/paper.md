@@ -569,7 +569,7 @@ GT runs in only 28 h of the year instead of 1,702 h (Fig. 4, Fig. 5). The
 > and flexible (Case 3) demand. Bottom: production and injection rates.
 
 > **Fig. 5.** Left: duration curves of GT load per running unit (shaded:
-> below 50 %). Right: hours per year with one and with two GTs running.
+> below 50 %). Right: hours per year with two and with one GT running.
 
 The pattern is illustrated by the example week in Fig. 4, which is the week
 with the median fuel saving. Whenever the wind drops, injection is reduced,

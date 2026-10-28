@@ -214,7 +214,7 @@ def fig_gt_load_duration(cfg, sched, out_dir, note=""):
         x = np.linspace(0, 100, len(load))
         a1.plot(x, load, lw=2.2, label=case_label(cfg, k), **style.line_kwargs(k))
     a1.axhspan(0, thr, color=MUTED, alpha=0.07, lw=0)
-    a1.text(98, thr - 2, f"low load (< {thr:.0f} %)", ha="right", va="top", fontsize=style.FONT_SIZE - 3, color=style.TEXT_COLOR)
+    a1.text(98, 30, f"low load (< {thr:.0f} %)", ha="right", va="center", fontsize=style.FONT_SIZE - 3, color=style.TEXT_COLOR)
     a1.set_ylim(0, 100)
     a1.set_xlim(0, 100)
     a1.set_xlabel("Share of hours [%]")
@@ -223,21 +223,32 @@ def fig_gt_load_duration(cfg, sched, out_dir, note=""):
     if note:
         fig.suptitle(note.strip(" ()"), x=0.01, ha="left")
     a1.legend(loc="upper right", frameon=False)
-    # Hours per year with n units running: grouped bars, one bar per case
+    # Hours per year by number of running units: one stacked bar per case, most units first
     n_max = int(max(d["gt_units_on"].max() for d in sched.values()))
-    counts = range(1, n_max + 1)
-    width = 0.8 / len(sched)
-    for i, (k, df) in enumerate(sched.items()):
-        units = df["gt_units_on"].round().astype(int)
-        hours = [int((units == n).sum()) for n in counts]
-        xs = np.array(list(counts)) + (i - (len(sched) - 1) / 2) * width
-        a2.bar(xs, hours, width=width * 0.92, **style.bar_kwargs(k))
-        for xv, h in zip(xs, hours):
-            a2.text(xv, h + 150, f"{h:,}", ha="center", va="bottom", rotation=90, fontsize=style.FONT_SIZE - 4)
-    a2.set_xticks(list(counts), [f"{n} GT" + ("s" if n > 1 else "") for n in counts])
-    a2.set_ylim(0, 8760 * 1.3)
-    a2.set_ylabel("Hours per year [h]")
+    shades = {0: "white", 1: style.PALETTE["neutral"], 2: style.PALETTE["dark"], 3: "black"}
+    keys = list(sched)
+    for i, k in enumerate(keys):
+        units = sched[k]["gt_units_on"].round().astype(int)
+        left = 0
+        for n in range(n_max, -1, -1):
+            h = int((units == n).sum())
+            if h:
+                a2.barh(i, h, left=left, height=0.6, color=shades.get(n, "black"), edgecolor="black", lw=1)
+            left += h
+        top = int((units == n_max).sum())       # label the hours with the most units running
+        inside = top > 2500
+        a2.text(top - 150 if inside else top + 150, i, f"{top:,} h", va="center", ha="right" if inside else "left",
+                color="white" if inside else style.TEXT_COLOR, fontsize=style.FONT_SIZE - 2)
+    a2.set_yticks(range(len(keys)), [f"Case {case_label(cfg, k).split()[0]}" for k in keys])
+    a2.invert_yaxis()
+    a2.set_xlim(0, 8760)
+    a2.set_xticks([0, 2000, 4000, 6000, 8000])
+    a2.set_xlabel("Hours per year [h]")
     a2.set_title("Hours by number of GTs running", loc="left")
+    a2.legend(handles=[plt.Rectangle((0, 0), 1, 1, facecolor=shades.get(n, "black"), edgecolor="black")
+                       for n in range(n_max, 0, -1)],
+              labels=[f"{n} GT" + ("s" if n > 1 else "") + " running" for n in range(n_max, 0, -1)],
+              loc="upper center", bbox_to_anchor=(0.5, -0.19), ncol=n_max, frameon=False)
     return save(fig, out_dir, "fig06_gt_load_duration")
 
 
