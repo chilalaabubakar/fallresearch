@@ -80,6 +80,10 @@ def apply_overrides(cfg, sys_, case_key, wind_W, overrides=None):
         s.wind_reserve_share = float(overrides.pop("wind_reserve_share"))
     if "injection_reserve" in overrides:            # trip injection pumps as reserve
         s.injection_reserve = bool(overrides.pop("injection_reserve"))
+    if "deficit_terminal_share" in overrides:       # value of deficit left at the horizon end
+        share = float(overrides.pop("deficit_terminal_share"))
+        price = s.prices["gas_price"] + s.fuel.co2_factor * s.prices["co2_price"]
+        s.deficit_terminal_cost = share * scheduler.catch_up_fuel(s) * price
     if "demand_scale" in overrides:                 # scale every electric consumer
         k = float(overrides.pop("demand_scale"))
         f = s.flex
@@ -388,29 +392,45 @@ def multi_year_report(cfg, base_by_year, synthetic=False):
 
 
 def _run_forecast_one(task):
-    """task = (case_key, forecast mode, horizon h, schedule path) -> summary row."""
-    case_key, mode, horizon, save_path = task
+    """task = (case_key, forecast mode, horizon h, overrides, schedule path) -> summary row."""
+    case_key, mode, horizon, overrides, save_path = task
     cfg, sys_, wind_W = _W["cfg"], _W["sys"], _W["wind"]
     t0 = time.time()
-    s, opt, wind = apply_overrides(cfg, sys_, case_key, wind_W.values)
+    s, opt, wind = apply_overrides(cfg, sys_, case_key, wind_W.values, overrides)
     df = scheduler.run_forecast(s, opt, wind, forecast=mode, horizon=horizon, index=wind_W.index, verbose=False)
     Path(save_path).parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(save_path, float_format="%.6g")
     row = {"case": case_key, "label": cfg["cases"][case_key]["label"], "forecast": mode,
-           "horizon_h": horizon, **summarize_run(cfg, s, df), "runtime_s": round(time.time() - t0, 1)}
+           "horizon_h": horizon, "overrides": str(overrides or {}), **summarize_run(cfg, s, df), "runtime_s": round(time.time() - t0, 1)}
     print(f"  done: {case_key:<18} {mode:<12} {row['runtime_s']:7.1f} s", flush=True)
     return row
 
 
-def forecast_study(cfg, jobs, hours=None, horizon=24):
-    """Hourly re-planning with persistence vs perfect wind over the horizon, Cases 2 and 3."""
+def forecast_study(cfg, jobs, hours=None, horizon=24, only_new=False):
+    """Hourly re-planning with persistence vs perfect wind over the horizon, Cases 2 and 3.
+
+    With the strict end condition each 24 h plan must repay its injection deficit, which a
+    persistence forecast of calm weather makes impossible; the runs with a terminal value
+    let the deficit carry over, priced at a share of the GT fuel needed to catch it up."""
     sched_dir = results_path(cfg, "schedules")
-    tasks = [(k, mode, horizon, sched_dir / f"schedule_{k}_forecast_{mode}{f'_{hours}h' if hours else ''}.csv")
-             for k in ("wind_fixed", "wind_flex") for mode in ("perfect", "persistence")]
+    sfx = f"_{hours}h" if hours else ""
+    runs = [(k, mode, None) for k in ("wind_fixed", "wind_flex") for mode in ("perfect", "persistence")]
+    runs += [("wind_flex", "persistence", {"deficit_terminal_share": x}) for x in (0.25, 0.5)]
+    runs += [("wind_flex", "perfect", {"deficit_terminal_share": 0.5})]
+    tasks = [(k, mode, horizon, o, sched_dir / f"schedule_{k}_forecast_{mode}"
+              f"{'_tv' + str(o['deficit_terminal_share']) if o else ''}{sfx}.csv") for k, mode, o in runs]
+    out = results_path(cfg, f"cases/forecast_summary{sfx}.csv")
+    old = pd.read_csv(out) if (only_new and out.exists()) else None
+    if old is not None:
+        if "overrides" not in old:
+            old["overrides"] = "{}"
+        have = set(zip(old["case"], old["forecast"], old["overrides"]))
+        tasks = [t for t in tasks if (t[0], t[1], str(t[3] or {})) not in have]
     with ProcessPoolExecutor(max_workers=min(jobs, len(tasks)), initializer=_init_worker,
                              initargs=(False, hours, None, None)) as ex:
         rows = pd.DataFrame(list(ex.map(_run_forecast_one, tasks)))
-    out = results_path(cfg, f"cases/forecast_summary{f'_{hours}h' if hours else ''}.csv")
+    if old is not None:
+        rows = pd.concat([old, rows], ignore_index=True)
     rows.to_csv(out, index=False, float_format="%.4g")
     print(rows[["case", "forecast", "co2_kt", "fuel_MSm3", "gt_starts", "end_deficit_h",
                 "unserved_MWh", "reserve_short_MWh"]].to_string(index=False))
@@ -434,7 +454,7 @@ def main(argv=None):
 
     cfg = load_config()
     if args.forecast:
-        return forecast_study(cfg, args.jobs, args.hours)
+        return forecast_study(cfg, args.jobs, args.hours, only_new=not args.fresh)
     default_year = param(cfg["site"]["year"])
     years = parse_years(args.year) or [default_year]
     results = {}

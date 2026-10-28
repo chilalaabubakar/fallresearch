@@ -90,6 +90,8 @@ class System:
     pump_start_cost: float = 0.0     # NOK per injection pump start (0: starts not modelled)
     wind_reserve_share: float = 0.0  # extra reserve per MW of wind used (loss of wind output)
     injection_reserve: bool = False  # running injection pumps may be tripped to provide reserve
+    deficit_terminal_cost: float | None = None  # NOK per h of deficit left at the horizon end;
+                                     # None: the window must end with no more deficit than it began
 
 
 def build_system(cfg, dp=None):
@@ -190,7 +192,8 @@ def build_model(sys, opt, wind_mw, state):
     m.deficit = pyo.Var(T, bounds=(0, fx.injection.max_deficit))
     m.deficit_balance = pyo.Constraint(T, rule=lambda m, t: m.deficit[t] == prev(
         m.deficit, t, state.deficit) + fx.injection.target_fraction - m.f_wi[t])
-    m.deficit_end = pyo.Constraint(expr=m.deficit[T[-1]] <= state.deficit + 1e-6)
+    if sys.deficit_terminal_cost is None:
+        m.deficit_end = pyo.Constraint(expr=m.deficit[T[-1]] <= state.deficit + 1e-6)
 
     # production deficit (gas platform: line pack of the export pipeline), if configured
     pl = fx.production
@@ -265,7 +268,9 @@ def build_model(sys, opt, wind_mw, state):
         + sys.heater_tiebreak * m.p_heat[t]
         + (sys.pump_start_cost * m.pump_start[t] if sys.pump_start_cost > 0 else 0)
         + (pr["unserved_energy_cost"] * m.unserved[t] + pr["reserve_shortfall_cost"] * m.res_short[t])
-        for t in T))
+        for t in T)
+        + (sys.deficit_terminal_cost * (m.deficit[T[-1]] - state.deficit)
+           if sys.deficit_terminal_cost is not None else 0))
     m.unit_list = unit_list
     return m
 
@@ -405,6 +410,15 @@ def run_forecast(sys, opt, wind_W, forecast="persistence", horizon=24, index=Non
     return df
 
 
+def catch_up_fuel(sys):
+    """Sm3 of fuel to catch up one hour of full-rate injection with GT power at the
+    marginal (Willans) fuel rate of the first unit type."""
+    fx = sys.flex
+    energy_MWh = (fx.injection_curve[1][-1] + fx.seawater_per_injection) / MW
+    gt = next(iter(sys.units.values())).gt
+    return energy_MWh * (1 - gt.no_load_fuel_fraction) / gt.rated_efficiency * MW * SECONDS_PER_HOUR / sys.fuel.lhv
+
+
 def summarize(df, sys):
     """Annual (or period) totals in reporting units."""
     h = SECONDS_PER_HOUR
@@ -423,6 +437,10 @@ def summarize(df, sys):
         "mean_injection_fraction": df["f_wi"].mean(),
         "pump_starts": pump_starts(df["f_wi"], sys.injection_trains, sys.flex.injection.target_fraction),
         "end_deficit_h": df["deficit_h"].iloc[-1],
+        # fuel and CO2 including the injection still owed at the end, caught up with GT power
+        "fuel_deficit_adjusted_MSm3": (df["fuel_Sm3"].sum() + df["deficit_h"].iloc[-1] * catch_up_fuel(sys)) / 1e6,
+        "co2_deficit_adjusted_kt": (df["co2_kg"].sum() + df["deficit_h"].iloc[-1] * catch_up_fuel(sys)
+                                    * sys.fuel.co2_factor) / 1e6,
         "end_prod_deficit_h": df["prod_deficit_h"].iloc[-1],
         "unserved_MWh": df["unserved_W"].sum() / MW,
         "reserve_short_MWh": df["reserve_short_W"].sum() / MW,
