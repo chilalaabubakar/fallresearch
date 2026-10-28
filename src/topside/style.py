@@ -23,12 +23,15 @@ PALETTE = {
     "green_1": "#DDF3DE", "green_2": "#AADCA9", "green_3": "#8BCF8B",
     "red_1": "#F6CFCB", "red_2": "#E9A6A1", "red_strong": "#B64342",
     "neutral": "#CFCECE", "grey": "#767676", "dark": "#4D4D4D", "ink": "#000000",
-    "highlight": "#FFD700", "teal": "#42949E", "violet": "#9A4D8E",
+    "highlight": "#FFD700", "teal": "#42949E", "violet": "#9A4D8E", "orange": "#E69F00",
 }
 
-# Cases: baseline grey, alternative red, proposed method blue (battery variant lighter blue)
-CASE_COLOR = {"gt_only": PALETTE["grey"], "wind_fixed": PALETTE["red_2"],
-              "wind_flex": PALETTE["blue_main"], "wind_flex_battery": PALETTE["blue_secondary"]}
+# Cases: baseline dark grey, alternative red, proposed method dark blue, battery variant orange.
+# Hues are far apart (and differ in lightness) so the four cases stay distinct as thin lines.
+CASE_COLOR = {"gt_only": PALETTE["dark"], "wind_fixed": PALETTE["red_strong"],
+              "wind_flex": PALETTE["blue_main"], "wind_flex_battery": PALETTE["orange"]}
+# Line styles for line plots, so the cases also differ in grayscale print
+CASE_LINESTYLE = {"gt_only": "-", "wind_fixed": "--", "wind_flex": "-", "wind_flex_battery": "-."}
 CASE_HATCH = {"gt_only": "", "wind_fixed": "//", "wind_flex": "", "wind_flex_battery": ".."}
 
 # Consumer flexibility classes
@@ -114,6 +117,11 @@ def finalize_figure(fig, out_dir, name, formats=("png", "pdf")):
         fig.savefig(p, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     return paths[0]
+
+
+def line_kwargs(case):
+    """Colour and line style for one case's line."""
+    return {"color": CASE_COLOR[case], "ls": CASE_LINESTYLE[case]}
 
 
 def bar_kwargs(case):

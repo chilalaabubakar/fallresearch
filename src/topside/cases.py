@@ -247,7 +247,7 @@ def plot_sensitivity(sens, name, out_path, note="", period="yr"):
     fig, ax = plt.subplots(figsize=(7, 4.5))
     for case, g in d.groupby("case", sort=False):
         x = range(len(g))
-        ax.plot(x, g["co2_kt"], marker="o", ms=8, color=CASE_COLOR[case], label=g["label"].iloc[0])
+        ax.plot(x, g["co2_kt"], marker="o", ms=8, label=g["label"].iloc[0], **style.line_kwargs(case))
         ax.set_xticks(list(x), [o.strip("{}").replace("'", "") for o in g["overrides"]],
                       rotation=20, ha="right")
     ax.set_ylabel(f"CO2 emitted [kt/{period}]")
