@@ -219,13 +219,13 @@ def plot_flexibility(table, flex, out_path, lever_labels=None):
     ax1.barh(t["label"], t["design_power_MW"], color=[CLASS_COLORS[c] for c in t["class"]],
              height=0.6)
     for y, (v, s) in enumerate(zip(t["design_power_MW"], t["share_of_total"])):
-        ax1.text(v + 0.15, y, f"{v:.1f} MW ({s:.0%})", va="center", fontsize=style.FONT_SIZE - 3, color=style.PALETTE["grey"])
+        ax1.text(v + 0.15, y, f"{v:.1f} MW ({s:.0%})", va="center", fontsize=style.FONT_SIZE - 3, color=style.TEXT_COLOR)
     ax1.set_xlabel("Electric power at design [MW]")
     ax1.set_title("Demand map by flexibility class", loc="left")
     ax1.set_xlim(0, t["design_power_MW"].max() * 1.35)
     used = list(dict.fromkeys(table["class"]))
     ax1.legend(handles=[plt.Rectangle((0, 0), 1, 1, color=CLASS_COLORS[c]) for c in used],
-               labels=[CLASS_LABELS[c] for c in used], loc="lower right", frameon=False, fontsize=style.FONT_SIZE - 3)
+               labels=[CLASS_LABELS[c] for c in used], loc="upper center", bbox_to_anchor=(0.45, -0.17), ncol=2, frameon=False, fontsize=style.FONT_SIZE - 3)
 
     # Production lever is red where it is sheddable, dark blue where it is flexible (line pack)
     prod_color = CLASS_COLORS["flexible"] if flex.production.max_deficit else CLASS_COLORS["sheddable"]
@@ -235,7 +235,7 @@ def plot_flexibility(table, flex, out_path, lever_labels=None):
         ax2.plot(np.asarray(x) * 100, np.asarray(y) / 1e6, color=color, lw=2, label=label)
     ax2.axvspan(0, flex.production.min_fraction * 100, color=style.PALETTE["grey"], alpha=0.07, lw=0)
     ax2.text(flex.production.min_fraction * 50, 0.3, "below min.\nproduction", ha="center",
-             fontsize=style.FONT_SIZE - 3, color=style.PALETTE["grey"])
+             fontsize=style.FONT_SIZE - 3, color=style.TEXT_COLOR)
     ax2.set_xlabel("Lever position [% of design]")
     ax2.set_ylabel("Electric power [MW]")
     ax2.set_title("Power vs lever position", loc="left")
@@ -246,6 +246,7 @@ def plot_flexibility(table, flex, out_path, lever_labels=None):
         ax.spines[["top", "right"]].set_visible(False)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    style.enforce_min_text_size(fig)
     fig.savefig(out_path, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     return out_path

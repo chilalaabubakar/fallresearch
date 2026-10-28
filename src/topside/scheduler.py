@@ -398,6 +398,7 @@ def plot_schedule(results, out_path, title_note="", lever_names=("Injection", "P
         a.spines[["top", "right"]].set_visible(False)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    style.enforce_min_text_size(fig)
     fig.savefig(out_path, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     return out_path

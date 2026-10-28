@@ -214,7 +214,7 @@ def plot_wind_power(df, installed_W, out_path, title_note=""):
         ax.grid(alpha=0.25, lw=0.5)
         ax.spines[["top", "right"]].set_visible(False)
     ax2.annotate(f"Installed {installed_W / 1e6:.0f} MW", (99, installed_W / 1e6),
-                 ha="right", va="bottom", color=INK_MUTED, fontsize=9)
+                 ha="right", va="bottom", color="black", fontsize=9)
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

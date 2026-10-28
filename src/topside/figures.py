@@ -107,9 +107,9 @@ def fig_system(cfg, dp, out_dir):
     # supply side
     _box(ax, 0.2, 4.1, 2.9, 0.95, f"Wind farm\n{n_wt} × {p_wt:.0f} MW (IEA 15 MW)", pal["blue_secondary"], color="white")
     _box(ax, 0.2, 2.75, 2.9, 0.95, f"Gas turbines\n{n_gt} × {p_gt:.1f} MW (LEOGO)", pal["red_2"])
-    bat_txt = f"Battery (case 4)\n{param(batt['power']):g} MW / {param(batt['energy']):g} MWh"
+    bat_txt = f"Battery (Case 4)\n{param(batt['power']):g} MW / {param(batt['energy']):g} MWh"
     _box(ax, 0.2, 1.4, 2.9, 0.95, bat_txt, pal["green_2"])
-    ax.text(1.65, 5.35, "ERA5 hourly wind, 2023", ha="center", fontsize=style.FONT_SIZE - 4, color=MUTED)
+    ax.text(1.65, 5.35, "ERA5 hourly wind, 2023", ha="center", fontsize=style.FONT_SIZE - 4, color=style.TEXT_COLOR)
     _arrow(ax, 1.65, 5.25, 1.65, 5.05, color=MUTED)
     # bus
     ax.add_patch(plt.Rectangle((3.9, 0.9), 0.16, 4.4, facecolor=INK))
@@ -138,15 +138,15 @@ def fig_system(cfg, dp, out_dir):
     _box(ax, 8.95, 1.05, 2.9, 1.95,
          "Scheduler (MILP)\nhourly, rolling 1-week\nwindows + 24 h look-ahead\n\ndecides: GT on/off and load,\n"
          "wind used, battery,\nproduction $f_p$, injection $f_{wi}$", "white", fs=style.FONT_SIZE - 5)
-    ax.text(10.4, 3.1, "minimise fuel value + CO2 cost\n+ lost production + GT starts",
-            ha="center", va="bottom", fontsize=style.FONT_SIZE - 5, color=MUTED)
+    ax.text(10.4, 0.72, "minimise fuel value + CO2 cost\n+ lost production + GT starts",
+            ha="center", va="top", fontsize=style.FONT_SIZE - 5, color=style.TEXT_COLOR)
     _arrow(ax, 8.95, 2.75, 8.6, ypos["flexible"][0], ls="--", color=pal["blue_main"])
     _arrow(ax, 8.95, 2.45, 8.6, ypos["sheddable"][1], ls="--", color=pal["red_strong"])
     ax.text(8.85, 4.3, "$f_{wi}$", color=pal["blue_main"], fontsize=style.FONT_SIZE - 2)
     ax.text(8.85, 3.05, "$f_p$", color=pal["red_strong"], fontsize=style.FONT_SIZE - 2)
     ax.plot([10.4, 10.4, 3.4], [1.05, 0.85, 0.85], ls="--", lw=1.2, color=MUTED)
     _arrow(ax, 3.4, 0.85, 3.4, 2.75, ls="--", color=MUTED)
-    ax.text(3.3, 1.0, "GT on/off\nand load", fontsize=style.FONT_SIZE - 5, color=MUTED, va="bottom", ha="right")
+    ax.text(3.3, 0.78, "GT on/off and load", fontsize=style.FONT_SIZE - 5, color=style.TEXT_COLOR, va="top", ha="right")
     return save(fig, out_dir, "fig00_system")
 def fig_wind_resource(cfg, wind_W, out_dir, note=""):
     """Monthly capacity factor and duration curve of wind farm power."""
@@ -216,7 +216,7 @@ def fig_gt_load_duration(cfg, sched, out_dir, note=""):
         units = np.sort(df["gt_units_on"].to_numpy())[::-1]
         a2.step(x, units, color=CASE_COLOR[k], lw=2, where="post", label=case_label(cfg, k))
     a1.axhspan(0, thr, color=MUTED, alpha=0.07, lw=0)
-    a1.text(98, thr - 2, f"low load (< {thr:.0f} %)", ha="right", va="top", fontsize=style.FONT_SIZE - 3, color=MUTED)
+    a1.text(98, thr - 2, f"low load (< {thr:.0f} %)", ha="right", va="top", fontsize=style.FONT_SIZE - 3, color=style.TEXT_COLOR)
     a1.set_ylim(0, 100)
     a1.set_xlim(0, 100)
     a1.set_xlabel("Share of hours [%]")
@@ -244,7 +244,7 @@ def fig_monthly_co2(cfg, sched, out_dir, note=""):
     ax.set_xticks(range(1, 13), list("JFMAMJJASOND"))
     ax.set_ylabel("CO2 emitted [kt/month]")
     ax.set_title(f"Monthly CO2 emissions{note}", loc="left", fontsize=style.FONT_SIZE - 1)
-    ax.legend(frameon=False, ncol=2)
+    ax.legend(frameon=False, ncol=2, loc="upper center", bbox_to_anchor=(0.5, -0.12))
     ax.grid(axis="x", visible=False)
     return save(fig, out_dir, "fig08_monthly_co2")
 
@@ -265,11 +265,11 @@ def fig_injection_mechanism(cfg, sched, out_dir, note=""):
                     label="10-90 % of hours")
     a1.plot(mids, stats["mean"] * 100, color=style.PALETTE["blue_main"], marker="o", ms=6, label="Mean")
     a1.axhline(target, color=MUTED, lw=1, ls="--")
-    a1.text(mids.max(), target + 1.5, f"target {target:.0f} %", ha="right", fontsize=style.FONT_SIZE - 3, color=MUTED)
+    a1.text(mids.max(), target + 1.5, f"target {target:.0f} %", ha="right", fontsize=style.FONT_SIZE - 3, color=style.TEXT_COLOR)
     a1.set_xlabel("Wind power available [MW]")
     a1.set_ylabel(f"{names['injection']} [% of capacity]")
     a1.set_ylim(0, 105)
-    a1.set_title(f"{names['injection']} vs available wind (case 3)", loc="left")
+    a1.set_title(f"{names['injection']} vs available wind (Case 3)", loc="left")
     if note:
         fig.suptitle(note.strip(" ()"), x=0.01, ha="left")
     a1.legend(frameon=False, loc="lower right")

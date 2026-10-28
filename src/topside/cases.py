@@ -219,7 +219,7 @@ def plot_base(base, out_path, note="", period="yr"):
         if col == "lost_production_pct" and abs(vals).max() < 0.005:
             ax.set_title(title, loc="left")
             ax.text(0.5, 0.5, "No production lost\nin any case", ha="center", va="center",
-                    transform=ax.transAxes, color=style.PALETTE["dark"])
+                    transform=ax.transAxes, color=style.TEXT_COLOR)
             ax.set_xticks([])
             ax.set_yticks([])
             ax.spines[["left", "bottom"]].set_visible(False)
@@ -287,8 +287,8 @@ def plot_multi_year(summary, out_path, note=""):
     years = d["year"].astype(int).astype(str)
     fig, ax = plt.subplots(figsize=(9, 4.5))
     ax.bar(years, d["flex_benefit_pct"], color=CASE_COLOR["wind_flex"], edgecolor="black", width=0.6,
-           label="Flexibility benefit (case 2 - case 3)")
-    ax.set_ylabel("CO2 saving vs case 2 [%]")
+           label="Flexibility benefit (Case 2 − Case 3)")
+    ax.set_ylabel("CO2 saving vs Case 2 [%]")
     ax.set_ylim(0, max(d["flex_benefit_pct"].max() * 1.3, 1))
     ax2 = ax.twinx()
     ax2.plot(years, d["capacity_factor_pct"], color=style.PALETTE["dark"], marker="o", lw=2,
