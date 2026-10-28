@@ -176,19 +176,14 @@ but the load is unchanged. The difference between Cases 2 and 3 isolates
 the value of demand flexibility, and Case 4 tests whether a small battery
 adds to it.
 
-The base case uses the existing main turbines rather than a new, smaller
-GT, for three reasons. First, wind is being added to existing platforms that
-keep their installed turbines; the five platforms supplied by Hywind Tampen
-are an example [@equinor2023]. Second, load flexibility is an operational
-measure, whereas a new GT is an investment; keeping the fleet fixed isolates
-the value of flexibility. The effect of a smaller unit is quantified
-separately in the sensitivity analysis with an 11.35 MW Solar Turbines
-Mars 100 [@solar_mars100], either replacing one main unit or added to the
-three, with both fixed and flexible demand. Third, the main turbine is a published reference machine with
-a documented part-load curve [@svendsen2023], whereas manufacturers publish
-only full-load ratings for small units. A small unit alone could not carry
-the 20 MW platform with 5 MW of reserve in calm periods, so it is meaningful
-only as part of a mixed fleet.
+The base case keeps the existing main turbines, as on the five platforms
+supplied by Hywind Tampen [@equinor2023], for two reasons: load flexibility is
+an operational measure, whereas a new GT is an investment, so a fixed fleet
+isolates the value of flexibility; and the main turbine is a published
+reference machine with a documented part-load curve [@svendsen2023]. A smaller
+unit, an 11.35 MW Solar Turbines Mars 100 [@solar_mars100], is tested in the
+sensitivity analysis, replacing one main unit or added to the three. Alone it
+could not carry the 20 MW platform with 5 MW of reserve in calm periods.
 
 Process behavior is represented by steady-state operating points with ramp
 limits; transient process dynamics are outside the scope. The model is
@@ -196,9 +191,7 @@ written in Python with NeqSim for thermodynamics and process simulation
 [@neqsim] and Pyomo with the HiGHS solver for optimization
 [@bynum2021; @huangfu2018]. Every parameter is stored in a single
 configuration file with its unit and source; 31 of 109 parameters are marked
-as assumptions because no published value could be found (Table S1). An
-automated test suite checks each model component against hand calculations
-and published values.
+as assumptions because no published value could be found (Table S1). 
 
 > **Fig. 1.** The platform power system. Supply (left) and topside consumers
 > colored by flexibility class (middle) are connected to one AC bus. The
@@ -462,16 +455,8 @@ The results were compared with independent values:
   Directorate [@sodir_factpages], summed over the fields processed at each
   center.
 
-The model components were verified by automated tests before the case
-runs. The water injection pump power from NeqSim matches a hand calculation
-of hydraulic power, the fuel model reproduces the LEOGO fuel coefficients,
-and the piecewise-linear lever curves used by the scheduler match the
-process model at every breakpoint. For the scheduler, the tests check on
-short synthetic wind series that the power and heat balances close in every
-hour, that the consumer limits and ramp rates are respected, that the fuel
-reported equals the GT model applied to the scheduled loads, that a zero
-deficit limit reproduces fixed injection, and that neither flexibility nor
-a battery ever increases fuel use compared with fixed demand.
+The model components were verified by automated tests against hand
+calculations and published values (Supplementary material, S5).
 
 The CO~2~ avoided per MWh of wind is computed as the difference in annual CO~2~
 between Case 1 and a wind case, divided by the wind energy used in that
@@ -556,36 +541,27 @@ filled by the GTs.
 | Fuel value + CO~2~ cost [MNOK/yr] | 484.0 | 245.1 | 217.9 | 216.7 |
 
 The annual results of the four cases are summarized in Table 2 and Fig. 3.
-With GTs only (Case 1), two turbines run in every hour in order to carry the
-average load of 18.8 MW and the reserve of 5 MW, each at about 43 % load. The
-platform burns 54.6 MSm³ of fuel gas and emits 127.7 kt CO~2~ per year, and all
-17,520 GT unit-hours are low-load hours. This result illustrates the reserve
-problem of off-grid platforms: even without wind, the turbines are operated
-far from their best efficiency.
+With GTs only (Case 1), two turbines run in every hour to carry the average
+load of 18.8 MW and the 5 MW reserve, each at about 43 % load, so all 17,520
+GT unit-hours are low-load hours. Even without wind, the reserve keeps the
+turbines far from their best efficiency.
 
 A 30 MW wind farm with fixed demand (Case 2) halves the emissions, to 64.7 kt
-(−49.4 %). Wind covers 54 % of the electricity demand, and one GT is
-sufficient in 7,058 h. Since the demand cannot follow the wind, 44.5 GWh, or
-33 % of the available wind energy, is curtailed, and the mean load of the
-running GTs decreases to 32 % of rating. A second GT is still required in
-1,702 h and is started 149 times.
+(−49.4 %). Wind covers 54 % of the demand, and one GT is sufficient in 7,058
+h. Since the demand cannot follow the wind, 33 % of the available wind energy
+is curtailed, and a second GT is still required in 1,702 h.
 
-Flexible scheduling (Case 3) reduces the CO~2~ emissions by a further 7.2 kt/yr,
-or 11.1 % relative to Case 2, to 57.5 kt, without any loss of production, and
-the fuel use decreases by the same 11 %. The GT running hours fall from 10,462
-to 8,788 unit-h, the low-load unit-hours by 34 % and the number of GT starts
-from 149 to 3. Wind covers 57.6 % of the demand, the curtailment decreases by
-13 % to 38.7 GWh, and the mean load of the running GTs increases to 36 %. The
-combined fuel value and CO~2~ cost is reduced by 27 MNOK/yr, of which 12.9 MNOK
-is the value of the fuel saved.
+Flexible scheduling (Case 3) reduces the CO~2~ emissions by a further 7.2
+kt/yr, or 11.1 % relative to Case 2, without any loss of production. The GT
+running hours fall from 10,462 to 8,788 unit-h, the low-load unit-hours by 34
+% and the GT starts from 149 to 3, and the curtailment decreases by 13 %. The
+combined fuel value and CO~2~ cost is reduced by 27 MNOK/yr, of which 12.9
+MNOK is the value of the fuel saved.
 
-The 4 MW / 4 MWh battery (Case 4) gives an additional reduction of only 0.3
-kt, or 0.6 % relative to Case 3. It removes the remaining starts and the last
-hours with a second GT, but its annual throughput is only 0.8 GWh. As one GT
-must always be online, the battery cannot remove the main remaining loss,
-which is one turbine idling near minimum load whenever the wind covers the
-demand, and the low-load unit-hours even increase slightly, from 5,932 to
-6,242.
+The 4 MW / 4 MWh battery (Case 4) adds only 0.3 kt (0.6 %). It removes the
+last starts and hours with a second GT, but with one GT always online it
+cannot remove the main remaining loss, one turbine idling near minimum load
+whenever the wind covers the demand.
 
 > **Fig. 3.** Annual CO~2~, fuel gas, GT hours below 50 % load and lost
 > production for Cases 1–4.
@@ -1006,42 +982,42 @@ replacement is normally managed. It must nevertheless be confirmed for each
 field, since a reservoir close to its bubble point, for example, may not
 accept even short pressure drops.
 
-The schedule also changes the duty of the injection pumps. In Case 3, the
-number of running pumps changes about 730 times a year, i.e. roughly two
-starts per day, and this is not penalized in the model. A start cost or a
-minimum run time would probably reduce the saving only slightly, since the
-deficit limit is rarely reached, but this has not been tested.
+The schedule also changes the duty of the injection pumps. Without a cost,
+they start 731 times a year in Case 3, about twice a day. A modest start cost
+reduces this to 100–160 starts a year at a loss of only 1–2 % of the saving
+(Section 3.4), so pump wear is not an obstacle; an operator can choose the
+start frequency it accepts.
 
 Operating practice deserves at least as much attention as hardware. The number
 of GTs that must be online, and the definition of reserve, affect the
 emissions more than any price or the battery size. Rules that keep two GTs
 online for redundancy increase the emissions by 40 % with fixed demand and by
-53 % with flexible demand, and they remove most of the value of flexibility.
-Such rules exist for good reasons of safety and regularity, and changing them
-requires a technical justification, for instance grid-forming batteries that
-can provide reserve and stability without a running GT. This is the logical
-next step after demand flexibility.
+53 % with flexible demand and remove most of the value of flexibility. Such
+rules exist for good reasons of safety and regularity. Two measures can relax
+them without new generation. Running injection pumps can serve as reserve,
+since tripping them is fast and costs no production; this alone captures about
+60 % of the benefit of flexibility. Grid-forming batteries that provide
+reserve and stability without a running GT would go further and are the
+logical next step after demand flexibility.
 
-The approach should be transferable to other installations, with some
-reservations. A platform gains most when it has a large deferrable consumer,
-an average demand close to the capacity of one GT minus the reserve, and a
-wind supply of the same order as its demand. On other types of installations,
-gas export compression, electric heating and the regeneration of glycol or
-other process chemicals could be deferrable, but only where buffer storage
-such as line pack or tank volume is available.
+The approach should be transferable to other installations. The demand and
+reserve map (Section 3.5) gives a simple screening rule: a platform gains
+most, about 10–12 %, when its mean demand exceeds the rating of one GT minus
+the reserve, and about 4–5 % otherwise, provided it has a large deferrable
+consumer and a wind supply of the same order as its demand. On other types of
+installations, gas export compression, electric heating and the regeneration
+of glycol or other process chemicals could be deferrable, but only where
+buffer storage such as line pack or tank volume is available.
 
 ### 4.4 Robustness of the conclusions
 
-Not all assumptions were varied in the sensitivity analysis, and the effect of
-the untested ones can be traced through the mechanism described above. The
-saving is determined by the number of hours in which, at fixed demand, the
-platform runs one GT more than its load requires. This number increases with
-the reserve requirement, with the demand relative to the capacity of one GT
-and with the time that the wind spends just below the demand. A reserve larger
-than 5 MW, or a platform whose demand is closer to the rating of one GT,
-should thus increase the value of flexibility. A large spare GT capacity, or a
-wind farm much larger than the demand, should reduce it, as the wind farm
-sensitivity shows for the latter.
+The saving is determined by the number of hours in which, at fixed demand, the
+platform runs one GT more than its load requires. The sensitivity runs confirm
+the expected direction of the main assumptions: a larger reserve, a reserve
+that covers the wind, a higher GT minimum load and a demand above the margin
+of one GT all increase the value of flexibility, whereas a wind farm much
+larger than the demand, or injection pumps that already count as reserve,
+reduce it.
 
 The assumptions on the flexible load have less effect than might be expected.
 Since injection is reduced by stopping whole pumps, the assumed minimum pump

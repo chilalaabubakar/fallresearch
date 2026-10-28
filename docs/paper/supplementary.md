@@ -35,3 +35,16 @@ begins with "ASSUMPTION" are not verified against a published source.
 **Table S1.** Model parameters.
 
 {{TABLE_S1}}
+
+## S5 Model verification
+
+The model components were verified by automated tests before the case
+runs. The water injection pump power from NeqSim matches a hand calculation
+of hydraulic power, the fuel model reproduces the LEOGO fuel coefficients,
+and the piecewise-linear lever curves used by the scheduler match the
+process model at every breakpoint. For the scheduler, the tests check on
+short synthetic wind series that the power and heat balances close in every
+hour, that the consumer limits and ramp rates are respected, that the fuel
+reported equals the GT model applied to the scheduled loads, that a zero
+deficit limit reproduces fixed injection, and that neither flexibility nor
+a battery ever increases fuel use compared with fixed demand.
