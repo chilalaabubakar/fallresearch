@@ -87,3 +87,38 @@ def test_low_load_uses_shared_load(sys_, fixed):
     shared = fixed["gt_total_W"] / cap
     expected = np.where(shared < sys_.low_load_threshold, fixed["gt_units_on"], 0)
     assert np.array_equal(fixed["gt_low_load_units"].to_numpy(), expected)
+
+
+def test_pump_start_cost_reduces_pump_starts(sys_, wind, flexible):
+    import copy
+    s = copy.copy(sys_)
+    s.pump_start_cost = 1e6           # prohibitive: avoid starting pumps
+    costly = run(s, wind, flexible=True)
+    n, f0 = sys_.injection_trains, sys_.flex.injection.target_fraction
+    assert scheduler.pump_starts(costly["f_wi"], n, f0) <= scheduler.pump_starts(flexible["f_wi"], n, f0)
+    assert scheduler.pump_starts([0.85, 0.2, 0.9, 1.0], 3, 0.85) == 2
+
+
+def test_wind_dependent_reserve_needs_more_gt_capacity(sys_, wind, fixed):
+    import copy
+    s = copy.copy(sys_)
+    s.wind_reserve_share = 1.0        # cover the loss of all wind used
+    strict = run(s, wind, flexible=False)
+    assert strict["gt_units_on"].sum() >= fixed["gt_units_on"].sum()
+    cap = strict["gt_units_on"] * sys_.units["main"].gt.rated_power - strict["gt_total_W"]
+    need = sys_.reserve + strict["wind_used_W"]
+    assert (cap + strict["reserve_short_W"] >= need - 1e3).all()
+
+
+def test_persistence_forecast_repeats_current_hour():
+    w = np.array([1.0, 5.0, 9.0, 2.0])
+    assert list(scheduler.persistence_forecast(w, 1, 3)) == [5.0, 5.0, 5.0]
+    assert len(scheduler.persistence_forecast(w, 3, 24)) == 1
+
+
+def test_forecast_run_balances_power(sys_, wind):
+    opt = scheduler.Options(fleet={"main": 3}, label="test", flexible=True)
+    df = scheduler.run_forecast(sys_, opt, wind[:24], horizon=12, verbose=False)
+    supply = df["gt_total_W"] + df["wind_used_W"] + df["battery_dis_W"] - df["battery_ch_W"]
+    assert np.allclose(supply, df["p_demand_W"] + df["p_heater_W"], atol=1e3)
+    assert (df["wind_used_W"] <= df["wind_avail_W"] + 1).all() and len(df) == 24

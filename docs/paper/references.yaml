@@ -90,3 +90,17 @@ npd_abatement:
 sodir2025:
   text: "Norwegian Offshore Directorate. New report about power from shore [news and report]. 2025. https://www.sodir.no/en/whats-new/news/general-news/2025/new-report-about-power-from-shore [accessed DATE]."
   check: true   # confirm 'just under NOK 2000 per tonne' in the report
+sanchez2017:
+  text: "Sanchez S, Tedeschi E, Silva J, Jafar M, Marichalar A. Smart load management of water injection systems in offshore oil and gas platforms integrating wind power. IET Renew Power Gener 2017;11(9):1153–62. https://doi.org/10.1049/iet-rpg.2016.0989."
+alves2019:
+  text: "Alves EF, Sanchez S, Brandão DI, Tedeschi E. Smart load management with energy storage for power quality enhancement in wind-powered oil and gas applications. Energies 2019;12(15):2985. https://doi.org/10.3390/en12152985."
+nilsen2025a:
+  year: "2025"
+  text: "Nilsen MM, Lorentzen RJ, Stordal AS, Leeuwenburgh O, Barros E. Wind-powered reservoir management with application to robust multi-objective optimization. Comput Geosci 2025;29:29. https://doi.org/10.1007/s10596-025-10370-w."
+nilsen2025b:
+  year: "2025"
+  text: "Nilsen MM, Lorentzen RJ, Leeuwenburgh O, Stordal AS, Barros E. Closed-loop workflow for short-term optimization of wind-powered reservoir management. Clean Energy Syst 2025;12:100213."
+  check: true   # author order and journal abbreviation taken from the repository record
+dnvgl2016:
+  text: "DNV GL. WIN WIN – wind-powered water injection: joint industry project, phase 1 results [news release, Offshore Technology Conference]. 2016."
+  check: true   # cite the JIP summary report if it can be obtained

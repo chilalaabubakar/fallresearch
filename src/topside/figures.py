@@ -138,7 +138,7 @@ def fig_system(cfg, dp, out_dir):
     _box(ax, 8.95, 1.05, 2.9, 1.95,
          "Scheduler (MILP)\nhourly, rolling 1-week\nwindows + 24 h look-ahead\n\ndecides: GT on/off and load,\n"
          "wind used, battery,\nproduction $f_p$, injection $f_{wi}$", "white", fs=style.FONT_SIZE - 5)
-    ax.text(10.4, 0.72, "minimise fuel value + CO2 cost\n+ lost production + GT starts",
+    ax.text(10.4, 0.72, "minimize fuel value + CO2 cost\n+ lost production + GT starts",
             ha="center", va="top", fontsize=style.FONT_SIZE - 5, color=style.TEXT_COLOR)
     _arrow(ax, 8.95, 2.75, 8.6, ypos["flexible"][0], ls="--", color=pal["blue_main"])
     _arrow(ax, 8.95, 2.45, 8.6, ypos["sheddable"][1], ls="--", color=pal["red_strong"])

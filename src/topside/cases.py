@@ -66,6 +66,29 @@ def apply_overrides(cfg, sys_, case_key, wind_W, overrides=None):
     for key in ("co2_price", "gas_price"):
         if key in overrides:
             s.prices[key] = float(overrides.pop(key))
+    s.solver = dict(sys_.solver)
+    if "mip_gap" in overrides:
+        s.solver["mip_gap"] = float(overrides.pop("mip_gap"))
+    if "gt_min_load" in overrides:                  # fraction of rated, all units
+        ml = float(overrides.pop("gt_min_load"))
+        s.units = {k: dataclasses.replace(u, gt=dataclasses.replace(u.gt, min_load=ml)) for k, u in sys_.units.items()}
+    if "pump_start_cost" in overrides:              # NOK per injection pump start
+        s.pump_start_cost = float(overrides.pop("pump_start_cost"))
+    if "reserve" in overrides:                      # MW spinning reserve
+        s.reserve = float(overrides.pop("reserve")) * MW
+    if "wind_reserve_share" in overrides:           # extra reserve per MW of wind used
+        s.wind_reserve_share = float(overrides.pop("wind_reserve_share"))
+    if "injection_reserve" in overrides:            # trip injection pumps as reserve
+        s.injection_reserve = bool(overrides.pop("injection_reserve"))
+    if "demand_scale" in overrides:                 # scale every electric consumer
+        k = float(overrides.pop("demand_scale"))
+        f = s.flex
+        s.flex = dataclasses.replace(
+            f, base_load=f.base_load * k,
+            production_curve=(f.production_curve[0], tuple(np.asarray(f.production_curve[1]) * k)),
+            injection_curve=(f.injection_curve[0], tuple(np.asarray(f.injection_curve[1]) * k)),
+            seawater_per_production=f.seawater_per_production * k,
+            seawater_per_injection=f.seawater_per_injection * k)
     if "min_gt_online" in overrides:
         s.min_gt_online = int(overrides.pop("min_gt_online"))
     if "line_pack_hours" in overrides:
@@ -364,6 +387,37 @@ def multi_year_report(cfg, base_by_year, synthetic=False):
     return summary
 
 
+def _run_forecast_one(task):
+    """task = (case_key, forecast mode, horizon h, schedule path) -> summary row."""
+    case_key, mode, horizon, save_path = task
+    cfg, sys_, wind_W = _W["cfg"], _W["sys"], _W["wind"]
+    t0 = time.time()
+    s, opt, wind = apply_overrides(cfg, sys_, case_key, wind_W.values)
+    df = scheduler.run_forecast(s, opt, wind, forecast=mode, horizon=horizon, index=wind_W.index, verbose=False)
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(save_path, float_format="%.6g")
+    row = {"case": case_key, "label": cfg["cases"][case_key]["label"], "forecast": mode,
+           "horizon_h": horizon, **summarize_run(cfg, s, df), "runtime_s": round(time.time() - t0, 1)}
+    print(f"  done: {case_key:<18} {mode:<12} {row['runtime_s']:7.1f} s", flush=True)
+    return row
+
+
+def forecast_study(cfg, jobs, hours=None, horizon=24):
+    """Hourly re-planning with persistence vs perfect wind over the horizon, Cases 2 and 3."""
+    sched_dir = results_path(cfg, "schedules")
+    tasks = [(k, mode, horizon, sched_dir / f"schedule_{k}_forecast_{mode}{f'_{hours}h' if hours else ''}.csv")
+             for k in ("wind_fixed", "wind_flex") for mode in ("perfect", "persistence")]
+    with ProcessPoolExecutor(max_workers=min(jobs, len(tasks)), initializer=_init_worker,
+                             initargs=(False, hours, None, None)) as ex:
+        rows = pd.DataFrame(list(ex.map(_run_forecast_one, tasks)))
+    out = results_path(cfg, f"cases/forecast_summary{f'_{hours}h' if hours else ''}.csv")
+    rows.to_csv(out, index=False, float_format="%.4g")
+    print(rows[["case", "forecast", "co2_kt", "fuel_MSm3", "gt_starts", "end_deficit_h",
+                "unserved_MWh", "reserve_short_MWh"]].to_string(index=False))
+    print(f"Saved {out}")
+    return rows
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Run cases 1-4 and sensitivities")
     ap.add_argument("--sensitivity", nargs="*", default=[],
@@ -374,9 +428,13 @@ def main(argv=None):
     ap.add_argument("--fresh", action="store_true", help="Ignore finished runs saved by an earlier, stopped batch")
     ap.add_argument("--year", nargs="+", default=None,
                     help="Weather year(s) instead of site.year, e.g. 2019 or 2014-2023 (outputs tagged _<year>)")
+    ap.add_argument("--forecast", action="store_true",
+                    help="Hourly re-planning with a persistence wind forecast vs perfect foresight (Cases 2, 3)")
     args = ap.parse_args(argv)
 
     cfg = load_config()
+    if args.forecast:
+        return forecast_study(cfg, args.jobs, args.hours)
     default_year = param(cfg["site"]["year"])
     years = parse_years(args.year) or [default_year]
     results = {}

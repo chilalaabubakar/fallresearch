@@ -246,7 +246,9 @@ cases:
 sensitivity:
   # Each run overrides base-case values. Override keys understood by cases.py:
   #   n_turbines, co2_price [NOK/kg], gas_price [NOK/Sm3], battery [MW, MWh],
-  #   min_gt_online, max_deficit [h], fleet {unit: count}
+  #   min_gt_online, max_deficit [h], fleet {unit: count}, mip_gap [-], gt_min_load [-],
+  #   pump_start_cost [NOK/start], reserve [MW], wind_reserve_share [-], injection_reserve [bool],
+  #   demand_scale [-]
   wind_farm_size:
     cases: [wind_fixed, wind_flex]
     runs: [{n_turbines: 1}, {n_turbines: 2}, {n_turbines: 3}, {n_turbines: 4}]
@@ -279,6 +281,27 @@ sensitivity:
     cases: [wind_fixed, wind_flex]
     runs: [{min_gt_online: 2}]
     source: "Keeps 2 GTs online whatever the wind (redundancy practice); compare CO2 avoided per wind MWh with Hywind Tampen's about 0.52 t/MWh"
+
+  solver_gap:
+    cases: [wind_flex, wind_flex_battery]
+    runs: [{mip_gap: 0.001}]
+    source: "Checks that the battery benefit (about 0.5 %) is not an artefact of the 0.5 % solver gap (modelling choice)"
+  gt_min_load:
+    cases: [wind_fixed, wind_flex]
+    runs: [{gt_min_load: 0.161}, {gt_min_load: 0.30}, {gt_min_load: 0.40}, {gt_min_load: 0.50}]
+    source: "ASSUMPTION: range for dry low-NOx gas turbines, which often cannot keep emissions within limits far below about 40-50 % load; base LEOGO 16 %"
+  pump_start_cost:
+    cases: [wind_flex]
+    runs: [{pump_start_cost: 0}, {pump_start_cost: 1000}, {pump_start_cost: 5000}, {pump_start_cost: 20000}]
+    source: "ASSUMPTION: wear cost per start of a large injection pump; no public value found, range up to 10 times the LEOGO GT start cost"
+  reserve_definition:
+    cases: [wind_fixed, wind_flex]
+    runs: [{wind_reserve_share: 0.5}, {wind_reserve_share: 1.0}, {injection_reserve: true}, {wind_reserve_share: 1.0, injection_reserve: true}]
+    source: "Modelling choice: reserve that also covers 50 % or 100 % of the wind power used, and running injection pumps that may be tripped as reserve"
+  demand_reserve_map:
+    cases: [wind_fixed, wind_flex]
+    runs: [{demand_scale: 0.6, reserve: 3}, {demand_scale: 0.7, reserve: 3}, {demand_scale: 0.8, reserve: 3}, {demand_scale: 0.9, reserve: 3}, {demand_scale: 1.0, reserve: 3}, {demand_scale: 1.1, reserve: 3}, {demand_scale: 1.2, reserve: 3}, {demand_scale: 0.6, reserve: 5}, {demand_scale: 0.7, reserve: 5}, {demand_scale: 0.8, reserve: 5}, {demand_scale: 0.9, reserve: 5}, {demand_scale: 1.0, reserve: 5}, {demand_scale: 1.1, reserve: 5}, {demand_scale: 1.2, reserve: 5}, {demand_scale: 0.6, reserve: 7}, {demand_scale: 0.7, reserve: 7}, {demand_scale: 0.8, reserve: 7}, {demand_scale: 0.9, reserve: 7}, {demand_scale: 1.0, reserve: 7}, {demand_scale: 1.1, reserve: 7}, {demand_scale: 1.2, reserve: 7}, {demand_scale: 0.6, reserve: 9}, {demand_scale: 0.7, reserve: 9}, {demand_scale: 0.8, reserve: 9}, {demand_scale: 0.9, reserve: 9}, {demand_scale: 1.0, reserve: 9}, {demand_scale: 1.1, reserve: 9}, {demand_scale: 1.2, reserve: 9}]
+    source: "Modelling choice: every electric consumer scaled by 0.6-1.2 and spinning reserve 3-9 MW, to map the flexibility benefit against the margin of one GT"
 
 validation:
   # Benchmarks from public sources. Each has a value or a [low, high] range.
