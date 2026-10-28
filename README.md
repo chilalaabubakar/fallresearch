@@ -1,34 +1,45 @@
-# Flexible Topside Power with Offshore Wind
+# Flexible top-side load scheduling on a wind-powered offshore oil platform
 
-**Working title:** *Energy Demand Mapping and Flexible Operation of Offshore
-Topside Systems under Variable Renewable Power Supply*
+Model code, configuration and results for the paper *"Flexible top-side load
+scheduling on a wind-powered offshore oil platform: effects on gas turbine fuel
+use and CO2 emissions"*.
 
-This project models the power system of an offshore oil & gas platform supplied
-by an offshore wind farm plus its existing gas turbines. It tests how scheduling
-flexible topside consumers (turning them down or off) to follow the wind can
-cut fuel gas use and CO2 emissions without large production losses.
+**Author:** Abubakar Juma Chilala, College of Engineering, Carnegie Mellon
+University Africa (achilala@andrew.cmu.edu)
+
+The repository models the power system of a generic North Sea oil platform
+supplied by an offshore wind farm and its existing gas turbines. The electric
+demand of each topside consumer is derived from a NeqSim process model, the
+consumers are classified as must-run, flexible or sheddable, and a mixed-integer
+linear program (Pyomo + HiGHS) schedules production, water injection, gas
+turbine commitment, wind use and an optional battery hour by hour over full
+years of ERA5 wind data.
 
 ## Cases
 1. Gas turbines only (baseline)
 2. Wind + existing gas turbines, fixed demand
 3. Wind + existing gas turbines, flexible scheduling
-   (a small gas turbine, Solar Mars 100, is tested as a fleet sensitivity)
 4. Case 3 + battery storage
 
-## Status
-| Step | Module | Status |
-|---|---|---|
-| 1 | Repo setup, environment, config | done |
-| 2 | `wind.py` – ERA5 → wind farm power | done (ERA5 2023, CF 50.9 %) |
-| 3 | `gas_turbine.py` – load → efficiency → fuel → CO2 | done (parameters to verify) |
-| 4 | `process.py` – NeqSim topside model | done (parameters to verify) |
-| 5 | `consumers.py` – flexibility classes | done (limits to verify) |
-| 6 | `scheduler.py` – Pyomo optimisation | done |
-| 7 | `cases.py` – cases 1–4, sensitivity | done (real ERA5 results in results/cases) |
-| 8 | `validation.py` – benchmarks + field data | done (Gullfaks, Snorre, Statfjord) |
-| 9 | `figures.py` – paper figures and tables | done (results/paper) |
-| 10 | Tanzania site + `compare_sites.py` – North Sea vs Tanzania | done, but not used in the paper (archived draft: docs/tanzania/comparison.md) |
-| 11 | Manuscript for Applied Energy (`docs/paper/`) | draft: paper, supplementary, highlights |
+Sensitivities cover wind farm size, battery size, injection deficit limit, gas
+turbine fleet (including a Solar Mars 100), operating practice, gas turbine
+minimum load, pump start cost, reserve definition, a demand and reserve map of
+28 platforms, and hourly re-planning with a persistence wind forecast.
+
+## Reproducing the results
+```
+pip install -e ".[dev]"
+pytest
+python -m topside.wind --download --year 2014-2023   # needs a Copernicus CDS key
+python -m topside.cases --sensitivity all --year 2014-2023
+python -m topside.cases --forecast
+python -m topside.validation
+python -m topside.economics
+python -m topside.figures                             # figures and tables in results/paper
+python docs/paper/build.py                            # manuscript (Word)
+```
+All parameters are in `config/base_case.yaml` with their unit and source;
+values without a published source are marked `ASSUMPTION`.
 
 ## Sites
 The North Sea case (`config/base_case.yaml`) is the default. A site config lists

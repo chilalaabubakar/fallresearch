@@ -21,3 +21,8 @@ data/processed/*synthetic*
 .idea/
 # Per-run cache of cases.py (lets a stopped batch resume)
 results/**/cases/runs*/
+
+# Private files kept out of the public repository
+CLAUDE.md
+docs/paper/cover_letter.*
+docs/paper/received/

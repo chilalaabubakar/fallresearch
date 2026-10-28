@@ -14,7 +14,8 @@ reference list with hanging indent.
 * {{TABLE_S1}} in the supplementary material becomes the parameter table.
 * Checks: 3-5 highlights of at most 85 characters, abstract of at most 250
   words; prints the word count and the references still marked "check".
-Outputs: paper.docx, supplementary.docx, highlights.docx and cover_letter.docx in docs/paper/.
+Outputs: paper.docx, supplementary.docx and highlights.docx in docs/paper/ (and cover_letter.docx when a
+private cover_letter.md is present).
 """
 
 import copy
