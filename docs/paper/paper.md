@@ -1,6 +1,10 @@
 # Scheduling flexible topside loads to reduce gas turbine emissions on a wind-powered offshore oil platform
 
-[Author names and affiliations]
+[Author 1]^a^, [Author 2]^b^
+
+^a^ *[Affiliation a]*
+
+^b^ *[Affiliation b]*
 
 Corresponding author: [name, e-mail]
 
@@ -29,42 +33,6 @@ reproduces Hywind Tampen's reported CO2 avoided per MWh of wind within 2 %.
 
 **Keywords:** offshore oil and gas platform; offshore wind; demand-side
 flexibility; gas turbine part load; unit commitment; water injection
-
-## Nomenclature
-
-| Symbol | Description | Unit |
-|---|---|---|
-| *Sets and indices* | | |
-| $t \in T$ | hours of a scheduling window | – |
-| $g \in G$ | gas turbines | – |
-| *Variables* | | |
-| $f_{p,t}$ | production rate, fraction of design | – |
-| $f_{wi,t}$ | water injection rate, fraction of pump capacity | – |
-| $D_t$ | water injection deficit | h of full-rate injection |
-| $u_{g,t}$ | on/off state of gas turbine $g$ | – |
-| $s_{g,t}$ | start-up indicator of gas turbine $g$ | – |
-| $P_{g,t}$ | electric power of gas turbine $g$ | W |
-| $Q_{g,t}$ | fuel energy input of gas turbine $g$ (LHV) | W |
-| $P^{w}_t$, $P^{c}_t$ | wind power used and curtailed | W |
-| $P^{h}_t$ | electric heater power | W |
-| $P^{ch}_t$, $P^{dis}_t$, $E_t$ | battery charge, discharge and stored energy | W, J |
-| $P^{dem}_t$ | platform electric demand | W |
-| *Parameters* | | |
-| $P^{avail}_t$ | available wind farm power | W |
-| $P_{rated}$, $P_{min}$ | rated and minimum stable gas turbine power | W |
-| $\eta_{rated}$ | gas turbine electric efficiency at rated load | – |
-| $a$ | no-load fuel fraction of the Willans line | – |
-| $\phi$ | fraction of gas turbine waste heat recovered | – |
-| $f_{wi}^{target}$ | voidage-replacement target for $f_{wi}$ | – |
-| $D_{max}$ | maximum injection deficit | h |
-| $R$ | spinning reserve requirement | W |
-| $H$ | process heat demand | W |
-| $v_{100}$, $v_{hub}$ | wind speed at 100 m and at hub height | m/s |
-| $\alpha$ | wind shear exponent | – |
-| *Abbreviations* | | |
-| GT | gas turbine | |
-| LHV | lower heating value | |
-| MILP | mixed-integer linear program | |
 
 ## 1 Introduction
 
@@ -994,28 +962,69 @@ forecasts, what limits pump starts and reservoir pressure place on the
 injection schedule, and whether grid-forming storage can remove the last
 running GT safely.
 
-## Declarations
+## Nomenclature
 
-**CRediT authorship contribution statement.** [Author 1]: Conceptualization,
-Methodology, Software, Formal analysis, Writing – original draft. [Author 2]:
-Supervision, Writing – review & editing.
+| Symbol | Description | Unit |
+|---|---|---|
+| *Sets and indices* | | |
+| $t \in T$ | hours of a scheduling window | – |
+| $g \in G$ | gas turbines | – |
+| *Variables* | | |
+| $f_{p,t}$ | production rate, fraction of design | – |
+| $f_{wi,t}$ | water injection rate, fraction of pump capacity | – |
+| $D_t$ | water injection deficit | h of full-rate injection |
+| $u_{g,t}$ | on/off state of gas turbine $g$ | – |
+| $s_{g,t}$ | start-up indicator of gas turbine $g$ | – |
+| $P_{g,t}$ | electric power of gas turbine $g$ | W |
+| $Q_{g,t}$ | fuel energy input of gas turbine $g$ (LHV) | W |
+| $P^{w}_t$, $P^{c}_t$ | wind power used and curtailed | W |
+| $P^{h}_t$ | electric heater power | W |
+| $P^{ch}_t$, $P^{dis}_t$, $E_t$ | battery charge, discharge and stored energy | W, J |
+| $P^{dem}_t$ | platform electric demand | W |
+| *Parameters* | | |
+| $P^{avail}_t$ | available wind farm power | W |
+| $P_{rated}$, $P_{min}$ | rated and minimum stable gas turbine power | W |
+| $\eta_{rated}$ | gas turbine electric efficiency at rated load | – |
+| $a$ | no-load fuel fraction of the Willans line | – |
+| $\phi$ | fraction of gas turbine waste heat recovered | – |
+| $f_{wi}^{target}$ | voidage-replacement target for $f_{wi}$ | – |
+| $D_{max}$ | maximum injection deficit | h |
+| $R$ | spinning reserve requirement | W |
+| $H$ | process heat demand | W |
+| $v_{100}$, $v_{hub}$ | wind speed at 100 m and at hub height | m/s |
+| $\alpha$ | wind shear exponent | – |
 
-**Declaration of competing interest.** The authors declare that they have no
-known competing financial interests or personal relationships that could
-have appeared to influence the work reported in this paper.
+## List of Acronyms
 
-**Declaration of generative AI and AI-assisted technologies in the
-manuscript preparation process.** During the preparation of this work the
-author(s) used [tool name] in order to [purpose]. After using this tool, the
-author(s) reviewed and edited the content as needed and take(s) full
-responsibility for the content of the published article.
+| Acronym | Meaning |
+|---|---|
+| GT | gas turbine |
+| LHV | lower heating value |
+| MILP | mixed-integer linear program |
 
-**Data availability.** The model code, configuration with all parameters and
-sources, and the processed results are available at [repository URL]. ERA5
-data are available from the Copernicus Climate Change Service.
+## Funding
 
-**Acknowledgements.** This work contains modified Copernicus Climate Change
-Service information (2014–2023). [Funding.]
+[Funding.]
+
+## Acknowledgements
+
+This work contains modified Copernicus Climate Change Service information (2014–2023).
+
+## Declaration of generative AI use
+
+During the preparation of this work the author(s) used [tool name] in order to [purpose]. After using this tool, the author(s) reviewed and edited the content as needed and take(s) full responsibility for the content of the published article.
+
+## Data and Code Availability
+
+The model code, configuration with all parameters and sources, and the processed results are available at [repository URL]. ERA5 data are available from the Copernicus Climate Change Service.
+
+## Conflict of interest
+
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+## CRediT authorship contribution statement
+
+[Author 1]: Conceptualization, Methodology, Software, Formal analysis, Writing – original draft. [Author 2]: Supervision, Writing – review & editing.
 
 ## References
 

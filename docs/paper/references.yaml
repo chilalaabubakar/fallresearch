@@ -1,5 +1,7 @@
 # Reference list for the paper, in Elsevier numbered style.
-# build.py numbers the entries in order of first citation ([@key] in the text).
+# build.py turns [@key] into author-year citations and lists the entries alphabetically.
+# The short label comes from the authors (override with 'label:'); the year from the key
+# (override with 'year:'), or 'n.d.' for undated web pages.
 # check: true marks an entry whose details were not confirmed against the original.
 
 offshorenorge2024:
@@ -41,6 +43,8 @@ gaertner2020:
 neqsim:
   text: "Solbraa E. NeqSim – Non-Equilibrium Simulator, an open-source library for thermodynamic and process calculations. https://github.com/equinor/neqsim."
 iso6976:
+  label: ISO
+  year: "2016"
   text: "ISO 6976:2016. Natural gas – Calculation of calorific values, density, relative density and Wobbe indices from composition. Geneva: International Organization for Standardization; 2016."
 sharqawy2010:
   text: "Sharqawy MH, Lienhard JH, Zubair SM. Thermophysical properties of seawater: a review of existing correlations and data. Desalin Water Treat 2010;16:354–80. https://doi.org/10.5004/dwt.2010.1079."
