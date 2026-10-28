@@ -304,7 +304,13 @@ SENS_TITLES = {"wind_farm_size": "Wind farm size [turbines]", "co2_price": "CO2 
                "gas_price": "Gas price [NOK/Sm3]", "battery_size": "Battery [MW / MWh]",
                "injection_deficit": "Injection deficit limit [h]",
                "min_gt_online": "Min. GTs online (8 MW battery)", "gt_fleet": "GT fleet",
-               "gt_operation_practice": "Keep 2 GTs online", "line_pack": "Line pack buffer [h]"}
+               "gt_operation_practice": "Keep 2 GTs online", "line_pack": "Line pack buffer [h]",
+               "gt_min_load": "GT minimum load [% of rated]", "pump_start_cost": "Pump start cost [kNOK]",
+               "reserve_definition": "Reserve definition"}
+
+# Panels of the sensitivity overview (prices change CO2 by < 0.1 % and are reported in the text)
+OVERVIEW_GROUPS = ("wind_farm_size", "battery_size", "injection_deficit", "min_gt_online", "gt_fleet",
+                   "gt_operation_practice", "gt_min_load", "pump_start_cost", "reserve_definition", "line_pack")
 
 
 UNSERVED_FLAG_MWH = 1.0   # runs with more unmet demand than this are marked as not feasible
@@ -313,6 +319,16 @@ UNSERVED_FLAG_MWH = 1.0   # runs with more unmet demand than this are marked as 
 def override_label(text):
     """Short x-label for one sensitivity run, e.g. "{'battery': [8, 16]}" -> "8/16"."""
     o = ast.literal_eval(text)
+    if not o:
+        return "base"
+    if "wind_reserve_share" in o or "injection_reserve" in o:
+        parts = [f"+{o['wind_reserve_share']:.0%}\nof wind"] if o.get("wind_reserve_share") else []
+        parts += ["pumps\ntrip"] if o.get("injection_reserve") else []
+        return "\n".join(parts)
+    if "gt_min_load" in o:
+        return f"{o['gt_min_load']:.0%}"
+    if "pump_start_cost" in o:
+        return f"{o['pump_start_cost'] / 1000:g}"
     if "min_gt_online" in o:
         return str(o["min_gt_online"])
     if "fleet" in o:
@@ -322,8 +338,12 @@ def override_label(text):
     return str(next(iter(o.values())))
 
 
-def fig_sensitivity_overview(cfg, sens, out_dir, note=""):
-    groups = list(dict.fromkeys(sens["group"]))
+def fig_sensitivity_overview(cfg, sens, out_dir, note="", base=None):
+    groups = [g for g in dict.fromkeys(sens["group"]) if g in OVERVIEW_GROUPS]
+    if base is not None and "reserve_definition" in groups:       # base case as the first point
+        ref = base[base["case"].isin(sens.loc[sens["group"] == "reserve_definition", "case"])].copy()
+        ref["group"], ref["overrides"] = "reserve_definition", "{}"
+        sens = pd.concat([ref[sens.columns.intersection(ref.columns)], sens], ignore_index=True)
     ncol = 3
     nrow = int(np.ceil(len(groups) / ncol))
     fig, axes = plt.subplots(nrow, ncol, figsize=(11, 3.1 * nrow), constrained_layout=True, squeeze=False)
@@ -357,6 +377,52 @@ def fig_sensitivity_overview(cfg, sens, out_dir, note=""):
     fig.legend(handles.values(), handles.keys(), loc="outside lower center", ncol=3, frameon=False)
     fig.suptitle(f"Sensitivity of annual CO2{note}", x=0.01, ha="left")
     return save(fig, out_dir, "fig09_sensitivity_overview")
+
+
+def demand_reserve_table(cfg, sens, mean_demand_mw):
+    """Flexibility benefit (Case 2 - Case 3) for every demand scale and reserve of the map."""
+    d = sens[sens["group"] == "demand_reserve_map"].copy()
+    o = d["overrides"].map(ast.literal_eval)
+    d["demand_scale"], d["reserve_MW"] = o.map(lambda x: x["demand_scale"]), o.map(lambda x: x["reserve"])
+    t = d.pivot_table(index=["demand_scale", "reserve_MW"], columns="case", values="co2_kt").reset_index()
+    t["mean_demand_MW"] = t["demand_scale"] * mean_demand_mw
+    t["benefit_kt"] = t["wind_fixed"] - t["wind_flex"]
+    t["benefit_pct"] = 100 * t["benefit_kt"] / t["wind_fixed"]
+    rated = cfg["gas_turbine"]["units"]["main"]["rated_power"]["value"] / 1e6
+    t["margin_MW"] = rated - t["reserve_MW"] - t["mean_demand_MW"]   # one GT's headroom over the load
+    return t.rename(columns={"wind_fixed": "co2_case2_kt", "wind_flex": "co2_case3_kt"})
+
+
+def fig_demand_reserve_map(cfg, t, out_dir, note=""):
+    """Left: benefit over demand and reserve. Right: the same points against one GT's margin."""
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 4), constrained_layout=True,
+                                 gridspec_kw={"width_ratios": [1.1, 1]})
+    piv = t.pivot(index="reserve_MW", columns="mean_demand_MW", values="benefit_pct")
+    im = a1.imshow(piv.values, origin="lower", aspect="auto", cmap="Blues",
+                   extent=[-0.5, len(piv.columns) - 0.5, -0.5, len(piv.index) - 0.5], vmin=0)
+    for i, r in enumerate(piv.index):
+        for j, c in enumerate(piv.columns):
+            v = piv.loc[r, c]
+            a1.text(j, i, f"{v:.0f}", ha="center", va="center", fontsize=style.FONT_SIZE - 3,
+                    color="white" if v > 0.6 * np.nanmax(piv.values) else "black")
+    a1.set_xticks(range(len(piv.columns)), [f"{c:.1f}" for c in piv.columns])
+    a1.set_yticks(range(len(piv.index)), [f"{r:g}" for r in piv.index])
+    a1.set_xlabel("Mean platform demand [MW]")
+    a1.set_ylabel("Spinning reserve [MW]")
+    a1.set_title("Flexibility benefit [% of Case 2 CO2]", loc="left")
+    fig.colorbar(im, ax=a1, shrink=0.85, label="[%]")
+    markers = dict(zip(sorted(t["reserve_MW"].unique()), "osD^v"))
+    for r, d in t.groupby("reserve_MW"):
+        a2.plot(d["margin_MW"], d["benefit_pct"], marker=markers[r], ls="-", lw=1.5, ms=7,
+                color=style.PALETTE["blue_main"], alpha=0.35 + 0.65 * (r / t["reserve_MW"].max()),
+                label=f"{r:g} MW reserve")
+    a2.axvline(0, color=style.PALETTE["dark"], lw=1, ls="--")
+    a2.set_xlabel("One GT's margin: rating − reserve − mean demand [MW]")
+    a2.set_ylabel("Flexibility benefit [%]")
+    a2.set_title("Benefit against the margin of one GT", loc="left")
+    a2.set_ylim(0, None)
+    a2.legend(frameon=False, fontsize=style.FONT_SIZE - 3)
+    return save(fig, out_dir, "fig12_demand_reserve_map")
 
 
 # --------------------------------------------------------------------------
@@ -454,7 +520,13 @@ def main(argv=None):
         print("skip fig05-08: no hourly schedules; run `python -m topside.cases` first")
 
     if inp["sensitivity"] is not None:
-        attempt("fig09", fig_sensitivity_overview, cfg, inp["sensitivity"], out, note)
+        attempt("fig09", fig_sensitivity_overview, cfg, inp["sensitivity"], out, note, inp["summary"])
+        if (inp["sensitivity"]["group"] == "demand_reserve_map").any() and inp["summary"] is not None:
+            sched_flex = inp["schedules"].get("wind_fixed")
+            mean_mw = sched_flex["p_demand_W"].mean() / 1e6 if sched_flex is not None else 18.8
+            drm = demand_reserve_table(cfg, inp["sensitivity"], mean_mw)
+            write_table(drm, tables, "T8_demand_reserve_map")
+            attempt("fig12", fig_demand_reserve_map, cfg, drm, out, note)
         write_table(inp["sensitivity"][["group", "case", "overrides", "co2_kt", "fuel_MSm3",
                                         "gt_low_load_unit_hours", "lost_production_pct",
                                         "wind_curtailed_GWh"]], tables, "T3_sensitivity")
