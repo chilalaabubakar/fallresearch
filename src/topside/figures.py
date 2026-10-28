@@ -322,9 +322,11 @@ def override_label(text):
     if not o:
         return "base"
     if "wind_reserve_share" in o or "injection_reserve" in o:
-        parts = [f"+{o['wind_reserve_share']:.0%}\nof wind"] if o.get("wind_reserve_share") else []
-        parts += ["pumps\ntrip"] if o.get("injection_reserve") else []
-        return "\n".join(parts)
+        if o.get("wind_reserve_share") and o.get("injection_reserve"):
+            return "both"
+        if o.get("wind_reserve_share"):
+            return f"+{100 * o['wind_reserve_share']:.0f} %\nwind"
+        return "pump\ntrip"
     if "gt_min_load" in o:
         return f"{o['gt_min_load']:.0%}"
     if "pump_start_cost" in o:
