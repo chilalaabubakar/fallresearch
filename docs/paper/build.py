@@ -32,10 +32,11 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
+from docx.text.paragraph import Paragraph
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-FIGURE_WIDTH = "15cm"
+FIGURE_WIDTH = "16cm"  # = topside.style.PRINT_WIDTH_IN
 # Figure label -> image (results/paper/, made by python -m topside.figures)
 FIGURES = {"1": "fig00_system", "2": "fig02_demand_map", "3": "fig04_cases", "4": "fig05_example_week",
            "5": "fig06_gt_load_duration", "6": "fig07_injection_mechanism",
@@ -334,6 +335,10 @@ def three_line_tables(doc, skip=()):
                     p.paragraph_format.space_after = Pt(1)
                     for r in p.runs:
                         r.font.size = SIZE
+        # Space between the bottom rule and the text that follows
+        nxt = t._tbl.getnext()
+        if nxt is not None and nxt.tag == qn("w:p"):
+            Paragraph(nxt, t._parent).paragraph_format.space_before = Pt(10)
 
 
 def numbered_equations(doc):
@@ -352,9 +357,22 @@ def numbered_equations(doc):
         for tag in ("top", "left", "bottom", "right", "insideH", "insideV"):
             borders.append(_border(tag, "nil"))
         pr.append(borders)
+        # The default table style rules off the first row; an equation table has
+        # only one row, so switch the header formatting off and clear cell borders.
+        look = pr.find(qn("w:tblLook"))
+        if look is not None:
+            look.set(qn("w:firstRow"), "0")
+            look.set(qn("w:firstColumn"), "0")
+            look.set(qn("w:val"), "0000")
         widths = (Cm(1.2), Cm(13.3), Cm(1.5))
+        for col, w in zip(tbl.tblGrid.findall(qn("w:gridCol")), widths):
+            col.set(qn("w:w"), str(int(w.twips)))
         for cell, w in zip(t.rows[0].cells, widths):
             cell.width = w
+            tcb = OxmlElement("w:tcBorders")
+            for tag in ("top", "left", "bottom", "right"):
+                tcb.append(_border(tag, "nil"))
+            cell._tc.get_or_add_tcPr().append(tcb)
         mid, right = t.rows[0].cells[1].paragraphs[0], t.rows[0].cells[2].paragraphs[0]
         mid.alignment = WD_ALIGN_PARAGRAPH.CENTER
         mid._p.append(copy.deepcopy(para))

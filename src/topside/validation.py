@@ -120,15 +120,17 @@ def load_field_data(cfg, path=None):
 def plot_validation(table, fields, model_intensity, out_path, note=""):
     t = table[table["status"] != "n/a"].reset_index(drop=True)
     has_fields = len(fields) > 0
-    fig, axes = plt.subplots(1, 2 if has_fields else 1, figsize=(13 if has_fields else 8, 0.5 * len(t) + 2),
+    fig, axes = plt.subplots(1, 2 if has_fields else 1, figsize=(10 if has_fields else 7, 0.62 * len(t) + 1.5),
+                             gridspec_kw={"width_ratios": [1.5, 1]} if has_fields else None,
                              constrained_layout=True, squeeze=False)
     ax = axes[0, 0]
     if t.empty:
         ax.text(0.5, 0.5, "No published benchmarks configured for this site", ha="center", va="center",
-                transform=ax.transAxes, color=style.PALETTE["dark"])
+                transform=ax.transAxes, color=style.TEXT_COLOR)
         ax.set_axis_off()
         out_path = Path(out_path)
         out_path.parent.mkdir(parents=True, exist_ok=True)
+        style.enforce_min_text_size(fig)
         fig.savefig(out_path, bbox_inches="tight", pad_inches=0.06)
         plt.close(fig)
         return out_path
@@ -141,9 +143,6 @@ def plot_validation(table, fields, model_intensity, out_path, note=""):
             ax.plot([r.benchmark_low / mid, r.benchmark_high / mid], [i, i], color=style.PALETTE["grey"], lw=3, alpha=0.4,
                     solid_capstyle="round")
         ax.plot(r.model_to_benchmark, i, "o", ms=9, color=STATUS_COLOR[r.status])
-        ax.text(r.model_to_benchmark, i - 0.32, f"{r.model:.3g} vs {r.benchmark_low:.3g}"
-                + (f"-{r.benchmark_high:.3g}" if r.benchmark_high > r.benchmark_low else "") + f" {r.unit}",
-                ha="center", fontsize=style.FONT_SIZE - 4, color=style.PALETTE["grey"])
     names = {"platform_power_voldsund": "Platform power (Voldsund)",
              "platform_power_nguyen": "Platform power (Nguyen)",
              "platform_power_castberg": "Platform power (Castberg PDO)",
@@ -155,9 +154,13 @@ def plot_validation(table, fields, model_intensity, out_path, note=""):
              "co2_intensity_ncs_2023": "CO2 intensity (NCS 2023)",
              "co2_intensity_non_electrified": "CO2 intensity (non-electrified)",
              "leogo_water_injection": "Water injection (LEOGO)"}
-    ax.set_yticks(range(len(t)), [names.get(b, b.replace("_", " ")) for b in t["benchmark"]])
-    ax.set_ylim(len(t) - 0.5, -1.0)
-    ax.set_xlabel("Model / benchmark (1 = equal; shaded = within ±20 %; grey bar = published range)")
+    # Values go on a second tick-label line, so no annotation can collide with the points
+    values = [f"{r.model:.3g} vs {r.benchmark_low:.3g}"
+              + (f"–{r.benchmark_high:.3g}" if r.benchmark_high > r.benchmark_low else "")
+              + (f" {r.unit}" if str(r.unit) not in ("-", "", "nan") else "") for r in t.itertuples()]
+    ax.set_yticks(range(len(t)), [f"{names.get(b, b.replace('_', ' '))}\n{v}" for b, v in zip(t["benchmark"], values)])
+    ax.set_ylim(len(t) - 0.5, -0.5)
+    ax.set_xlabel("Model / benchmark [–]")
     ax.set_title(f"Model vs published benchmarks{note}", loc="left")
     ax.spines[["top", "right"]].set_visible(False)
 
@@ -167,14 +170,15 @@ def plot_validation(table, fields, model_intensity, out_path, note=""):
         colors = [style.PALETTE["teal"] if str(e).lower() == "yes" else style.PALETTE["grey"] for e in fields["electrified"]]
         ax2.barh(lab, fields["co2_intensity_kg_per_boe"], color=colors, height=0.6)
         if model_intensity is not None:
-            ax2.axvline(model_intensity, color=style.CASE_COLOR["gt_only"], lw=2.5, ls="--", label=f"Model case 1: {model_intensity:.1f}")
+            ax2.axvline(model_intensity, color=style.CASE_COLOR["gt_only"], lw=2.5, ls="--", label=f"Model Case 1: {model_intensity:.1f}")
         ax2.set_xlabel("CO2 intensity [kg CO2/boe]")
-        ax2.set_title("Field data (grey: GT-powered, teal: electrified)", loc="left")
+        ax2.set_title("Field data", loc="left")
         ax2.invert_yaxis()
-        ax2.legend(frameon=False, fontsize=style.FONT_SIZE - 3)
+        ax2.legend(frameon=False, loc="lower right", fontsize=style.FONT_SIZE - 3)
         ax2.spines[["top", "right"]].set_visible(False)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    style.enforce_min_text_size(fig)
     fig.savefig(out_path, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     return out_path

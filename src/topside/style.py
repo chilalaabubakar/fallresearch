@@ -16,18 +16,22 @@ magnitude); only line plots get tightened axis limits.
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib.text import Text
 
 PALETTE = {
     "blue_main": "#0F4D92", "blue_secondary": "#3775BA",
     "green_1": "#DDF3DE", "green_2": "#AADCA9", "green_3": "#8BCF8B",
     "red_1": "#F6CFCB", "red_2": "#E9A6A1", "red_strong": "#B64342",
-    "neutral": "#CFCECE", "grey": "#767676", "dark": "#4D4D4D", "ink": "#272727",
-    "highlight": "#FFD700", "teal": "#42949E", "violet": "#9A4D8E",
+    "neutral": "#CFCECE", "grey": "#767676", "dark": "#4D4D4D", "ink": "#000000",
+    "highlight": "#FFD700", "teal": "#42949E", "violet": "#9A4D8E", "orange": "#E69F00",
 }
 
-# Cases: baseline grey, alternative red, proposed method blue (battery variant lighter blue)
-CASE_COLOR = {"gt_only": PALETTE["grey"], "wind_fixed": PALETTE["red_2"],
-              "wind_flex": PALETTE["blue_main"], "wind_flex_battery": PALETTE["blue_secondary"]}
+# Cases: baseline dark grey, alternative red, proposed method dark blue, battery variant orange.
+# Hues are far apart (and differ in lightness) so the four cases stay distinct as thin lines.
+CASE_COLOR = {"gt_only": PALETTE["dark"], "wind_fixed": PALETTE["red_strong"],
+              "wind_flex": PALETTE["blue_main"], "wind_flex_battery": PALETTE["orange"]}
+# Line styles for line plots, so the cases also differ in grayscale print
+CASE_LINESTYLE = {"gt_only": "-", "wind_fixed": "--", "wind_flex": "-", "wind_flex_battery": "-."}
 CASE_HATCH = {"gt_only": "", "wind_fixed": "//", "wind_flex": "", "wind_flex_battery": ".."}
 
 # Consumer flexibility classes
@@ -38,6 +42,11 @@ CLASS_COLOR = {"must_run": PALETTE["grey"], "flexible": PALETTE["blue_main"],
 SOURCE_COLOR = {"gt": PALETTE["red_2"], "wind": PALETTE["blue_secondary"], "battery": PALETTE["teal"]}
 
 FONT_SIZE = 14
+TEXT_COLOR = "black"  # all figure text pure black for legibility in print
+# Figures are placed at the manuscript text width (docs/paper/build.py FIGURE_WIDTH);
+# no text may print smaller than MIN_PRINT_PT at that width.
+PRINT_WIDTH_IN = 16 / 2.54
+MIN_PRINT_PT = 8.0
 LINE_WIDTH = 2.5
 
 
@@ -60,6 +69,12 @@ def apply_publication_style(font_size=FONT_SIZE):
         "xtick.labelsize": font_size - 2,
         "ytick.labelsize": font_size - 2,
         "legend.fontsize": font_size - 2,
+        "text.color": TEXT_COLOR,
+        "axes.labelcolor": TEXT_COLOR,
+        "axes.edgecolor": TEXT_COLOR,
+        "xtick.color": TEXT_COLOR,
+        "ytick.color": TEXT_COLOR,
+        "legend.labelcolor": TEXT_COLOR,
         "axes.linewidth": 1.5,
         "xtick.major.width": 1.5,
         "ytick.major.width": 1.5,
@@ -75,8 +90,26 @@ def apply_publication_style(font_size=FONT_SIZE):
     })
 
 
+def _saved_width_in(fig):
+    """Width of the saved image in inches (bbox_inches='tight' crops the canvas)."""
+    fig.canvas.draw()
+    return fig.get_tightbbox(fig.canvas.get_renderer()).width
+
+
+def enforce_min_text_size(fig, print_width_in=PRINT_WIDTH_IN, min_pt=MIN_PRINT_PT):
+    """Enlarge any text that would print below min_pt once the figure is scaled to print width."""
+    for _ in range(3):  # enlarging text widens the tight box, so repeat until stable
+        scale = print_width_in / _saved_width_in(fig)
+        small = [t for t in fig.findobj(Text) if t.get_text().strip() and t.get_fontsize() * scale < min_pt - 0.05]
+        if not small:
+            return
+        for t in small:
+            t.set_fontsize(min_pt / scale)
+
+
 def finalize_figure(fig, out_dir, name, formats=("png", "pdf")):
     """Save in each format (PNG 300 dpi, vector PDF) and close. Returns the first path."""
+    enforce_min_text_size(fig)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     paths = [out_dir / f"{name}.{ext}" for ext in formats]
@@ -84,6 +117,11 @@ def finalize_figure(fig, out_dir, name, formats=("png", "pdf")):
         fig.savefig(p, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     return paths[0]
+
+
+def line_kwargs(case):
+    """Colour and line style for one case's line."""
+    return {"color": CASE_COLOR[case], "ls": CASE_LINESTYLE[case]}
 
 
 def bar_kwargs(case):

@@ -224,10 +224,11 @@ def plot_part_load(gts, fuel, out_path):
     ax1.set_ylim(0, None)
     ax2.set_ylim(0, None)
     ax1.text(min_load * 50, 2, "below\nmin. load", ha="center", va="bottom",
-             color=INK_MUTED, fontsize=style.FONT_SIZE - 3)
-    ax1.legend(loc="lower right", frameon=False, fontsize=style.FONT_SIZE - 2)
+             color=style.TEXT_COLOR, fontsize=style.FONT_SIZE - 3)
+    ax2.legend(loc="upper right", frameon=False, fontsize=style.FONT_SIZE - 2)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    style.enforce_min_text_size(fig)
     fig.savefig(out_path, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     return out_path
