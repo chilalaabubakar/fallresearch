@@ -1,6 +1,6 @@
 # Supplementary material
 
-**Flexible topside load scheduling on a wind-powered offshore oil platform: effects on gas turbine fuel use and CO2 emissions**
+**Flexible top-side load scheduling on a wind-powered offshore oil platform: effects on gas turbine fuel use and CO~2~ emissions**
 
 ## S1 Wind resource
 
@@ -10,7 +10,7 @@
 
 ## S2 Gas turbine part-load performance
 
-> **Fig. S2.** Part-load electric efficiency (left) and specific CO2 emission
+> **Fig. S2.** Part-load electric efficiency (left) and specific CO~2~ emission
 > (right) of the gas turbines. Shaded: below minimum stable load. The main
 > units follow the LEOGO reference turbine. The small unit (Solar Turbines
 > Mars 100, 11.35 MW, 32.9 % ISO efficiency) is used only in the GT fleet
@@ -24,7 +24,7 @@ flexibility (Case 2 − Case 3) is present in every month (0.43–0.77 kt). It
 is largest in June, December and July, months in which the wind often falls
 just below the demand and a second GT would otherwise be needed.
 
-> **Fig. S3.** Monthly CO2 emissions for Cases 1–4.
+> **Fig. S3.** Monthly CO~2~ emissions for Cases 1–4.
 
 ## S4 Model parameters
 

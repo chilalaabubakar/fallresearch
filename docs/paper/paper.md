@@ -1,16 +1,16 @@
-# Flexible topside load scheduling on a wind-powered offshore oil platform: effects on gas turbine fuel use and CO2 emissions
+# Flexible top-side load scheduling on a wind-powered offshore oil platform: effects on gas turbine fuel use and CO~2~ emissions
 
-[Author 1]^a^, [Author 2]^b^
+Abubakar Juma Chilala^a,b^
 
-^a^ *[Affiliation a]*
+^a^ *College of Engineering, Carnegie Mellon University Africa, Carnegie Mellon University, Pittsburgh, PA, 15213, USA*
 
-^b^ *[Affiliation b]*
+^b^
 
-Corresponding author: [name, e-mail]
+Corresponding author: achilala@andrew.cmu.edu
 
 ## Abstract
 
-Gas turbines on offshore oil and gas platforms are a major source of CO2
+Gas turbines on offshore oil and gas platforms are a major source of CO~2~
 emissions, and the fuel saved by wind power integrated into these off-grid
 systems is smaller than expected, since the turbines must remain online at
 inefficient part load to provide reserve. Studies of wind-powered platforms
@@ -21,14 +21,14 @@ mixed-integer linear program was then used to schedule production rate, water
 injection rate, gas turbine commitment, wind use and an optional battery for
 one year at hourly resolution with ERA5 wind data, with postponed water
 injection represented as a virtual storage. For a 20.3 MW platform supplied by
-a 30 MW wind farm, wind with fixed demand reduces the annual CO2 emissions by
+a 30 MW wind farm, wind with fixed demand reduces the annual CO~2~ emissions by
 49 %. Flexible scheduling cuts them by a further 11 % (7.2 kt/yr) without lost
 production, mainly because the operation of a second gas turbine is avoided:
 the hours with two turbines online fall from 1,702 to 28. Over ten weather
 years the benefit ranges from 10.5 to 11.7 %. About 24 h of deferrable
 injection captures it, and a small added gas turbine is complementary, whereas
 operating rules that keep two gas turbines online remove most of the gain. The
-model reproduces the CO2 avoided per MWh of wind reported for Hywind Tampen
+model reproduces the CO~2~ avoided per MWh of wind reported for Hywind Tampen
 within 2 %.
 
 **Keywords:** offshore oil and gas platform; offshore wind; demand-side
@@ -42,7 +42,7 @@ emissions originate from the gas turbines (GTs) that generate power and drive
 compressors on the offshore installations [@norskpetroleum_emissions]. Power
 from shore eliminates them where a cable connection is feasible: the
 electrification projects planned in 2020 had abatement costs below NOK 1,500
-per tonne of CO2 [@sodir2020], and the CO2 cost paid by the operators has
+per tonne of CO~2~ [@sodir2020], and the CO~2~ cost paid by the operators has
 since increased from about NOK 860 to NOK 1,860 per tonne [@sodir_pfs].
 However, many installations are located too far from shore or are too small to
 justify a cable, or they depend on onshore grid capacity that is required by
@@ -57,10 +57,10 @@ power with offshore oil and gas platforms, and Marvik et al. [@marvik2013]
 studied the transient stability of a cluster of North Sea installations
 connected to a wind farm. Riboldi and Nord [@riboldi2018] optimised an
 offshore combined-cycle plant integrating a wind farm and found that its
-economic performance depends on the gas and CO2 prices. The first large
+economic performance depends on the gas and CO~2~ prices. The first large
 application is Hywind Tampen, an 88 MW floating wind farm that supplies five
 platforms and has been in operation since 2023; it is expected to cover about
-35 % of their electricity demand and to avoid about 200 kt of CO2 per year
+35 % of their electricity demand and to avoid about 200 kt of CO~2~ per year
 [@equinor2023].
 
 The fuel saved per MWh of wind is, however, smaller on such a platform than in
@@ -109,7 +109,7 @@ and the need to catch up postponed injection.
 
 To the authors' knowledge, no study of wind-powered platforms has scheduled
 the topside consumers together with the power plant. The goal of this study is
-to help address this gap, by quantifying how much fuel and CO2 a wind-powered
+to help address this gap, by quantifying how much fuel and CO~2~ a wind-powered
 oil platform can save by scheduling its flexible loads, which consumers
 provide the saving and through which mechanism, and which assumptions
 determine its magnitude. Four main steps were followed in this study:
@@ -219,13 +219,13 @@ $\eta_{rated} = 0.347$ and no-load fuel fraction $a = 0.184$ follow from the
 LEOGO fuel coefficients. A running GT burns 18.4 % of its full-load
 fuel before it delivers any power, which is why low-load operation is
 costly: efficiency falls from 34.7 % at full load to 29.3 % at half load and
-17.7 % at minimum load, and the CO2 emitted per MWh of electricity rises from
+17.7 % at minimum load, and the CO~2~ emitted per MWh of electricity rises from
 623 kg to 737 kg and 1,220 kg (Fig. S2). A fraction $\phi = 0.5$ of the fuel
 energy not converted to power is recovered as process heat.
 
 The lower heating value of the fuel gas (38.96 MJ/Sm³) was computed with
 NeqSim to ISO 6976 [@iso6976] from a generic North Sea fuel gas
-composition. CO2 emissions use the Norwegian standard factor of
+composition. CO~2~ emissions use the Norwegian standard factor of
 2.34 kg/Sm³ [@svendsen2023]. A carbon balance of the assumed composition
 gives 2.27 kg/Sm³, and the factor reported for the Gullfaks field centre lies
 between 2.32 and 2.40 kg/Sm³ (Section 3.5).
@@ -333,7 +333,7 @@ $$ \min \sum_{t \in T} \Big[ (c_{gas} + c_{CO2}\,e_{CO2}) \sum_{g} \frac{Q_{g,t}
 
 where $c_{gas} = 4.19$ NOK/Sm³ is the value of fuel gas, which could
 otherwise be sold, $c_{CO2} = 2.0$ NOK/kg is the Norwegian target for the
-total CO2 price in 2030 [@klimaplan2021], $e_{CO2}$ is the emission factor,
+total CO~2~ price in 2030 [@klimaplan2021], $e_{CO2}$ is the emission factor,
 $c_{prod}$ is the hourly value of design production (oil at 4,190 NOK/Sm³
 and gas at the gas price) and $c_{start} = 2,000$ NOK per GT start
 [@svendsen2023]. Unserved energy $P^{u}_t$ and missing reserve $R^{u}_t$ are
@@ -395,7 +395,7 @@ For the base year 2023, Cases 2–4 were rerun with one input changed at a
 time:
 
 * wind farm size (1–4 turbines, 15–60 MW);
-* CO2 price (0.5–3.0 NOK/kg) and gas price (2–8 NOK/Sm³);
+* CO~2~ price (0.5–3.0 NOK/kg) and gas price (2–8 NOK/Sm³);
 * battery size (up to 8 MW / 16 MWh);
 * injection deficit limit (0, 24, 72 and 168 h);
 * minimum number of GTs online (1 or 0, with an 8 MW / 8 MWh battery that
@@ -414,12 +414,12 @@ The results were compared with independent values:
   Johan Castberg development plan [@castberg2017], and the average demand
   implied by Hywind Tampen [@equinor2023];
 * **wind capacity factor:** Hywind Tampen [@equinor2023; @nowind2025];
-* **CO2 avoided per MWh of wind:** Hywind Tampen [@equinor2023];
+* **CO~2~ avoided per MWh of wind:** Hywind Tampen [@equinor2023];
 * **water injection specific energy:** LEOGO [@svendsen2023];
-* **CO2 intensity:** the Norwegian shelf [@offshorenorge2024] and
+* **CO~2~ intensity:** the Norwegian shelf [@offshorenorge2024] and
   non-electrified hubs [@westwood2022];
 * **field data** for the Gullfaks, Snorre and Statfjord field centres,
-  2021–2024: CO2 to air, fuel gas and diesel use from Norskeutslipp
+  2021–2024: CO~2~ to air, fuel gas and diesel use from Norskeutslipp
   [@norskeutslipp] and net production from the Norwegian Offshore
   Directorate [@sodir_factpages], summed over the fields processed at each
   centre.
@@ -435,7 +435,7 @@ reported equals the GT model applied to the scheduled loads, that a zero
 deficit limit reproduces fixed injection, and that neither flexibility nor
 a battery ever increases fuel use compared with fixed demand.
 
-The CO2 avoided per MWh of wind is computed as the difference in annual CO2
+The CO~2~ avoided per MWh of wind is computed as the difference in annual CO~2~
 between Case 1 and a wind case, divided by the wind energy used in that
 case. For the field data, the system boundary was checked by comparing the
 reported oil volumes of the fields assigned to each centre with the
@@ -452,8 +452,8 @@ $$ c_{abate} = \frac{I\,\mathrm{CRF}(r, n) + C_{O\&M} - \Delta C_{fuel}}{\Delta 
 
 where $I$ is the investment, $C_{O\&M}$ the annual operation and maintenance
 cost, $\Delta C_{fuel}$ the annual value of the fuel saved and
-$\Delta m_{CO2}$ the CO2 avoided per year. The CO2 price is not counted as a
-saving, because the abatement cost is what is compared with the CO2 price.
+$\Delta m_{CO2}$ the CO~2~ avoided per year. The CO~2~ price is not counted as a
+saving, because the abatement cost is what is compared with the CO~2~ price.
 The investment is scaled from Hywind Tampen, about NOK 7.4 billion for 88 MW
 before public support [@equinor2023], which gives 84 MNOK/MW for a
 first-of-a-kind floating farm. Operation and maintenance cost 35–97 EUR/kW
@@ -464,7 +464,7 @@ abatement-cost analyses of power from shore [@npd_abatement], and the economic
 life is 20 years. For flexibility, the battery and a small GT, whose
 investment on an existing platform could not be estimated from published
 data, the break-even investment is given instead: the present value over 20
-years of the annual saving, for the fuel saved alone and for fuel plus CO2
+years of the annual saving, for the fuel saved alone and for fuel plus CO~2~
 cost.
 
 ## 3 Results
@@ -506,7 +506,7 @@ filled by the GTs.
 
 | | 1 GTs only | 2 Wind, fixed | 3 Wind, flexible | 4 Flexible + battery |
 |---|---|---|---|---|
-| CO2 [kt/yr] | 127.7 | 64.7 | 57.5 | 57.2 |
+| CO~2~ [kt/yr] | 127.7 | 64.7 | 57.5 | 57.2 |
 | Reduction vs Case 1 | – | 49.4 % | 55.0 % | 55.2 % |
 | Fuel gas [MSm³/yr] | 54.6 | 27.6 | 24.6 | 24.4 |
 | GT running [unit-h/yr] | 17,520 | 10,462 | 8,788 | 8,760 |
@@ -515,12 +515,12 @@ filled by the GTs.
 | Wind used [GWh/yr] | 0 | 89.3 | 95.1 | 95.7 |
 | Wind curtailed [GWh/yr] | 0 | 44.5 | 38.7 | 38.1 |
 | Lost production | 0 | 0 | 0 | 0 |
-| Fuel value + CO2 cost [MNOK/yr] | 484.0 | 245.1 | 217.9 | 216.7 |
+| Fuel value + CO~2~ cost [MNOK/yr] | 484.0 | 245.1 | 217.9 | 216.7 |
 
 The annual results of the four cases are summarised in Table 2 and Fig. 3.
 With GTs only (Case 1), two turbines run in every hour in order to carry the
 average load of 18.8 MW and the reserve of 5 MW, each at about 43 % load. The
-platform burns 54.6 MSm³ of fuel gas and emits 127.7 kt CO2 per year, and all
+platform burns 54.6 MSm³ of fuel gas and emits 127.7 kt CO~2~ per year, and all
 17,520 GT unit-hours are low-load hours. This result illustrates the reserve
 problem of off-grid platforms: even without wind, the turbines are operated
 far from their best efficiency.
@@ -532,13 +532,13 @@ sufficient in 7,058 h. Since the demand cannot follow the wind, 44.5 GWh, or
 running GTs decreases to 32 % of rating. A second GT is still required in
 1,702 h and is started 149 times.
 
-Flexible scheduling (Case 3) reduces the CO2 emissions by a further 7.2 kt/yr,
+Flexible scheduling (Case 3) reduces the CO~2~ emissions by a further 7.2 kt/yr,
 or 11.1 % relative to Case 2, to 57.5 kt, without any loss of production, and
 the fuel use decreases by the same 11 %. The GT running hours fall from 10,462
 to 8,788 unit-h, the low-load unit-hours by 34 % and the number of GT starts
 from 149 to 3. Wind covers 57.6 % of the demand, the curtailment decreases by
 13 % to 38.7 GWh, and the mean load of the running GTs increases to 36 %. The
-combined fuel value and CO2 cost is reduced by 27 MNOK/yr, of which 12.9 MNOK
+combined fuel value and CO~2~ cost is reduced by 27 MNOK/yr, of which 12.9 MNOK
 is the value of the fuel saved.
 
 The 4 MW / 4 MWh battery (Case 4) gives an additional reduction of only 0.3
@@ -549,7 +549,7 @@ which is one turbine idling near minimum load whenever the wind covers the
 demand, and the low-load unit-hours even increase slightly, from 5,932 to
 6,242.
 
-> **Fig. 3.** Annual CO2, fuel gas, GT hours below 50 % load and lost
+> **Fig. 3.** Annual CO~2~, fuel gas, GT hours below 50 % load and lost
 > production for Cases 1–4.
 
 ### 3.3 How flexible scheduling saves fuel
@@ -592,7 +592,7 @@ required occur in spells of a few hours to about a day, between periods of
 sufficient wind.
 
 Production is not reduced in any of the cases. One hour at a rate of 50 %
-would lose oil and gas worth about 1.5 MNOK, whereas the fuel and CO2 saved in
+would lose oil and gas worth about 1.5 MNOK, whereas the fuel and CO~2~ saved in
 that hour are worth a few thousand NOK, and the optimiser therefore always
 prefers to defer injection. The saving from flexibility is obtained in every
 month and ranges from 0.43 to 0.77 kt (Fig. S3). It is largest in June,
@@ -605,12 +605,12 @@ below the demand.
 
 ### 3.4 Sensitivity analysis
 
-**Table 3.** Annual CO2 [kt/yr] in the sensitivity runs.
+**Table 3.** Annual CO~2~ [kt/yr] in the sensitivity runs.
 
 | Varied input | Values | Case 2 | Case 3 | Case 4 |
 |---|---|---|---|---|
 | Wind farm size [turbines] | 1 / 2 / 3 / 4 | 77.6 / 64.7 / 60.2 / 57.6 | 71.9 / 57.5 / 53.4 / 50.9 | |
-| CO2 price [NOK/kg] | 0.5 / 1 / 2 / 3 | | 57.5 / 57.5 / 57.5 / 57.6 | |
+| CO~2~ price [NOK/kg] | 0.5 / 1 / 2 / 3 | | 57.5 / 57.5 / 57.5 / 57.6 | |
 | Gas price [NOK/Sm³] | 2 / 4.19 / 8 | | 57.5 / 57.5 / 57.5 | |
 | Battery [MW / MWh] | 0 / 2/2 / 4/4 / 8/8 / 8/16 | | | 57.5 / 57.3 / 57.2 / 56.9 / 56.4 |
 | Injection deficit limit [h] | 0 / 24 / 72 / 168 | | 64.7 / 57.5 / 57.5 / 57.5 | |
@@ -619,7 +619,7 @@ below the demand.
 | Keep two GTs online | | 90.7 | 87.7 | |
 
 The results of the sensitivity runs are given in Table 3 and Fig. 7. Several
-inputs have little effect. Across CO2 prices of 0.5–3 NOK/kg and gas prices of
+inputs have little effect. Across CO~2~ prices of 0.5–3 NOK/kg and gas prices of
 2–8 NOK/Sm³, the emissions change by less than 0.1 %, since the prices scale
 the cost of every option alike and the cheapest schedule remains the cheapest.
 Deferring injection saves fuel at any price, and shedding production is never
@@ -663,7 +663,7 @@ small unit and flexibility reduce the emissions by 26 % relative to Case 2.
 When the small unit is instead added to the three main units, the emissions
 are 47.7 kt, and the third main unit is never used.
 
-> **Fig. 7.** Sensitivity of annual CO2 emissions to wind farm size, CO2 and
+> **Fig. 7.** Sensitivity of annual CO~2~ emissions to wind farm size, CO~2~ and
 > gas price, battery size, injection deficit limit, minimum number of GTs
 > online, GT fleet and operating practice.
 
@@ -679,9 +679,9 @@ are 47.7 kt, and the third main unit is never used.
 | Platform power implied by Hywind Tampen [@equinor2023] | 20.3 MW | 25.1 MW | within 20 % |
 | Wind capacity factor, Hywind Tampen design [@equinor2023] | 50.9 % | 49.8 % | agrees |
 | Wind capacity factor, Hywind Tampen Q1 2025 [@nowind2025] | 50.9 % | 58.4 % (winter) | within 20 % |
-| CO2 avoided per MWh wind, two GTs kept online [@equinor2023] | 0.51 t/MWh | 0.52 t/MWh | agrees |
+| CO~2~ avoided per MWh wind, two GTs kept online [@equinor2023] | 0.51 t/MWh | 0.52 t/MWh | agrees |
 | Water injection specific energy [@svendsen2023] | 8.8 kWh/m³ | 9.0 kWh/m³ | agrees |
-| CO2 intensity, Norwegian shelf 2023 [@offshorenorge2024] | 3.1 kg/boe | 7.3 kg/boe | lower |
+| CO~2~ intensity, Norwegian shelf 2023 [@offshorenorge2024] | 3.1 kg/boe | 7.3 kg/boe | lower |
 
 The model results are compared with the published benchmarks in Table 4 and
 Fig. 8. The platform power, the wind resource and the pump energy agree with
@@ -694,8 +694,8 @@ MW in the present model. The capacity factor obtained with ERA5 is within 2 %
 of the 49.8 % expected for Hywind Tampen, although that farm uses smaller
 floating turbines.
 
-The CO2 avoided per MWh of wind is the most demanding check, as it tests the
-wind model, the part-load fuel model, the CO2 factor and the scheduling
+The CO~2~ avoided per MWh of wind is the most demanding check, as it tests the
+wind model, the part-load fuel model, the CO~2~ factor and the scheduling
 together. When the model keeps two GTs online and only reduces their load, as
 assumed in the Hywind Tampen estimate, it avoids 0.51 t/MWh, against the
 published value of 0.52 t/MWh. When a GT may be stopped in windy hours, as in
@@ -704,24 +704,24 @@ saved as well. The difference shows to what extent the benefit of wind depends
 on the operating practice rather than on the wind farm itself.
 
 The field data support the fuel and emission model (Fig. 8, right). The
-Gullfaks field centre emitted 2.32–2.40 kg CO2 per Sm³ of fuel gas in
+Gullfaks field centre emitted 2.32–2.40 kg CO~2~ per Sm³ of fuel gas in
 2021–2024, which is consistent with the 2.34 kg/Sm³ used here. After Hywind
 Tampen started supplying power, the fuel gas use decreased by 30 % at Gullfaks
 (2021–2023) and by 11 % at Snorre (2021–2024), and the diesel use at Snorre
 fell from 15.6 kt to about 3 kt, whereas the fuel use was unchanged at
 Statfjord, which receives no wind power. Since production also declined over
 the period, not all of the reduction can be attributed to the wind farm. The
-CO2 intensity of the model is lower than the shelf average and the field
+CO~2~ intensity of the model is lower than the shelf average and the field
 values (9–14 kg/boe at Gullfaks and Snorre, 55–78 kg/boe at the late-life
 Statfjord), as expected from the system boundary: the model covers only power
 generation on an efficient platform at plateau rate, whereas the field values
 include flaring, diesel, gas re-injection compression and the lower production
 of mature fields. The like-for-like checks, i.e. the fuel gas factor and the
-CO2 avoided per MWh, agree, which indicates that the difference originates
+CO~2~ avoided per MWh, agree, which indicates that the difference originates
 from the boundary and not from the power system model.
 
 > **Fig. 8.** Left: model results divided by published benchmarks (1 =
-> equal; shaded: ±20 %; grey bars: published ranges). Right: CO2 intensity of
+> equal; shaded: ±20 %; grey bars: published ranges). Right: CO~2~ intensity of
 > the Gullfaks, Snorre and Statfjord field centres (grey: GT-powered; teal:
 > receiving Hywind Tampen power) with the model Case 1 value (dashed).
 
@@ -730,7 +730,7 @@ from the boundary and not from the power system model.
 **Table 5.** Economic indicators (real NOK, 20 years; abatement cost range
 from the O&M range of floating wind).
 
-| Measure | CO2 avoided [kt/yr] | Fuel value saved [MNOK/yr] | Abatement cost [NOK/t], 7 % / 4 % | Break-even investment [MNOK], fuel / fuel + CO2 |
+| Measure | CO~2~ avoided [kt/yr] | Fuel value saved [MNOK/yr] | Abatement cost [NOK/t], 7 % / 4 % | Break-even investment [MNOK], fuel / fuel + CO~2~ |
 |---|---|---|---|---|
 | Wind farm, fixed demand (Case 2 vs 1) | 63.0 | 112.8 | 2,180–2,519 / 1,347–1,686 | – |
 | Wind farm with flexibility (Case 3 vs 1) | 70.2 | 125.7 | 1,774–2,078 / 1,026–1,330 | – |
@@ -739,21 +739,21 @@ from the O&M range of floating wind).
 | Small GT replacing one main GT (flexible) | 9.7 | 17.4 | −1,786 before GT cost | 184 / 391 |
 
 The economic indicators are given in Table 5. With an investment of 2.5
-billion NOK for 30 MW, the wind farm with fixed demand avoids CO2 at
+billion NOK for 30 MW, the wind farm with fixed demand avoids CO~2~ at
 2,180–2,519 NOK/t at a 7 % discount rate and at 1,347–1,686 NOK/t at 4 %.
 These values are of the same order as the abatement cost of the
 power-from-shore projects most recently approved on the Norwegian shelf, just
-under 2,000 NOK/t [@sodir2025], and close to the CO2 price of 2,000 NOK/t
+under 2,000 NOK/t [@sodir2025], and close to the CO~2~ price of 2,000 NOK/t
 targeted for 2030 [@klimaplan2021]. Scheduling the flexible loads lowers the
 abatement cost of the same wind farm by about 400 NOK/t, to 1,774–2,078 NOK/t
-at 7 %, since 11 % more CO2 is avoided and 11 % more fuel is saved for the
+at 7 %, since 11 % more CO~2~ is avoided and 11 % more fuel is saved for the
 same investment.
 
 Flexibility on its own gives a net saving before any implementation cost, as
-the fuel saved is worth about 1,800 NOK per tonne of CO2 avoided. An operator
+the fuel saved is worth about 1,800 NOK per tonne of CO~2~ avoided. An operator
 could spend up to 137 MNOK on control systems and process modifications and
 still break even on the fuel saved alone, or up to 288 MNOK when the avoided
-CO2 cost is included. The 4 MW / 4 MWh battery breaks even only at an
+CO~2~ cost is included. The 4 MW / 4 MWh battery breaks even only at an
 investment below 5–13 MNOK, which is low for an offshore installation of that
 size. A small GT replacing one main GT breaks even below 184–391 MNOK, before
 its additional maintenance and its 262 starts per year are taken into account.
@@ -765,8 +765,8 @@ its additional maintenance and its 262 starts per year are taken into account.
 | | Mean | Range | 2023 |
 |---|---|---|---|
 | Wind capacity factor | 54.2 % | 50.3–59.8 % | 50.9 % |
-| CO2 reduction, Case 2 vs 1 | 51.8 % | 48.5–55.6 % | 49.4 % |
-| CO2 reduction, Case 3 vs 1 | 57.1 % | 54.5–60.3 % | 55.0 % |
+| CO~2~ reduction, Case 2 vs 1 | 51.8 % | 48.5–55.6 % | 49.4 % |
+| CO~2~ reduction, Case 3 vs 1 | 57.1 % | 54.5–60.3 % | 55.0 % |
 | Flexibility benefit, Case 2 − 3 | 6.8 kt (11.0 %) | 5.9–7.7 kt (10.5–11.7 %) | 7.2 kt (11.1 %) |
 | Hours with two GTs, Case 2 / Case 3 | | 1,082–1,889 / 4–66 | 1,702 / 28 |
 | Battery benefit, Case 3 − 4 | 0.35 kt | 0.25–0.42 kt | 0.32 kt |
@@ -849,7 +849,7 @@ tolerates about 260 starts a year.
 Most studies of wind-powered platforms report the benefit of wind at fixed
 demand, which corresponds to Case 2 in the present study. This understates the
 potential of the same wind farm, as the emissions with fixed demand are 12 %
-higher than when the platform schedules its flexible loads. The CO2 avoided
+higher than when the platform schedules its flexible loads. The CO~2~ avoided
 per MWh of wind, which is the usual metric for wind integration, is 0.71 t/MWh
 in Case 2, 0.74 t/MWh in Case 3 and 0.51 t/MWh if two GTs are kept online.
 Values reported for different platforms can therefore only be compared if the
@@ -857,9 +857,9 @@ GT operating practice behind them is stated.
 
 The economic performance of flexibility also differs from that of wind
 integration. Riboldi and Nord [@riboldi2018] found that integrating wind is
-profitable only with favourable gas and CO2 prices. Flexibility, in contrast,
+profitable only with favourable gas and CO~2~ prices. Flexibility, in contrast,
 requires no investment in power generation, its schedule does not depend on
-prices, and the fuel it saves is worth about 1,800 NOK per tonne of CO2
+prices, and the fuel it saves is worth about 1,800 NOK per tonne of CO~2~
 avoided at the base-case gas price alone. It is thus profitable without any
 carbon price, which is relevant in regions where emissions are not priced. The
 wind farm, by comparison, requires about 1,800–2,500 NOK/t at a 7 % discount
@@ -981,7 +981,7 @@ investigated in order to separate the effect of the wind farm from that of
 demand flexibility and of a battery, and the model was validated against
 published data for Hywind Tampen and three North Sea field centres.
 
-With fixed demand, the wind farm halves the CO2 emissions of the 20 MW
+With fixed demand, the wind farm halves the CO~2~ emissions of the 20 MW
 platform (−49 %). Scheduling the flexible consumers reduces the emissions by a
 further 11 % (7.2 kt/yr) without lost production, and the saving remains
 between 10.5 % and 11.7 % across the ten weather years. The GT low-load hours
@@ -997,7 +997,7 @@ saves another 17 %, and flexibility still saves 11 % with this unit installed.
 Prices and battery size alone have little effect on the results. Flexibility
 pays for itself through fuel savings, breaks even for an implementation cost
 of up to 137 MNOK and lowers the abatement cost of the wind farm from
-2,180–2,519 to 1,774–2,078 NOK/t. The model reproduces the CO2 avoided per MWh
+2,180–2,519 to 1,774–2,078 NOK/t. The model reproduces the CO~2~ avoided per MWh
 of wind reported for Hywind Tampen within 2 %, as well as the fuel gas
 emission factor observed at Gullfaks. Although the exact values would differ
 from one platform to another, it is suggested that the scheduling of topside
