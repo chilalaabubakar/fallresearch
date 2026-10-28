@@ -1,11 +1,12 @@
-"""Validation: compare model results with published benchmarks and field data.
+"""Benchmark checks: compare model results with published values and field data.
 
 Two layers:
   1. Benchmarks from the literature (config "validation.benchmarks"): platform
      power, wind capacity factor, CO2 avoided per MWh of wind, CO2 intensity
      and water-injection specific energy.
-  2. Field data you download (data/validation/field_data.csv): CO2 and
-     production per field and year -> CO2 intensity in kg CO2 per boe.
+  2. Reported field data (data/validation/field_data.csv, from Norskeutslipp and
+     the Norwegian Offshore Directorate): CO2 and production per field and year
+     -> CO2 intensity in kg CO2 per boe.
 
 Model values come from process.design_point(), the wind series and the case
 results written by cases.py (results/cases/cases_summary.csv), so run

@@ -9,9 +9,10 @@ Inputs (written by the other modules):
 Figures whose inputs are missing are skipped with a message.
 
 Outputs go to results/paper/ (results/paper_synthetic/ for synthetic wind):
-    figXX_<name>.png and .pdf      (PDF is vector, for the thesis/journal)
+    figXX_<name>.png and .pdf      (PDF is vector, for the journal)
     tables/T1_parameters.(csv|md)  every config parameter with unit and source
-    tables/T2_cases.(csv|md), T3_sensitivity, T4_validation
+    tables/T2_cases, T3_sensitivity, T4_validation, T6_multi_year,
+    T7_fuel_saving_split, T8_demand_reserve_map   (T5_economics: economics.py)
 
 Run from the repository root:
     python -m topside.figures [--synthetic]
@@ -71,7 +72,7 @@ def case_label(cfg, key):
 
 
 # --------------------------------------------------------------------------
-# New figures
+# Paper figures
 # --------------------------------------------------------------------------
 CLASS_NAMES = {"must_run": "must-run", "flexible": "flexible (deferrable)",
                "sheddable": "sheddable", "mixed": "mixed"}

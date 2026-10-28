@@ -1,7 +1,7 @@
 """Process module: NeqSim topside model -> electric power per consumer vs flow.
 
 Flowsheet (steady state, hydrocarbons in NeqSim with Peng-Robinson), for N
-separator stages (base case 4: 70 / 29.2 / 7.9 / 1.8 bara):
+separator stages (base case 4: 70 / 29 / 7.2 / 1.8 bara):
 
     well -> sep 1 -> valve -> sep 2 -> ... -> sep N -> oil export pump
               |                 |                |

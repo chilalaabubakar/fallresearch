@@ -9,13 +9,15 @@ Every hour the model chooses
     ch, dis  battery charge / discharge (case 4)
 to minimise, in NOK,
     fuel gas value + CO2 cost + value of lost production + GT start costs
-    (+ large penalties on unserved energy or missing reserve, which should stay 0).
+    (+ optional injection pump start costs, and large penalties on unserved energy
+    or missing reserve, which keep every window feasible and stay at zero in practice).
 
 Constraints (power in MW and energy in MWh inside the solver, for good numerics):
     power balance   sum P + w + dis - ch = P_demand(f_p, f_wi) + P_heat
     heat balance    sum eta_h (Q - P) + eta_eh P_heat >= heat demand
     GT limits       P_min on <= P <= P_max on,  fuel Q = P_max/eta (a on) + (1-a)/eta P
-    reserve         sum (P_max on - P) + battery reserve >= spinning reserve
+    reserve         sum (P_max on - P) + battery reserve [+ tripped injection pumps]
+                        >= spinning reserve [+ share of the wind used]
     at least min_gt_online turbines on
     consumer curves piecewise linear (train switching), ramp limits on f_p and f_wi
     injection deficit D[t] = D[t-1] + target - f_wi[t], 0 <= D <= D_max
@@ -24,7 +26,9 @@ Constraints (power in MW and energy in MWh inside the solver, for good numerics)
 A year is solved as rolling weekly windows with one extra day of look-ahead.
 At the end of each window's horizon the injection deficit may not exceed, and
 the battery energy may not fall below, their values at the window start, so
-no window "borrows" from the future without paying back.
+no window "borrows" from the future without paying back. run_forecast() instead
+re-plans every hour with a wind forecast, and may value the deficit left at the
+end of the horizon instead of forcing it back (deficit_terminal_cost).
 
 Run from the repository root (demo, two weeks, fixed vs flexible demand):
     python -m topside.scheduler [--synthetic] [--weeks 2]
@@ -159,8 +163,10 @@ def build_model(sys, opt, wind_mw, state):
             m.f_p[t].fix(1.0)
             m.f_wi[t].fix(fx.injection.target_fraction)
 
-    # injection pump starts, only when they carry a cost: n_pumps is the number of running
-    # pumps implied by the train curve, n_pumps = ceil(f_wi * n)
+    # Injection pump starts are only modelled when they carry a cost, because the extra
+    # integers slow the solver. n_pumps must equal the number of running pumps implied by
+    # the train curve, ceil(f_wi * n): f_wi lies in ((n_pumps - 1)/n, n_pumps/n]. The small
+    # offset excludes the lower end, where the curve would already count one pump fewer.
     n_tr = sys.injection_trains
     if sys.pump_start_cost > 0:
         m.n_pumps = pyo.Var(T, domain=pyo.NonNegativeIntegers, bounds=(0, n_tr))
@@ -177,7 +183,8 @@ def build_model(sys, opt, wind_mw, state):
                 + fx.seawater_per_production / MW * m.f_p[t]
                 + fx.seawater_per_injection / MW * m.f_wi[t])
 
-    # ramps (fraction per hour)
+    # Ramp limits (fraction of design per hour): how fast chokes, separators and pumps
+    # can follow a new set point. The first hour ramps from the previous window's state.
     def prev(var, t, init):
         return init if t == 0 else var[t - 1]
     m.ramp_p = pyo.ConstraintList()
@@ -188,7 +195,8 @@ def build_model(sys, opt, wind_mw, state):
         m.ramp_p.add((-fx.production.ramp_rate, dp_, fx.production.ramp_rate))
         m.ramp_wi.add((-fx.injection.ramp_rate, dw_, fx.injection.ramp_rate))
 
-    # injection deficit (virtual storage), 1 h steps
+    # Injection deficit = virtual storage, in hours of full-rate injection (1 h steps).
+    # D >= 0 forbids injecting ahead of the target, which the reservoir may not tolerate.
     m.deficit = pyo.Var(T, bounds=(0, fx.injection.max_deficit))
     m.deficit_balance = pyo.Constraint(T, rule=lambda m, t: m.deficit[t] == prev(
         m.deficit, t, state.deficit) + fx.injection.target_fraction - m.f_wi[t])
@@ -222,13 +230,17 @@ def build_model(sys, opt, wind_mw, state):
             m.gt.add(m.q_gt[u, t] == pmax / eta * a * m.on[u, t] + (1 - a) / eta * m.p_gt[u, t])
             on_before = m.on[u, t - 1] if t > 0 else state.on.get(u, 1)
             m.gt.add(m.start[u, t] >= m.on[u, t] - on_before)
-            # identical units: use them in order (removes symmetric solutions)
+            # Identical units are committed in order (unit u only if unit u-1 runs). This
+            # removes equivalent solutions that differ only in which unit is on, which
+            # otherwise makes the branch-and-bound search much slower.
             if u > 0 and unit_list[u - 1].key == unit.key:
                 m.gt.add(m.on[u, t] <= m.on[u - 1, t])
     m.min_online = pyo.Constraint(T, rule=lambda m, t: sum(m.on[u, t] for u in U)
                                   >= min(sys.min_gt_online, len(unit_list)))
 
     # --- wind, heater, battery, slacks (MW / MWh)
+    # The battery counts as reserve only up to its unused discharge power, and only if its
+    # stored energy can hold that power for battery_reserve_duration.
     m.w = pyo.Var(T, bounds=lambda m, t: (0, float(wind_mw[t])))
     m.p_heat = pyo.Var(T, bounds=(0, None))
     m.unserved = pyo.Var(T, bounds=(0, None))
@@ -258,6 +270,8 @@ def build_model(sys, opt, wind_mw, state):
         >= sys.reserve / MW + sys.wind_reserve_share * m.w[t])
 
     # --- objective (NOK)
+    # Fuel is valued at the gas sales price plus the CO2 cost. The heater tie-break is a tiny
+    # cost that stops the solver from burning surplus wind in the heater for no reason.
     sm3_per_mwh = MW * SECONDS_PER_HOUR / fuel.lhv
     fuel_cost_per_sm3 = pr["gas_price"] + fuel.co2_factor * pr["co2_price"]
     lost_value_per_h = (sys.oil_rate * pr["oil_price"] + sys.gas_export_rate * pr["gas_price"]) * SECONDS_PER_HOUR

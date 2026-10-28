@@ -13,9 +13,14 @@ e.g. {n_turbines: 3} or {co2_price: 1.0}.
 Runs are independent, so they can go in parallel (--jobs). Each worker starts
 its own NeqSim/Java process once and then solves its runs.
 
+Finished runs are cached under results/cases/runs/, keyed on the configuration and
+the overrides, so a stopped batch resumes where it stopped.
+
 Run from the repository root:
     python -m topside.cases                         # cases 1-4 (real ERA5 wind)
     python -m topside.cases --sensitivity all       # plus every sensitivity
+    python -m topside.cases --year 2014-2023        # every weather year
+    python -m topside.cases --forecast              # hourly re-planning with a wind forecast
     python -m topside.cases --synthetic --hours 336 # quick demo
 """
 
@@ -187,7 +192,8 @@ def build_tasks(cfg, sensitivities, tag, schedules_dir, cache_dir=None):
     return [t + (cache_file(cfg, cache_dir, t) if cache_dir else None,) for t in tasks]
 
 
-# Config sections that do not change a single run (lists of runs, benchmarks)
+# Config sections that do not change a single run (lists of runs, benchmarks, costs used
+# only after the runs): editing them must not invalidate the cache
 CACHE_IGNORED_SECTIONS = ("sensitivity", "validation", "investment")
 
 

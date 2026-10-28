@@ -2,11 +2,12 @@
 
 Adapted from the figures4papers house style (Chen Liu,
 https://github.com/ChenLiu-1996/figures4papers, scientific-figure-making/):
-  * semantic colours: blue = proposed method (flexible scheduling),
-    red/pink = alternative (fixed demand), grey = baseline (gas turbines only)
+  * semantic colours: dark blue = proposed method (flexible scheduling),
+    red = alternative (fixed demand), dark grey = baseline (gas turbines only),
+    orange = battery variant; line styles differ as well, for grayscale print
   * top/right spines off, frameless legends, no grid
-  * fonts large relative to the canvas, so text stays readable when a
-    ~10 inch figure is scaled to a ~6.5 inch page width
+  * all text black, and no text smaller than MIN_PRINT_PT once the figure is
+    scaled to the 16 cm text width of the manuscript
   * black bar edges + hatching so bars stay distinct in grayscale print
   * PNG at 300 dpi plus vector PDF with editable (TrueType) text
 Deliberate difference: bar charts always start at zero (bar length encodes
