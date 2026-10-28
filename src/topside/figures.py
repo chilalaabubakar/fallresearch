@@ -441,6 +441,12 @@ def main(argv=None):
     if {"wind_fixed", "wind_flex"} <= set(sched):
         attempt("fig05", fig_example_week, cfg, sched, out, note)
         attempt("fig07", fig_injection_mechanism, cfg, sched, out, note)
+    if {"wind_fixed", "wind_flex"} <= set(sched):
+        from topside import gas_turbine as _gt
+        dec = cases.fuel_saving_decomposition(sched["wind_fixed"], sched["wind_flex"],
+                                              _gt.gas_turbine_from_config(cfg, "main"),
+                                              _gt.fuel_gas_from_config(cfg).lhv)
+        write_table(pd.DataFrame([{"comparison": "Case 2 -> Case 3", **dec}]), tables, "T7_fuel_saving_split")
     if sched:
         attempt("fig06", fig_gt_load_duration, cfg, sched, out, note)
         attempt("fig08", fig_monthly_co2, cfg, sched, out, note)

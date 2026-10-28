@@ -195,6 +195,40 @@ def cached_rows(tasks):
 
 
 # --------------------------------------------------------------------------
+# Where the fuel saving comes from
+# --------------------------------------------------------------------------
+def fuel_saving_decomposition(ref, alt, gt, lhv):
+    """Split the fuel saved between two hourly schedules of identical GTs (Willans line).
+
+    Fuel = no-load fuel per running unit-hour + marginal fuel per MWh of GT output, so the
+    saving splits exactly into fewer running unit-hours (commitment) and less GT energy.
+    The GT energy saved is further split into the platform demand moved (energy shifting,
+    shown in the hours where the alternative schedule avoids a unit) and wind and other terms."""
+    a, eta = gt.no_load_fuel_fraction, gt.rated_efficiency
+    noload_per_h = a * gt.rated_power / eta * 3600 / lhv            # Sm3 per running unit-hour
+    marginal_per_J = (1 - a) / eta / lhv                              # Sm3 per J of GT output
+    d_unit_h = ref["gt_units_on"].sum() - alt["gt_units_on"].sum()
+    d_gt_J = (ref["gt_total_W"].sum() - alt["gt_total_W"].sum()) * 3600
+    avoided = (ref["gt_units_on"] > alt["gt_units_on"])
+    d_fuel = ref["fuel_Sm3"].sum() - alt["fuel_Sm3"].sum()
+    commit, energy = noload_per_h * d_unit_h, marginal_per_J * d_gt_J
+    return {
+        "fuel_saved_MSm3": d_fuel / 1e6,
+        "avoided_unit_hours": d_unit_h,
+        "hours_with_unit_avoided": int(avoided.sum()),
+        "commitment_MSm3": commit / 1e6,
+        "commitment_share_pct": 100 * commit / d_fuel,
+        "energy_MSm3": energy / 1e6,
+        "energy_share_pct": 100 * energy / d_fuel,
+        "extra_wind_used_GWh": (alt["wind_used_W"].sum() - ref["wind_used_W"].sum()) / 1e9,
+        "demand_moved_out_of_avoided_hours_GWh": (ref["p_demand_W"][avoided].sum()
+                                                  - alt["p_demand_W"][avoided].sum()) / 1e9,
+        "noload_fuel_Sm3_per_unit_hour": noload_per_h,
+        "marginal_fuel_Sm3_per_MWh": marginal_per_J * 3.6e9,
+    }
+
+
+# --------------------------------------------------------------------------
 # Tables and figures
 # --------------------------------------------------------------------------
 def add_reductions(base):
