@@ -1,4 +1,4 @@
-# Scheduling flexible topside loads to reduce gas turbine emissions on a wind-powered offshore oil platform
+# Flexible topside load scheduling on a wind-powered offshore oil platform: effects on gas turbine fuel use and CO2 emissions
 
 [Author 1]^a^, [Author 2]^b^
 
