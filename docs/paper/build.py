@@ -28,7 +28,7 @@ FIGURE_WIDTH = "16cm"
 # Figure label -> image (results/paper/, made by python -m topside.figures)
 FIGURES = {"1": "fig00_system", "2": "fig02_demand_map", "3": "fig04_cases", "4": "fig05_example_week",
            "5": "fig06_gt_load_duration", "6": "fig07_injection_mechanism",
-           "7": "fig09_sensitivity_overview", "8": "fig10_validation",
+           "7": "fig09_sensitivity_overview", "8": "fig10_validation", "9": "fig11_multi_year",
            "S1": "fig01_wind_resource", "S2": "fig03_gt_part_load", "S3": "fig08_monthly_co2"}
 MAX_HIGHLIGHT_CHARS, HIGHLIGHTS = 85, (3, 5)
 MAX_ABSTRACT_WORDS = 250

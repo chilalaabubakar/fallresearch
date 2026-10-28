@@ -1,0 +1,5 @@
+group,case,label,overrides,hours,fuel_MSm3,co2_kt,lost_oil_kSm3,lost_production_pct,gt_unit_hours,gt_low_load_unit_hours,gt_starts,wind_used_GWh,wind_curtailed_GWh,heater_GWh,mean_injection_fraction,end_deficit_h,end_prod_deficit_h,unserved_MWh,reserve_short_MWh,fuel_value_MNOK,co2_cost_MNOK,lost_production_MNOK,co2_intensity_kg_per_Sm3oe,total_cost_MNOK,runtime_s,co2_reduction_pct,fuel_reduction_pct
+base,gt_only,1 Gas turbines only,{},8760,54.56,127.7,0,0,17520,17520,0,0,0,0,0.85,0,0,0,0,228.6,255.4,0,19.78,484,74.5,0,0
+base,wind_fixed,"2 Wind, fixed demand",{},8760,24.21,56.66,0,0,9842,8675,131,102,55.13,0,0.85,0,0,0,0,101.5,113.3,0,8.779,214.8,73.6,55.63,55.63
+base,wind_flex,"3 Wind, flexible demand",{},8760,21.67,50.72,-8.971e-13,0,8785,7019,3,108.5,48.66,0,0.8497,2.53,0,0,0,90.81,101.4,-4.431e-12,7.859,192.2,102.5,60.28,60.28
+base,wind_flex_battery,"4 Wind, flexible + battery",{},8760,21.5,50.3,-8.66e-13,0,8760,7195,0,109.3,47.82,0,0.8497,2.671,0,0,0,90.07,100.6,-4.277e-12,7.795,190.7,87.9,60.6,60.6

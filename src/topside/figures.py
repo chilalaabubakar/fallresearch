@@ -450,6 +450,16 @@ def main(argv=None):
     else:
         print("skip fig10/T4: run `python -m topside.validation` first")
 
+    multi = results_path(cfg, f"cases/multi_year_summary{tag}.csv")
+    if multi.exists():
+        summary = pd.read_csv(multi)
+        for ext in ("pdf", "png"):
+            p = cases.plot_multi_year(summary, out / f"fig11_multi_year.{ext}", note)
+        made.append(p)
+        write_table(summary, tables, "T6_multi_year")
+    else:
+        print("skip fig11: run `python -m topside.cases --year 2014-2023` first")
+
     params = parameter_table(cfg)
     write_table(params, tables, "T1_parameters")
     print(f"\n{len(made)} figures and tables in {out}")

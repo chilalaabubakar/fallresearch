@@ -103,3 +103,16 @@ def test_multi_year_summary_and_plot(tmp_path):
     assert abs(years["flex_benefit_pct"].iloc[0] - 10.0) < 1e-9
     assert set(s["year"]) >= {"mean", "min", "max"}
     assert cases.plot_multi_year(s, tmp_path / "multi.png").exists()
+
+
+def test_merge_years_keeps_earlier_years():
+    import pandas as pd
+    cfg = load_config()
+    mk = lambda ys, v: cases.multi_year_summary(
+        cfg, {y: pd.DataFrame({"case": cases.case_keys(cfg), "co2_kt": [100.0, 60.0, 60.0 - v, 50.0]}) for y in ys},
+        synthetic=True)
+    merged = cases.merge_years(mk([2021, 2022], 6.0), mk([2022], 3.0))
+    years = merged[pd.to_numeric(merged["year"], errors="coerce").notna()]
+    assert list(years["year"]) == [2021, 2022]
+    assert years.set_index("year").loc[2022, "flex_benefit_kt"] == 3.0          # new value wins
+    assert merged.set_index("year").loc["mean", "flex_benefit_kt"] == 4.5

@@ -17,14 +17,13 @@ the gas turbines. A steady-state process model gives the power of each
 consumer as a function of its operating lever. A mixed-integer linear
 program then schedules production rate, water injection rate, gas turbine
 commitment, wind use and an optional battery for one year hourly with ERA5
-wind data. Postponed water injection is represented as a virtual storage
-that must be caught up. For a 20.3 MW platform with a 30 MW wind farm, wind
+wind data, with postponed water injection as a virtual storage. For a 20.3 MW platform with a 30 MW wind farm, wind
 with fixed demand reduces annual CO2 emissions by 49 %. Flexible scheduling
 cuts them by a further 11 % (7.2 kt/yr) without lost production,
 mainly because it avoids running a second gas turbine: the hours with two
-turbines online fall from 1,702 to 28. About 24 h of deferrable injection
-captures the full benefit, and a small added gas turbine saves a similar
-amount on top. Operating
+turbines online fall from 1,702 to 28. Over ten weather years the benefit
+is 10.5–11.7 %. About 24 h of deferrable injection captures it, and a
+small added gas turbine is complementary. Operating
 rules that keep two gas turbines online remove most of the gain. The model
 reproduces Hywind Tampen's reported CO2 avoided per MWh of wind within 2 %.
 
@@ -179,7 +178,8 @@ their sources are openly available (see Data availability).
 
 The study models the electric power system of a generic oil platform in the
 northern North Sea (Tampen area, 61.0° N, 2.0° E) for the year 2023 at
-hourly resolution (Fig. 1). The platform produces oil with associated gas,
+hourly resolution (Fig. 1), with cases 1–4 repeated for the weather years
+2014–2022. The platform produces oil with associated gas,
 exports both, and injects water for pressure support. Power is supplied by
 three GTs and, in the wind cases, by a nearby two-turbine offshore wind farm
 connected to the platform's AC system. Four cases are compared:
@@ -424,7 +424,12 @@ is arbitrary. GT load is therefore reported as shared in proportion to
 rating, as with droop control in real operation, and an hour counts as a
 low-load hour for a unit when this shared load is below 50 % of rating.
 
-### 2.7 Sensitivity analysis and validation
+### 2.7 Weather years, sensitivity analysis and validation
+
+To test whether 2023 is representative, cases 1–4 were also run for each
+weather year from 2014 to 2022 with ERA5 data at the same grid point and all
+other inputs unchanged. The injection deficit limit was varied for 2016 and
+2017 as well, the years in which the deficit reached its highest values.
 
 Cases 2–4 were rerun with one input changed at a time:
 
@@ -787,6 +792,43 @@ low for an offshore installation of that size. A small GT that replaces one
 main GT breaks even below 184–391 MNOK, before its additional maintenance and
 its 262 starts per year are accounted for.
 
+### 3.7 Weather years
+
+**Table 6.** Results for ten weather years (ERA5, 2014–2023).
+
+| | Mean | Range | 2023 |
+|---|---|---|---|
+| Wind capacity factor | 54.2 % | 50.3–59.8 % | 50.9 % |
+| CO2 reduction, case 2 vs 1 | 51.8 % | 48.5–55.6 % | 49.4 % |
+| CO2 reduction, case 3 vs 1 | 57.1 % | 54.5–60.3 % | 55.0 % |
+| Flexibility benefit, case 2 − 3 | 6.8 kt (11.0 %) | 5.9–7.7 kt (10.5–11.7 %) | 7.2 kt (11.1 %) |
+| Hours with two GTs, case 2 / case 3 | | 1,082–1,889 / 4–66 | 1,702 / 28 |
+| Battery benefit, case 3 − 4 | 0.3 kt | 0.25–0.42 kt | 0.3 kt |
+| Maximum injection deficit | | 25.8–59.3 h | 27.5 h |
+
+The weather year changes the benefit of wind more than the benefit of
+flexibility (Table 6, Fig. 9). Over the ten years the capacity factor of the
+wind farm ranges from 50.3 % to 59.8 %, and 2023 is one of the calmer years.
+The reduction with fixed demand (case 2) ranges from 48.5 % to 55.6 %. The
+additional saving from flexibility is remarkably stable at 10.5–11.7 % of
+case 2 emissions, or 5.9–7.7 kt/yr, and averages 11.0 %, almost exactly the
+2023 value. In absolute terms it is largest in the calm years 2016, 2021 and
+2023, in which a second GT is needed most often with fixed demand, and
+smallest in the windy year 2022. Flexibility removes 96–100 % of the hours
+with two GTs online in every year, and no year loses production or leaves
+demand unmet.
+
+The injection deficit varies more between years than the saving does. Its
+maximum ranges from 26 to 59 h, below the 72 h limit in every year, and up
+to 28 h remain to be caught up at the end of a year. In 2016 and 2017, the
+years with the largest deficits, a limit of 24 h still captures 98 % of the
+saving obtained with 72 h (58.4 against 58.3 kt in 2016, 52.7 against
+52.6 kt in 2017). The conclusion that about one day of deferral is enough
+therefore holds for all weather years tested.
+
+> **Fig. 9.** Flexibility benefit (case 2 − case 3, bars) and wind capacity
+> factor (line) for the weather years 2014–2023.
+
 ## 4 Discussion
 
 ### 4.1 Why load flexibility works
@@ -945,16 +987,16 @@ not modelled. The scheduler has perfect foresight of wind within each week,
 so the savings are an upper bound for real operation with forecast errors;
 because the deficit limit is rarely active, a forecast-based schedule with a
 safety margin on the deficit is expected to retain most of the saving. The
-analysis covers one weather year and a single platform without power import
-or export. The economic indicators rest on the cost of one first-of-a-kind
+analysis covers ten weather years at one site and a single platform without
+power import or export. The economic indicators rest on the cost of one first-of-a-kind
 floating wind farm and do not include the cost of implementing flexibility,
 the battery or the small GT on an existing platform, for which break-even
 values are given instead. Finally, the small GT
 in the fleet sensitivity is given the same relative part-load curve as the
 main units, because its manufacturer publishes only the full-load rating.
 
-Future work should test the approach with wind forecast errors and several
-weather years, add pump start costs and a reservoir model for the injection
+Future work should test the approach with wind forecast errors, add pump
+start costs and a reservoir model for the injection
 deficit, and apply it to real platform data. Combining load flexibility with
 grid-forming storage, and evaluating the investment cost of the whole system,
 would show how far an off-grid platform can be decarbonised before power from
@@ -970,7 +1012,8 @@ resolution. The main conclusions are:
 1. A 30 MW wind farm halves the CO2 emissions of the 20 MW platform (−49 %)
    with fixed demand.
 2. Scheduling flexible topside consumers reduces emissions by a further 11 %
-   (7.2 kt/yr) without lost production. GT low-load hours fall by 34 % and
+   (7.2 kt/yr) without lost production, and by 10.5–11.7 % in each of ten
+   weather years. GT low-load hours fall by 34 % and
    GT starts nearly disappear.
 3. Water injection provides all of the useful flexibility; shedding
    production is never worthwhile. A deferral capacity of about 24 h of

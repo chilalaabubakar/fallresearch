@@ -23,7 +23,7 @@ gas_turbine.units.main.no_load_fuel_fraction,0.184,-,"B/(A+B) with A = 2.35, B =
 gas_turbine.units.main.min_load,0.161,-,"3.5 MW minimum of 21.8 MW, Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)",False
 gas_turbine.units.main.n_installed,3,-,"Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)",False
 gas_turbine.units.main.heat_recovery_efficiency,0.5,-,"Share of (fuel - electricity) recovered as useful heat, eta_heat in Svendsen et al. (2023), LEOGO reference platform, IET Energy Syst. Integr., doi:10.1049/esi2.12085; dataset Zenodo 7373223 (values read from oogeso/tests/test_data/leogo_reference_platform.yaml)",False
-gas_turbine.units.small.rated_power,11350000.0,W,"Solar Turbines, Mars 100 oil and gas power generation package: 11,350 kWe at ISO conditions (https://www.solarturbines.com/en_US/products/oil-and-gas-power-generation-packages/mars-100.html)",False
+gas_turbine.units.small.rated_power,11350000.0,W,"Solar Turbines, Mars 100 oil and gas power generation package: 11,350 kWe at ISO conditions (https://www.solarturbines.com/en_US/products/oil-and-gas-power-generation-packages/mars-100.html, accessed 27 October 2026)",False
 gas_turbine.units.small.rated_efficiency,0.3292,-,"3600/10935 from the ISO heat rate of 10,935 kJ/kWe-h (10,365 Btu/kWe-h) at the generator terminals, Solar Turbines Mars 100 product page",False
 gas_turbine.units.small.no_load_fuel_fraction,0.184,-,"ASSUMPTION: same relative part-load shape as the LEOGO turbine (Svendsen et al., 2023); no OEM part-load curve published",True
 gas_turbine.units.small.min_load,0.161,-,"ASSUMPTION: same minimum-load fraction as the LEOGO turbine (Svendsen et al., 2023), i.e. 1.8 MW",True
@@ -74,6 +74,14 @@ economics.gt_start_cost,2000.0,NOK,"penalty_start in Svendsen et al. (2023), LEO
 economics.unserved_energy_cost,1000000.0,NOK/MWh,"Modelling choice: feasibility penalty, high enough that the 0.5 % MIP gap cannot leave demand unserved (LEOGO uses 36000 NOK/MWh for load shedding); should never be used",False
 economics.reserve_shortfall_cost,1000000.0,NOK/MWh,Modelling choice: same feasibility penalty as unserved energy; should never be used,False
 economics.gas_per_oil_equivalent,1000.0,Sm3_gas/Sm3_oe,Norwegian Offshore Directorate (Sodir) convention: 1000 Sm3 gas = 1 Sm3 oil equivalent,False
+investment.discount_rate,0.07,-,"Real discount rate; 4 % and 7 % are both used in the Norwegian Petroleum Directorate's abatement-cost curves for power from shore (NPD conference abstract, IAEE); 4 % shown as sensitivity",False
+investment.discount_rate_low,0.04,-,Lower real discount rate used in the same NPD abatement-cost curves,False
+investment.lifetime,20,yr,ASSUMPTION: economic life of a retrofit wind farm on a producing field (remaining field life),True
+investment.wind_capex,84.1,NOK/W,"Hywind Tampen: investment forecast of about NOK 7.4 billion for 88 MW at opening (Equinor, 23 Aug 2023), i.e. 84.1 MNOK/MW before Enova and NOx Fund support; first-of-a-kind floating farm",False
+investment.wind_om_low,35.0,EUR/kW/yr,"Floating wind O&M with self-hoisting crane strategy, up to 64 % below the tow-to-port cost (Dighe et al., J. Mar. Sci. Eng. 2024, 12(11):1948, Marram Wind and Celtic Sea C case study)",False
+investment.wind_om_high,97.0,EUR/kW/yr,"Floating wind O&M with tow-to-port repair strategy, 94-97 kEUR/MW/yr (Dighe et al., J. Mar. Sci. Eng. 2024, 12(11):1948)",False
+investment.eur_nok,11.5,NOK/EUR,ASSUMPTION: approximate 2024-2025 exchange rate,True
+investment.power_from_shore_abatement_cost,2000.0,NOK/t_CO2,"Norwegian Offshore Directorate (2025): operators' estimated abatement cost of the most recently approved power-from-shore projects (Melkøya, Njord/Draugen) just under NOK 2000 per tonne CO2 (2025-NOK); taken from a search summary, verify in the report. The 2020 report gave below NOK 1500/t for the then-planned projects",False
 scheduler.window_hours,168,h,Modelling choice: one week committed per solve,False
 scheduler.lookahead_hours,24,h,"Modelling choice: extra day solved but not committed, so end-of-week decisions are sensible",False
 scheduler.mip_gap,0.005,-,Modelling choice: solver stops within 0.5 % of the proven optimum,False

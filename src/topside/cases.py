@@ -304,10 +304,24 @@ def plot_multi_year(summary, out_path, note=""):
     return style.finalize_figure(fig, out_path.parent, out_path.stem, formats=(out_path.suffix.lstrip("."),))
 
 
+def merge_years(old, new):
+    """Keep the years of an earlier summary that are not in the new one; recompute mean/min/max."""
+    is_year = lambda d: pd.to_numeric(d["year"], errors="coerce").notna()
+    old_y, new_y = old[is_year(old)].copy(), new[is_year(new)].copy()
+    for d in (old_y, new_y):
+        d["year"] = d["year"].astype(float).astype(int)
+    years = pd.concat([old_y[~old_y["year"].isin(new_y["year"])], new_y]).sort_values("year")
+    stats = years.drop(columns="year").agg(["mean", "min", "max"])
+    stats.insert(0, "year", stats.index)
+    return pd.concat([years, stats], ignore_index=True)
+
+
 def multi_year_report(cfg, base_by_year, synthetic=False):
     tag = "_synthetic" if synthetic else ""
     summary = multi_year_summary(cfg, base_by_year, synthetic)
     out = results_path(cfg, f"cases/multi_year_summary{tag}.csv")
+    if out.exists():                       # a run for some years must not drop the others
+        summary = merge_years(pd.read_csv(out), summary)
     summary.to_csv(out, index=False, float_format="%.4g")
     plot_multi_year(summary, results_path(cfg, f"figures/multi_year{tag}.png"),
                     " (SYNTHETIC wind, demo only)" if synthetic else "")
