@@ -66,6 +66,33 @@ def apply_overrides(cfg, sys_, case_key, wind_W, overrides=None):
     for key in ("co2_price", "gas_price"):
         if key in overrides:
             s.prices[key] = float(overrides.pop(key))
+    s.solver = dict(sys_.solver)
+    if "mip_gap" in overrides:
+        s.solver["mip_gap"] = float(overrides.pop("mip_gap"))
+    if "gt_min_load" in overrides:                  # fraction of rated, all units
+        ml = float(overrides.pop("gt_min_load"))
+        s.units = {k: dataclasses.replace(u, gt=dataclasses.replace(u.gt, min_load=ml)) for k, u in sys_.units.items()}
+    if "pump_start_cost" in overrides:              # NOK per injection pump start
+        s.pump_start_cost = float(overrides.pop("pump_start_cost"))
+    if "reserve" in overrides:                      # MW spinning reserve
+        s.reserve = float(overrides.pop("reserve")) * MW
+    if "wind_reserve_share" in overrides:           # extra reserve per MW of wind used
+        s.wind_reserve_share = float(overrides.pop("wind_reserve_share"))
+    if "injection_reserve" in overrides:            # trip injection pumps as reserve
+        s.injection_reserve = bool(overrides.pop("injection_reserve"))
+    if "deficit_terminal_share" in overrides:       # value of deficit left at the horizon end
+        share = float(overrides.pop("deficit_terminal_share"))
+        price = s.prices["gas_price"] + s.fuel.co2_factor * s.prices["co2_price"]
+        s.deficit_terminal_cost = share * scheduler.catch_up_fuel(s) * price
+    if "demand_scale" in overrides:                 # scale every electric consumer
+        k = float(overrides.pop("demand_scale"))
+        f = s.flex
+        s.flex = dataclasses.replace(
+            f, base_load=f.base_load * k,
+            production_curve=(f.production_curve[0], tuple(np.asarray(f.production_curve[1]) * k)),
+            injection_curve=(f.injection_curve[0], tuple(np.asarray(f.injection_curve[1]) * k)),
+            seawater_per_production=f.seawater_per_production * k,
+            seawater_per_injection=f.seawater_per_injection * k)
     if "min_gt_online" in overrides:
         s.min_gt_online = int(overrides.pop("min_gt_online"))
     if "line_pack_hours" in overrides:
@@ -192,6 +219,40 @@ def cached_rows(tasks):
         else:
             todo.append((i, t))
     return done, todo
+
+
+# --------------------------------------------------------------------------
+# Where the fuel saving comes from
+# --------------------------------------------------------------------------
+def fuel_saving_decomposition(ref, alt, gt, lhv):
+    """Split the fuel saved between two hourly schedules of identical GTs (Willans line).
+
+    Fuel = no-load fuel per running unit-hour + marginal fuel per MWh of GT output, so the
+    saving splits exactly into fewer running unit-hours (commitment) and less GT energy.
+    The GT energy saved is further split into the platform demand moved (energy shifting,
+    shown in the hours where the alternative schedule avoids a unit) and wind and other terms."""
+    a, eta = gt.no_load_fuel_fraction, gt.rated_efficiency
+    noload_per_h = a * gt.rated_power / eta * 3600 / lhv            # Sm3 per running unit-hour
+    marginal_per_J = (1 - a) / eta / lhv                              # Sm3 per J of GT output
+    d_unit_h = ref["gt_units_on"].sum() - alt["gt_units_on"].sum()
+    d_gt_J = (ref["gt_total_W"].sum() - alt["gt_total_W"].sum()) * 3600
+    avoided = (ref["gt_units_on"] > alt["gt_units_on"])
+    d_fuel = ref["fuel_Sm3"].sum() - alt["fuel_Sm3"].sum()
+    commit, energy = noload_per_h * d_unit_h, marginal_per_J * d_gt_J
+    return {
+        "fuel_saved_MSm3": d_fuel / 1e6,
+        "avoided_unit_hours": d_unit_h,
+        "hours_with_unit_avoided": int(avoided.sum()),
+        "commitment_MSm3": commit / 1e6,
+        "commitment_share_pct": 100 * commit / d_fuel,
+        "energy_MSm3": energy / 1e6,
+        "energy_share_pct": 100 * energy / d_fuel,
+        "extra_wind_used_GWh": (alt["wind_used_W"].sum() - ref["wind_used_W"].sum()) / 1e9,
+        "demand_moved_out_of_avoided_hours_GWh": (ref["p_demand_W"][avoided].sum()
+                                                  - alt["p_demand_W"][avoided].sum()) / 1e9,
+        "noload_fuel_Sm3_per_unit_hour": noload_per_h,
+        "marginal_fuel_Sm3_per_MWh": marginal_per_J * 3.6e9,
+    }
 
 
 # --------------------------------------------------------------------------
@@ -330,6 +391,53 @@ def multi_year_report(cfg, base_by_year, synthetic=False):
     return summary
 
 
+def _run_forecast_one(task):
+    """task = (case_key, forecast mode, horizon h, overrides, schedule path) -> summary row."""
+    case_key, mode, horizon, overrides, save_path = task
+    cfg, sys_, wind_W = _W["cfg"], _W["sys"], _W["wind"]
+    t0 = time.time()
+    s, opt, wind = apply_overrides(cfg, sys_, case_key, wind_W.values, overrides)
+    df = scheduler.run_forecast(s, opt, wind, forecast=mode, horizon=horizon, index=wind_W.index, verbose=False)
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(save_path, float_format="%.6g")
+    row = {"case": case_key, "label": cfg["cases"][case_key]["label"], "forecast": mode,
+           "horizon_h": horizon, "overrides": str(overrides or {}), **summarize_run(cfg, s, df), "runtime_s": round(time.time() - t0, 1)}
+    print(f"  done: {case_key:<18} {mode:<12} {row['runtime_s']:7.1f} s", flush=True)
+    return row
+
+
+def forecast_study(cfg, jobs, hours=None, horizon=24, only_new=False):
+    """Hourly re-planning with persistence vs perfect wind over the horizon, Cases 2 and 3.
+
+    With the strict end condition each 24 h plan must repay its injection deficit, which a
+    persistence forecast of calm weather makes impossible; the runs with a terminal value
+    let the deficit carry over, priced at a share of the GT fuel needed to catch it up."""
+    sched_dir = results_path(cfg, "schedules")
+    sfx = f"_{hours}h" if hours else ""
+    runs = [(k, mode, None) for k in ("wind_fixed", "wind_flex") for mode in ("perfect", "persistence")]
+    runs += [("wind_flex", "persistence", {"deficit_terminal_share": x}) for x in (0.25, 0.5)]
+    runs += [("wind_flex", "perfect", {"deficit_terminal_share": 0.5})]
+    tasks = [(k, mode, horizon, o, sched_dir / f"schedule_{k}_forecast_{mode}"
+              f"{'_tv' + str(o['deficit_terminal_share']) if o else ''}{sfx}.csv") for k, mode, o in runs]
+    out = results_path(cfg, f"cases/forecast_summary{sfx}.csv")
+    old = pd.read_csv(out) if (only_new and out.exists()) else None
+    if old is not None:
+        if "overrides" not in old:
+            old["overrides"] = "{}"
+        have = set(zip(old["case"], old["forecast"], old["overrides"]))
+        tasks = [t for t in tasks if (t[0], t[1], str(t[3] or {})) not in have]
+    with ProcessPoolExecutor(max_workers=min(jobs, len(tasks)), initializer=_init_worker,
+                             initargs=(False, hours, None, None)) as ex:
+        rows = pd.DataFrame(list(ex.map(_run_forecast_one, tasks)))
+    if old is not None:
+        rows = pd.concat([old, rows], ignore_index=True)
+    rows.to_csv(out, index=False, float_format="%.4g")
+    print(rows[["case", "forecast", "co2_kt", "fuel_MSm3", "gt_starts", "end_deficit_h",
+                "unserved_MWh", "reserve_short_MWh"]].to_string(index=False))
+    print(f"Saved {out}")
+    return rows
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Run cases 1-4 and sensitivities")
     ap.add_argument("--sensitivity", nargs="*", default=[],
@@ -340,9 +448,13 @@ def main(argv=None):
     ap.add_argument("--fresh", action="store_true", help="Ignore finished runs saved by an earlier, stopped batch")
     ap.add_argument("--year", nargs="+", default=None,
                     help="Weather year(s) instead of site.year, e.g. 2019 or 2014-2023 (outputs tagged _<year>)")
+    ap.add_argument("--forecast", action="store_true",
+                    help="Hourly re-planning with a persistence wind forecast vs perfect foresight (Cases 2, 3)")
     args = ap.parse_args(argv)
 
     cfg = load_config()
+    if args.forecast:
+        return forecast_study(cfg, args.jobs, args.hours, only_new=not args.fresh)
     default_year = param(cfg["site"]["year"])
     years = parse_years(args.year) or [default_year]
     results = {}

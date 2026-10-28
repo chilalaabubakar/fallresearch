@@ -86,6 +86,12 @@ class System:
     battery_reserve_duration: float  # s
     prices: dict = field(default_factory=dict)
     solver: dict = field(default_factory=dict)
+    injection_trains: int = 3        # parallel water injection pumps (pump starts)
+    pump_start_cost: float = 0.0     # NOK per injection pump start (0: starts not modelled)
+    wind_reserve_share: float = 0.0  # extra reserve per MW of wind used (loss of wind output)
+    injection_reserve: bool = False  # running injection pumps may be tripped to provide reserve
+    deficit_terminal_cost: float | None = None  # NOK per h of deficit left at the horizon end;
+                                     # None: the window must end with no more deficit than it began
 
 
 def build_system(cfg, dp=None):
@@ -110,6 +116,8 @@ def build_system(cfg, dp=None):
         prices={k: param(e[k]) for k in ("oil_price", "gas_price", "co2_price", "gt_start_cost",
                                            "unserved_energy_cost", "reserve_shortfall_cost")},
         solver={k: param(s[k]) for k in ("window_hours", "lookahead_hours", "mip_gap", "time_limit")},
+        injection_trains=int(sum(cfg["process"]["consumers"][c]["n_trains"] for c in
+                                 cfg["flexibility"].get("levers", {}).get("injection", consumers.INJECTION_CONSUMERS))),
     )
 
 
@@ -151,6 +159,19 @@ def build_model(sys, opt, wind_mw, state):
             m.f_p[t].fix(1.0)
             m.f_wi[t].fix(fx.injection.target_fraction)
 
+    # injection pump starts, only when they carry a cost: n_pumps is the number of running
+    # pumps implied by the train curve, n_pumps = ceil(f_wi * n)
+    n_tr = sys.injection_trains
+    if sys.pump_start_cost > 0:
+        m.n_pumps = pyo.Var(T, domain=pyo.NonNegativeIntegers, bounds=(0, n_tr))
+        m.pump_start = pyo.Var(T, bounds=(0, None))
+        n0 = math.ceil(round(state.f_wi * n_tr, 6))
+        m.pumps = pyo.ConstraintList()
+        for t in T:
+            m.pumps.add(m.f_wi[t] <= m.n_pumps[t] / n_tr)
+            m.pumps.add(m.f_wi[t] >= (m.n_pumps[t] - 1) / n_tr + 1e-3)
+            m.pumps.add(m.pump_start[t] >= m.n_pumps[t] - (m.n_pumps[t - 1] if t > 0 else n0))
+
     def demand(t):
         return (fx.base_load / MW + m.p_prod[t] + m.p_inj[t]
                 + fx.seawater_per_production / MW * m.f_p[t]
@@ -171,7 +192,8 @@ def build_model(sys, opt, wind_mw, state):
     m.deficit = pyo.Var(T, bounds=(0, fx.injection.max_deficit))
     m.deficit_balance = pyo.Constraint(T, rule=lambda m, t: m.deficit[t] == prev(
         m.deficit, t, state.deficit) + fx.injection.target_fraction - m.f_wi[t])
-    m.deficit_end = pyo.Constraint(expr=m.deficit[T[-1]] <= state.deficit + 1e-6)
+    if sys.deficit_terminal_cost is None:
+        m.deficit_end = pyo.Constraint(expr=m.deficit[T[-1]] <= state.deficit + 1e-6)
 
     # production deficit (gas platform: line pack of the export pipeline), if configured
     pl = fx.production
@@ -232,7 +254,8 @@ def build_model(sys, opt, wind_mw, state):
         >= (sys.heat_demand + fx.heat_per_production * m.f_p[t] + fx.heat_per_injection * m.f_wi[t]) / MW)
     m.reserve = pyo.Constraint(T, rule=lambda m, t: sum(
         unit_list[u].gt.rated_power / MW * m.on[u, t] - m.p_gt[u, t] for u in U)
-        + m.r_bat[t] + m.res_short[t] >= sys.reserve / MW)
+        + m.r_bat[t] + m.res_short[t] + (m.p_inj[t] if sys.injection_reserve else 0)
+        >= sys.reserve / MW + sys.wind_reserve_share * m.w[t])
 
     # --- objective (NOK)
     sm3_per_mwh = MW * SECONDS_PER_HOUR / fuel.lhv
@@ -243,8 +266,11 @@ def build_model(sys, opt, wind_mw, state):
         + (1 - m.f_p[t]) * lost_value_per_h
         + pr["gt_start_cost"] * sum(m.start[u, t] for u in U)
         + sys.heater_tiebreak * m.p_heat[t]
+        + (sys.pump_start_cost * m.pump_start[t] if sys.pump_start_cost > 0 else 0)
         + (pr["unserved_energy_cost"] * m.unserved[t] + pr["reserve_shortfall_cost"] * m.res_short[t])
-        for t in T))
+        for t in T)
+        + (sys.deficit_terminal_cost * (m.deficit[T[-1]] - state.deficit)
+           if sys.deficit_terminal_cost is not None else 0))
     m.unit_list = unit_list
     return m
 
@@ -336,6 +362,63 @@ def run(sys, opt, wind_W, index=None, verbose=True):
     return df
 
 
+def pump_starts(f_wi, n_trains, f0):
+    """Injection pump starts implied by the train curve (n running = ceil(f_wi * n))."""
+    n = np.ceil(np.round(np.concatenate([[f0], np.asarray(f_wi, float)]) * n_trains, 4))
+    return int(np.clip(np.diff(n), 0, None).sum())
+
+
+def persistence_forecast(wind_mw, t0, horizon):
+    """Wind for hours t0..t0+horizon-1 as known at the start of hour t0: the current hour
+    is measured (nowcast); every later hour repeats it (persistence)."""
+    now = float(wind_mw[t0])
+    return np.full(min(horizon, len(wind_mw) - t0), now)
+
+
+def run_forecast(sys, opt, wind_W, forecast="persistence", horizon=24, index=None, verbose=True):
+    """Re-plan every hour over `horizon` hours and implement only the first hour.
+
+    forecast = "persistence": hours after the current one use persistence_forecast;
+    forecast = "perfect": they use the actual wind (same rolling scheme, isolates the
+    effect of the forecast from that of the short horizon)."""
+    wind_mw = np.asarray(wind_W, dtype=float) / MW
+    n = len(wind_mw)
+    n_units = sum(opt.fleet.values())
+    state = State(f_p=1.0, f_wi=sys.flex.injection.target_fraction, deficit=0.0,
+                  energy=0.5 * opt.battery_energy / MW / SECONDS_PER_HOUR,
+                  on={u: 1 for u in range(n_units)})
+    rows, t0_clock = [], time.time()
+    for t0 in range(n):
+        if forecast == "persistence":
+            w = persistence_forecast(wind_mw, t0, horizon)
+        elif forecast == "perfect":
+            w = wind_mw[t0:t0 + horizon]
+        else:
+            raise ValueError(f"Unknown forecast {forecast!r}")
+        m = build_model(sys, opt, w, state)
+        solve(m, sys)
+        r = extract(m, sys, 1)[0]
+        rows.append(r)
+        state = State(f_p=r["f_p"], f_wi=r["f_wi"], deficit=r["deficit_h"], prod_deficit=r["prod_deficit_h"],
+                      energy=r["battery_energy_J"] / MW / SECONDS_PER_HOUR,
+                      on={u: r[f"gt{u}_on"] for u in range(n_units)})
+        if verbose and t0 % 500 == 0:
+            print(f"  [{opt.label}, {forecast}] hour {t0:5d}: {time.time() - t0_clock:6.1f} s", flush=True)
+    df = pd.DataFrame(rows)
+    if index is not None:
+        df.index = index[:n]
+    return df
+
+
+def catch_up_fuel(sys):
+    """Sm3 of fuel to catch up one hour of full-rate injection with GT power at the
+    marginal (Willans) fuel rate of the first unit type."""
+    fx = sys.flex
+    energy_MWh = (fx.injection_curve[1][-1] + fx.seawater_per_injection) / MW
+    gt = next(iter(sys.units.values())).gt
+    return energy_MWh * (1 - gt.no_load_fuel_fraction) / gt.rated_efficiency * MW * SECONDS_PER_HOUR / sys.fuel.lhv
+
+
 def summarize(df, sys):
     """Annual (or period) totals in reporting units."""
     h = SECONDS_PER_HOUR
@@ -352,7 +435,12 @@ def summarize(df, sys):
         "wind_curtailed_GWh": (df["wind_avail_W"] - df["wind_used_W"]).sum() * h / 3.6e12,
         "heater_GWh": df["p_heater_W"].sum() * h / 3.6e12,
         "mean_injection_fraction": df["f_wi"].mean(),
+        "pump_starts": pump_starts(df["f_wi"], sys.injection_trains, sys.flex.injection.target_fraction),
         "end_deficit_h": df["deficit_h"].iloc[-1],
+        # fuel and CO2 including the injection still owed at the end, caught up with GT power
+        "fuel_deficit_adjusted_MSm3": (df["fuel_Sm3"].sum() + df["deficit_h"].iloc[-1] * catch_up_fuel(sys)) / 1e6,
+        "co2_deficit_adjusted_kt": (df["co2_kg"].sum() + df["deficit_h"].iloc[-1] * catch_up_fuel(sys)
+                                    * sys.fuel.co2_factor) / 1e6,
         "end_prod_deficit_h": df["prod_deficit_h"].iloc[-1],
         "unserved_MWh": df["unserved_W"].sum() / MW,
         "reserve_short_MWh": df["reserve_short_W"].sum() / MW,

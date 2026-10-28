@@ -40,7 +40,8 @@ FIGURE_WIDTH = "16cm"  # = topside.style.PRINT_WIDTH_IN
 # Figure label -> image (results/paper/, made by python -m topside.figures)
 FIGURES = {"1": "fig00_system", "2": "fig02_demand_map", "3": "fig04_cases", "4": "fig05_example_week",
            "5": "fig06_gt_load_duration", "6": "fig07_injection_mechanism",
-           "7": "fig09_sensitivity_overview", "8": "fig10_validation", "9": "fig11_multi_year",
+           "7": "fig09_sensitivity_overview", "8": "fig12_demand_reserve_map",
+           "9": "fig10_validation", "10": "fig11_multi_year",
            "S1": "fig01_wind_resource", "S2": "fig03_gt_part_load", "S3": "fig08_monthly_co2"}
 MAX_HIGHLIGHT_CHARS, HIGHLIGHTS = 85, (3, 5)
 MAX_ABSTRACT_WORDS = 250
@@ -164,8 +165,9 @@ def house_markdown(markdown):
     # abstract heading -> bold run-in label
     body = re.sub(r"(?m)^# Abstract\s*\n+", "**Abstract.** ", body)
     # front matter: affiliations and corresponding author in their own styles
-    body = re.sub(r"(?m)^(\[Author[^\n]*\^a\^[^\n]*)$", r'::: {custom-style="Author"}\n\1\n:::', body)
-    body = re.sub(r"(?m)^(\^[a-z]\^ \*[^\n]*\*)$", r'::: {custom-style="Affiliation"}\n\1\n:::', body)
+    # Author line: the first line after the title that carries the ^a^ affiliation mark
+    body = re.sub(r"(?m)^(?!\^)([^\n#]*\^a[,^][^\n]*)$", r'::: {custom-style="Author"}\n\1\n:::', body, count=1)
+    body = re.sub(r"(?m)^(\^[a-z]\^(?: \*[^\n]*\*)?)$", r'::: {custom-style="Affiliation"}\n\1\n:::', body)
     # "Fig. 3" in the text -> "Figure 3" (captions are rebuilt below)
     body = re.sub(r"(?<!\*\*)\bFigs?\. (S?\d)", lambda m: "Figure " + m.group(1), body)
     return title, body
@@ -305,6 +307,31 @@ def _border(tag, val="single", sz="4"):
     return el
 
 
+def full_width_columns(table, text_width=Cm(16.51), min_share=0.08):
+    """Table across the text width, columns in proportion to their longest line of text."""
+    pr = table._tbl.tblPr
+    w = pr.find(qn("w:tblW"))
+    if w is None:
+        w = OxmlElement("w:tblW")
+        pr.append(w)
+    w.set(qn("w:type"), "pct")
+    w.set(qn("w:w"), "5000")
+    ncol = len(table.columns)
+    need = [1] * ncol
+    for row in table.rows:
+        for j, cell in enumerate(row.cells[:ncol]):
+            longest = max((len(word) for word in cell.text.split()), default=1)
+            need[j] = max(need[j], min(len(cell.text), 40), longest)
+    share = [max(n / sum(need), min_share) for n in need]
+    share = [x / sum(share) for x in share]
+    widths = [int(text_width.twips * x) for x in share]
+    for col, tw in zip(table._tbl.tblGrid.findall(qn("w:gridCol")), widths):
+        col.set(qn("w:w"), str(tw))
+    for row in table.rows:
+        for cell, tw in zip(row.cells, widths):
+            cell.width = tw * 635  # twips -> EMU
+
+
 def three_line_tables(doc, skip=()):
     """Rule above the table, below the header and at the bottom; header bold."""
     for t in doc.tables:
@@ -313,6 +340,7 @@ def three_line_tables(doc, skip=()):
         pr = t._tbl.tblPr
         for old in pr.findall(qn("w:tblBorders")):
             pr.remove(old)
+        full_width_columns(t)
         borders = OxmlElement("w:tblBorders")
         for tag in ("top", "bottom"):
             borders.append(_border(tag))
@@ -424,6 +452,7 @@ def words(text):
     text = re.sub(r"(?m)^\|.*$", "", text)            # tables
     text = re.sub(r"(?m)^>.*$", "", text)             # figure captions
     text = re.sub(r"\$\$.*?\$\$", "", text, flags=re.S)
+    text = re.sub(r"~(\w+)~", r"\1", text)             # subscripts such as CO~2~
     return len(re.findall(r"[A-Za-z0-9][\w'’–-]*", text))
 
 

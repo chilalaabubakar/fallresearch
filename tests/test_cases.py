@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import pytest
 
 from topside.config import load_config
@@ -116,3 +117,22 @@ def test_merge_years_keeps_earlier_years():
     assert list(years["year"]) == [2021, 2022]
     assert years.set_index("year").loc[2022, "flex_benefit_kt"] == 3.0          # new value wins
     assert merged.set_index("year").loc["mean", "flex_benefit_kt"] == 4.5
+
+
+def test_fuel_saving_decomposition_is_exact():
+    from types import SimpleNamespace
+    gt = SimpleNamespace(no_load_fuel_fraction=0.2, rated_efficiency=0.35, rated_power=20e6)
+    lhv = 40e6
+
+    def sched(units, power, wind, demand):
+        units, power = np.array(units, float), np.array(power, float)
+        fuel = (0.2 * 20e6 / 0.35 * units + 0.8 / 0.35 * power) * 3600 / lhv
+        return pd.DataFrame({"gt_units_on": units, "gt_total_W": power, "fuel_Sm3": fuel,
+                             "wind_used_W": wind, "p_demand_W": demand})
+
+    ref = sched([2, 1, 1], [15e6, 10e6, 5e6], [0, 5e6, 10e6], [15e6, 15e6, 15e6])
+    alt = sched([1, 1, 1], [10e6, 10e6, 4e6], [0, 5e6, 11e6], [10e6, 15e6, 15e6])
+    d = cases.fuel_saving_decomposition(ref, alt, gt, lhv)
+    assert d["commitment_MSm3"] + d["energy_MSm3"] == pytest.approx(d["fuel_saved_MSm3"])
+    assert d["avoided_unit_hours"] == 1 and d["hours_with_unit_avoided"] == 1
+    assert d["demand_moved_out_of_avoided_hours_GWh"] == pytest.approx(5e6 / 1e9)

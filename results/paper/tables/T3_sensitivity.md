@@ -1,36 +1,114 @@
-| group                 | case              | overrides                               |   co2_kt |   fuel_MSm3 |   gt_low_load_unit_hours |   lost_production_pct |   wind_curtailed_GWh |
-|:----------------------|:------------------|:----------------------------------------|---------:|------------:|-------------------------:|----------------------:|---------------------:|
-| wind_farm_size        | wind_fixed        | {'n_turbines': 1}                       |    77.55 |       33.14 |                     9062 |             0         |              0       |
-| wind_farm_size        | wind_fixed        | {'n_turbines': 2}                       |    64.66 |       27.63 |                     9005 |             0         |             44.49    |
-| wind_farm_size        | wind_fixed        | {'n_turbines': 3}                       |    60.23 |       25.74 |                     9085 |             0         |            103.9     |
-| wind_farm_size        | wind_fixed        | {'n_turbines': 4}                       |    57.56 |       24.6  |                     9114 |             0         |            166.2     |
-| wind_farm_size        | wind_flex         | {'n_turbines': 1}                       |    71.94 |       30.74 |                     4597 |            -4.441e-14 |              0.06061 |
-| wind_farm_size        | wind_flex         | {'n_turbines': 2}                       |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
-| wind_farm_size        | wind_flex         | {'n_turbines': 3}                       |    53.41 |       22.82 |                     6574 |             0         |             97.48    |
-| wind_farm_size        | wind_flex         | {'n_turbines': 4}                       |    50.87 |       21.74 |                     6932 |             0         |            159.5     |
-| co2_price             | wind_flex         | {'co2_price': 0.5}                      |    57.49 |       24.57 |                     5925 |             0         |             38.71    |
-| co2_price             | wind_flex         | {'co2_price': 1.0}                      |    57.5  |       24.57 |                     5912 |             0         |             38.71    |
-| co2_price             | wind_flex         | {'co2_price': 2.0}                      |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
-| co2_price             | wind_flex         | {'co2_price': 3.0}                      |    57.55 |       24.6  |                     5939 |             0         |             38.79    |
-| gas_price             | wind_flex         | {'gas_price': 2.0}                      |    57.51 |       24.58 |                     5916 |             0         |             38.72    |
-| gas_price             | wind_flex         | {'gas_price': 4.19}                     |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
-| gas_price             | wind_flex         | {'gas_price': 8.0}                      |    57.48 |       24.57 |                     5936 |             0         |             38.67    |
-| battery_size          | wind_flex_battery | {'battery': [0, 0]}                     |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
-| battery_size          | wind_flex_battery | {'battery': [2, 2]}                     |    57.32 |       24.49 |                     6091 |             0         |             38.41    |
-| battery_size          | wind_flex_battery | {'battery': [4, 4]}                     |    57.17 |       24.43 |                     6242 |             0         |             38.06    |
-| battery_size          | wind_flex_battery | {'battery': [8, 8]}                     |    56.9  |       24.32 |                     6291 |             0         |             37.48    |
-| battery_size          | wind_flex_battery | {'battery': [8, 16]}                    |    56.38 |       24.09 |                     6328 |             0         |             36.37    |
-| injection_deficit     | wind_flex         | {'max_deficit': 0}                      |    64.65 |       27.63 |                     8993 |             0.0002028 |             44.49    |
-| injection_deficit     | wind_flex         | {'max_deficit': 24}                     |    57.52 |       24.58 |                     5954 |             0         |             38.72    |
-| injection_deficit     | wind_flex         | {'max_deficit': 72}                     |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
-| injection_deficit     | wind_flex         | {'max_deficit': 168}                    |    57.52 |       24.58 |                     5931 |             0         |             38.75    |
-| min_gt_online         | wind_flex_battery | {'min_gt_online': 1, 'battery': [8, 8]} |    56.9  |       24.32 |                     6291 |             0         |             37.48    |
-| min_gt_online         | wind_flex_battery | {'min_gt_online': 0, 'battery': [8, 8]} |    38.66 |       16.52 |                      815 |            -4.441e-14 |             10.98    |
-| gt_fleet              | wind_fixed        | {'fleet': {'main': 3}}                  |    64.66 |       27.63 |                     9005 |             0         |             44.49    |
-| gt_fleet              | wind_fixed        | {'fleet': {'main': 2, 'small': 1}}      |    53.86 |       23.02 |                     5513 |             0         |             37.04    |
-| gt_fleet              | wind_fixed        | {'fleet': {'main': 3, 'small': 1}}      |    53.86 |       23.02 |                     5513 |             0         |             37.04    |
-| gt_fleet              | wind_flex         | {'fleet': {'main': 3}}                  |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
-| gt_fleet              | wind_flex         | {'fleet': {'main': 2, 'small': 1}}      |    47.75 |       20.41 |                     5070 |            -4.441e-14 |             31.48    |
-| gt_fleet              | wind_flex         | {'fleet': {'main': 3, 'small': 1}}      |    47.68 |       20.38 |                     5072 |            -4.441e-14 |             31.42    |
-| gt_operation_practice | wind_fixed        | {'min_gt_online': 2}                    |    90.74 |       38.78 |                    17520 |             0         |             61.09    |
-| gt_operation_practice | wind_flex         | {'min_gt_online': 2}                    |    87.68 |       37.47 |                    17520 |             0         |             55.1     |
+| group                 | case              | overrides                                              |   co2_kt |   fuel_MSm3 |   gt_low_load_unit_hours |   lost_production_pct |   wind_curtailed_GWh |
+|:----------------------|:------------------|:-------------------------------------------------------|---------:|------------:|-------------------------:|----------------------:|---------------------:|
+| wind_farm_size        | wind_fixed        | {'n_turbines': 1}                                      |    77.55 |       33.14 |                     9062 |             0         |              0       |
+| wind_farm_size        | wind_fixed        | {'n_turbines': 2}                                      |    64.66 |       27.63 |                     9005 |             0         |             44.49    |
+| wind_farm_size        | wind_fixed        | {'n_turbines': 3}                                      |    60.23 |       25.74 |                     9085 |             0         |            103.9     |
+| wind_farm_size        | wind_fixed        | {'n_turbines': 4}                                      |    57.56 |       24.6  |                     9114 |             0         |            166.2     |
+| wind_farm_size        | wind_flex         | {'n_turbines': 1}                                      |    71.94 |       30.74 |                     4597 |            -4.441e-14 |              0.06061 |
+| wind_farm_size        | wind_flex         | {'n_turbines': 2}                                      |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
+| wind_farm_size        | wind_flex         | {'n_turbines': 3}                                      |    53.41 |       22.82 |                     6574 |             0         |             97.48    |
+| wind_farm_size        | wind_flex         | {'n_turbines': 4}                                      |    50.87 |       21.74 |                     6932 |             0         |            159.5     |
+| co2_price             | wind_flex         | {'co2_price': 0.5}                                     |    57.49 |       24.57 |                     5925 |             0         |             38.71    |
+| co2_price             | wind_flex         | {'co2_price': 1.0}                                     |    57.5  |       24.57 |                     5912 |             0         |             38.71    |
+| co2_price             | wind_flex         | {'co2_price': 2.0}                                     |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
+| co2_price             | wind_flex         | {'co2_price': 3.0}                                     |    57.55 |       24.6  |                     5939 |             0         |             38.79    |
+| gas_price             | wind_flex         | {'gas_price': 2.0}                                     |    57.51 |       24.58 |                     5916 |             0         |             38.72    |
+| gas_price             | wind_flex         | {'gas_price': 4.19}                                    |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
+| gas_price             | wind_flex         | {'gas_price': 8.0}                                     |    57.48 |       24.57 |                     5936 |             0         |             38.67    |
+| battery_size          | wind_flex_battery | {'battery': [0, 0]}                                    |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
+| battery_size          | wind_flex_battery | {'battery': [2, 2]}                                    |    57.32 |       24.49 |                     6091 |             0         |             38.41    |
+| battery_size          | wind_flex_battery | {'battery': [4, 4]}                                    |    57.17 |       24.43 |                     6242 |             0         |             38.06    |
+| battery_size          | wind_flex_battery | {'battery': [8, 8]}                                    |    56.9  |       24.32 |                     6291 |             0         |             37.48    |
+| battery_size          | wind_flex_battery | {'battery': [8, 16]}                                   |    56.38 |       24.09 |                     6328 |             0         |             36.37    |
+| injection_deficit     | wind_flex         | {'max_deficit': 0}                                     |    64.65 |       27.63 |                     8993 |             0.0002028 |             44.49    |
+| injection_deficit     | wind_flex         | {'max_deficit': 24}                                    |    57.52 |       24.58 |                     5954 |             0         |             38.72    |
+| injection_deficit     | wind_flex         | {'max_deficit': 72}                                    |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
+| injection_deficit     | wind_flex         | {'max_deficit': 168}                                   |    57.52 |       24.58 |                     5931 |             0         |             38.75    |
+| min_gt_online         | wind_flex_battery | {'min_gt_online': 1, 'battery': [8, 8]}                |    56.9  |       24.32 |                     6291 |             0         |             37.48    |
+| min_gt_online         | wind_flex_battery | {'min_gt_online': 0, 'battery': [8, 8]}                |    38.66 |       16.52 |                      815 |            -4.441e-14 |             10.98    |
+| gt_fleet              | wind_fixed        | {'fleet': {'main': 3}}                                 |    64.66 |       27.63 |                     9005 |             0         |             44.49    |
+| gt_fleet              | wind_fixed        | {'fleet': {'main': 2, 'small': 1}}                     |    53.86 |       23.02 |                     5513 |             0         |             37.04    |
+| gt_fleet              | wind_fixed        | {'fleet': {'main': 3, 'small': 1}}                     |    53.86 |       23.02 |                     5513 |             0         |             37.04    |
+| gt_fleet              | wind_flex         | {'fleet': {'main': 3}}                                 |    57.49 |       24.57 |                     5932 |             0         |             38.67    |
+| gt_fleet              | wind_flex         | {'fleet': {'main': 2, 'small': 1}}                     |    47.75 |       20.41 |                     5070 |            -4.441e-14 |             31.48    |
+| gt_fleet              | wind_flex         | {'fleet': {'main': 3, 'small': 1}}                     |    47.68 |       20.38 |                     5072 |            -4.441e-14 |             31.42    |
+| gt_operation_practice | wind_fixed        | {'min_gt_online': 2}                                   |    90.74 |       38.78 |                    17520 |             0         |             61.09    |
+| gt_operation_practice | wind_flex         | {'min_gt_online': 2}                                   |    87.68 |       37.47 |                    17520 |             0         |             55.1     |
+| solver_gap            | wind_flex         | {'mip_gap': 0.001}                                     |    57.52 |       24.58 |                     5956 |             0         |             38.71    |
+| solver_gap            | wind_flex_battery | {'mip_gap': 0.001}                                     |    57.12 |       24.41 |                     6243 |             0         |             38.03    |
+| gt_min_load           | wind_fixed        | {'gt_min_load': 0.161}                                 |    64.66 |       27.63 |                     9005 |             0         |             44.49    |
+| gt_min_load           | wind_fixed        | {'gt_min_load': 0.3}                                   |    71.9  |       30.73 |                     9005 |             0         |             58.73    |
+| gt_min_load           | wind_fixed        | {'gt_min_load': 0.4}                                   |    77.53 |       33.13 |                     9005 |             0         |             69.81    |
+| gt_min_load           | wind_fixed        | {'gt_min_load': 0.5}                                   |    86.44 |       36.94 |                        0 |             0         |             82.35    |
+| gt_min_load           | wind_flex         | {'gt_min_load': 0.161}                                 |    57.49 |       24.57 |                     5912 |             0         |             38.71    |
+| gt_min_load           | wind_flex         | {'gt_min_load': 0.3}                                   |    64.63 |       27.62 |                     5963 |            -4.441e-14 |             52.72    |
+| gt_min_load           | wind_flex         | {'gt_min_load': 0.4}                                   |    70.18 |       29.99 |                     6065 |             0         |             63.54    |
+| gt_min_load           | wind_flex         | {'gt_min_load': 0.5}                                   |    76.22 |       32.57 |                        2 |             0         |             75.37    |
+| pump_start_cost       | wind_flex         | {'pump_start_cost': 0}                                 |    57.49 |       24.57 |                     5912 |             0         |             38.71    |
+| pump_start_cost       | wind_flex         | {'pump_start_cost': 1000}                              |    57.57 |       24.6  |                     5870 |            -4.441e-14 |             38.9     |
+| pump_start_cost       | wind_flex         | {'pump_start_cost': 5000}                              |    57.6  |       24.61 |                     5901 |             2.317e-05 |             38.9     |
+| pump_start_cost       | wind_flex         | {'pump_start_cost': 20000}                             |    57.63 |       24.63 |                     5891 |             0.0001206 |             38.95    |
+| reserve_definition    | wind_fixed        | {'wind_reserve_share': 0.5}                            |    66.16 |       28.28 |                    10207 |             0         |             44.49    |
+| reserve_definition    | wind_fixed        | {'wind_reserve_share': 1.0}                            |    90.74 |       38.78 |                    17520 |             0         |             61.09    |
+| reserve_definition    | wind_fixed        | {'injection_reserve': True}                            |    60.41 |       25.82 |                     5601 |             0         |             44.49    |
+| reserve_definition    | wind_fixed        | {'wind_reserve_share': 1.0, 'injection_reserve': True} |    60.41 |       25.82 |                     5601 |             0         |             44.49    |
+| reserve_definition    | wind_flex         | {'wind_reserve_share': 0.5}                            |    57.69 |       24.65 |                     5974 |            -4.441e-14 |             38.73    |
+| reserve_definition    | wind_flex         | {'wind_reserve_share': 1.0}                            |    78.23 |       33.43 |                    13091 |            -4.441e-14 |             54.08    |
+| reserve_definition    | wind_flex         | {'injection_reserve': True}                            |    57.57 |       24.6  |                     6163 |             0         |             38.89    |
+| reserve_definition    | wind_flex         | {'wind_reserve_share': 1.0, 'injection_reserve': True} |    57.57 |       24.6  |                     6239 |             0         |             38.95    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.6, 'reserve': 3}                    |    46.09 |       19.7  |                     7735 |             0         |             82.36    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.7, 'reserve': 3}                    |    49.26 |       21.05 |                     6978 |             0         |             72.08    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.8, 'reserve': 3}                    |    52.73 |       22.53 |                     6435 |             0         |             62.39    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.9, 'reserve': 3}                    |    56.46 |       24.13 |                     5994 |             0         |             53.22    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.0, 'reserve': 3}                    |    62.51 |       26.71 |                     7279 |             0         |             44.49    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.1, 'reserve': 3}                    |    68.72 |       29.37 |                     8586 |             0         |             36.16    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.2, 'reserve': 3}                    |    74.46 |       31.82 |                     6992 |             0         |             28.19    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.6, 'reserve': 5}                    |    46.09 |       19.7  |                     7735 |             0         |             82.36    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.7, 'reserve': 5}                    |    49.26 |       21.05 |                     6978 |             0         |             72.08    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.8, 'reserve': 5}                    |    52.73 |       22.53 |                     6435 |             0         |             62.39    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.9, 'reserve': 5}                    |    58.66 |       25.07 |                     7760 |             0         |             53.22    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.0, 'reserve': 5}                    |    64.66 |       27.63 |                     9005 |             0         |             44.49    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.1, 'reserve': 5}                    |    70.24 |       30.02 |                     9810 |             0         |             36.16    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.2, 'reserve': 5}                    |    75.67 |       32.34 |                     7962 |             0         |             28.19    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.6, 'reserve': 7}                    |    46.09 |       19.7  |                     7735 |             0         |             82.36    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.7, 'reserve': 7}                    |    49.26 |       21.05 |                     6978 |             0         |             72.08    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.8, 'reserve': 7}                    |    55.1  |       23.55 |                     8339 |             0         |             62.39    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.9, 'reserve': 7}                    |    60.83 |       26    |                     9494 |             0         |             53.22    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.0, 'reserve': 7}                    |    66.14 |       28.27 |                    10191 |             0         |             44.49    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.1, 'reserve': 7}                    |    71.38 |       30.5  |                    10716 |             0         |             36.16    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.2, 'reserve': 7}                    |    76.73 |       32.79 |                     8804 |             0         |             28.19    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.6, 'reserve': 9}                    |    46.09 |       19.7  |                     7735 |             0         |             82.36    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.7, 'reserve': 9}                    |    51.78 |       22.13 |                     8998 |             0         |             72.08    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.8, 'reserve': 9}                    |    57.16 |       24.43 |                     9981 |             0         |             62.39    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 0.9, 'reserve': 9}                    |    62.25 |       26.6  |                    10634 |             0         |             53.22    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.0, 'reserve': 9}                    |    67.31 |       28.76 |                    11121 |             0         |             44.49    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.1, 'reserve': 9}                    |    72.45 |       30.96 |                    11574 |             0         |             36.16    |
+| demand_reserve_map    | wind_fixed        | {'demand_scale': 1.2, 'reserve': 9}                    |    77.62 |       33.17 |                     9522 |             0         |             28.19    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.6, 'reserve': 3}                    |    44.08 |       18.84 |                     8174 |             0         |             78.44    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.7, 'reserve': 3}                    |    47.04 |       20.1  |                     7657 |             0         |             67.71    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.8, 'reserve': 3}                    |    50.19 |       21.45 |                     7146 |             0         |             57.44    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.9, 'reserve': 3}                    |    53.79 |       22.99 |                     6742 |             0         |             48.01    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.0, 'reserve': 3}                    |    57.55 |       24.59 |                     6057 |             0         |             38.86    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.1, 'reserve': 3}                    |    61.47 |       26.27 |                     5457 |             3.144e-05 |             30.17    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.2, 'reserve': 3}                    |    66.11 |       28.25 |                     5068 |             0         |             21.77    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.6, 'reserve': 5}                    |    44.06 |       18.83 |                     8180 |             0         |             78.4     |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.7, 'reserve': 5}                    |    46.98 |       20.08 |                     7678 |             0         |             67.64    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.8, 'reserve': 5}                    |    50.2  |       21.45 |                     7146 |             0         |             57.46    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.9, 'reserve': 5}                    |    53.78 |       22.98 |                     6629 |             0         |             48.01    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.0, 'reserve': 5}                    |    57.49 |       24.57 |                     5912 |             0         |             38.71    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.1, 'reserve': 5}                    |    62.11 |       26.54 |                     5471 |             0         |             30.1     |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.2, 'reserve': 5}                    |    67.21 |       28.72 |                     5178 |             0         |             21.69    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.6, 'reserve': 7}                    |    44.06 |       18.83 |                     8203 |             0         |             78.39    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.7, 'reserve': 7}                    |    47.01 |       20.09 |                     7691 |             0         |             67.68    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.8, 'reserve': 7}                    |    50.19 |       21.45 |                     7050 |             0         |             57.46    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.9, 'reserve': 7}                    |    53.8  |       22.99 |                     6525 |             0         |             47.82    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.0, 'reserve': 7}                    |    58.43 |       24.97 |                     6499 |            -2.22e-14  |             38.8     |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.1, 'reserve': 7}                    |    63.41 |       27.1  |                     5744 |             0         |             30.15    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.2, 'reserve': 7}                    |    68.58 |       29.31 |                     5271 |             0         |             21.83    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.6, 'reserve': 9}                    |    44.08 |       18.84 |                     8169 |             0         |             78.42    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.7, 'reserve': 9}                    |    46.96 |       20.07 |                     7676 |             0         |             67.6     |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.8, 'reserve': 9}                    |    50.38 |       21.53 |                     7045 |             0         |             57.33    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 0.9, 'reserve': 9}                    |    54.78 |       23.41 |                     7133 |             0         |             47.8     |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.0, 'reserve': 9}                    |    59.61 |       25.48 |                     7423 |            -4.441e-14 |             38.68    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.1, 'reserve': 9}                    |    64.73 |       27.66 |                     6390 |             7.835e-05 |             30.12    |
+| demand_reserve_map    | wind_flex         | {'demand_scale': 1.2, 'reserve': 9}                    |    69.87 |       29.86 |                     5789 |             0.0001587 |             21.7     |

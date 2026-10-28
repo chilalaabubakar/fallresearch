@@ -1,0 +1,8 @@
+case,label,forecast,horizon_h,hours,fuel_MSm3,co2_kt,lost_oil_kSm3,lost_production_pct,gt_unit_hours,gt_low_load_unit_hours,gt_starts,wind_used_GWh,wind_curtailed_GWh,heater_GWh,mean_injection_fraction,pump_starts,end_deficit_h,end_prod_deficit_h,unserved_MWh,reserve_short_MWh,fuel_value_MNOK,co2_cost_MNOK,lost_production_MNOK,co2_intensity_kg_per_Sm3oe,total_cost_MNOK,runtime_s,overrides,fuel_deficit_adjusted_MSm3,co2_deficit_adjusted_kt
+wind_fixed,"2 Wind, fixed demand",perfect,24,8760,27.63,64.66,0,0,10462,9005,149,89.3,44.49,0,0.85,0,0,0,0.01959,0,115.8,129.3,0,10.02,245.1,1869,{},,
+wind_fixed,"2 Wind, fixed demand",persistence,24,8760,27.63,64.66,0,0,10462,9005,149,89.3,44.49,0,0.85,0,0,0,0.01959,0,115.8,129.3,0,10.02,245.1,1846,{},,
+wind_flex,"3 Wind, flexible demand",perfect,24,8760,25.17,58.9,-5.135e-15,0,9063,6422,39,93.25,40.54,0,0.8435,714,56.51,0,0,0,105.5,117.8,-2.536e-14,9.127,223.3,3482,{},,
+wind_flex,"3 Wind, flexible demand",persistence,24,8760,27.42,64.17,-2.082e-14,0,9837,7601,100,87.19,46.6,0,0.8499,388,1.168,0,0,0,114.9,128.3,-1.028e-13,9.944,243.3,4747,{},,
+wind_flex,"3 Wind, flexible demand",persistence,24,8760,24.66,57.7,1.185e-05,2.164e-07,9025,6505,40,95.5,38.29,0,0.8448,779,45.74,0,0,0,103.3,115.4,5.852e-05,8.941,218.7,3203,{'deficit_terminal_share': 0.25},24.75,57.93
+wind_flex,"3 Wind, flexible demand",persistence,24,8760,24.68,57.75,0.001772,3.236e-05,9042,6522,43,95.5,38.29,0,0.845,781,44.11,0,0,0,103.4,115.5,0.00875,8.949,218.9,3186,{'deficit_terminal_share': 0.5},24.77,57.97
+wind_flex,"3 Wind, flexible demand",perfect,24,8760,24.51,57.35,2.796e-13,0,8917,6369,19,95.53,38.26,0,0.8431,689,60.14,0,0,0,102.7,114.7,1.381e-12,8.886,217.4,2391,{'deficit_terminal_share': 0.5},24.63,57.64

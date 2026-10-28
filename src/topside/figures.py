@@ -138,7 +138,7 @@ def fig_system(cfg, dp, out_dir):
     _box(ax, 8.95, 1.05, 2.9, 1.95,
          "Scheduler (MILP)\nhourly, rolling 1-week\nwindows + 24 h look-ahead\n\ndecides: GT on/off and load,\n"
          "wind used, battery,\nproduction $f_p$, injection $f_{wi}$", "white", fs=style.FONT_SIZE - 5)
-    ax.text(10.4, 0.72, "minimise fuel value + CO2 cost\n+ lost production + GT starts",
+    ax.text(10.4, 0.72, "minimize fuel value + CO2 cost\n+ lost production + GT starts",
             ha="center", va="top", fontsize=style.FONT_SIZE - 5, color=style.TEXT_COLOR)
     _arrow(ax, 8.95, 2.75, 8.6, ypos["flexible"][0], ls="--", color=pal["blue_main"])
     _arrow(ax, 8.95, 2.45, 8.6, ypos["sheddable"][1], ls="--", color=pal["red_strong"])
@@ -214,7 +214,7 @@ def fig_gt_load_duration(cfg, sched, out_dir, note=""):
         x = np.linspace(0, 100, len(load))
         a1.plot(x, load, lw=2.2, label=case_label(cfg, k), **style.line_kwargs(k))
     a1.axhspan(0, thr, color=MUTED, alpha=0.07, lw=0)
-    a1.text(98, thr - 2, f"low load (< {thr:.0f} %)", ha="right", va="top", fontsize=style.FONT_SIZE - 3, color=style.TEXT_COLOR)
+    a1.text(98, 30, f"low load (< {thr:.0f} %)", ha="right", va="center", fontsize=style.FONT_SIZE - 3, color=style.TEXT_COLOR)
     a1.set_ylim(0, 100)
     a1.set_xlim(0, 100)
     a1.set_xlabel("Share of hours [%]")
@@ -223,21 +223,32 @@ def fig_gt_load_duration(cfg, sched, out_dir, note=""):
     if note:
         fig.suptitle(note.strip(" ()"), x=0.01, ha="left")
     a1.legend(loc="upper right", frameon=False)
-    # Hours per year with n units running: grouped bars, one bar per case
+    # Hours per year by number of running units: one stacked bar per case, most units first
     n_max = int(max(d["gt_units_on"].max() for d in sched.values()))
-    counts = range(1, n_max + 1)
-    width = 0.8 / len(sched)
-    for i, (k, df) in enumerate(sched.items()):
-        units = df["gt_units_on"].round().astype(int)
-        hours = [int((units == n).sum()) for n in counts]
-        xs = np.array(list(counts)) + (i - (len(sched) - 1) / 2) * width
-        a2.bar(xs, hours, width=width * 0.92, **style.bar_kwargs(k))
-        for xv, h in zip(xs, hours):
-            a2.text(xv, h + 150, f"{h:,}", ha="center", va="bottom", rotation=90, fontsize=style.FONT_SIZE - 4)
-    a2.set_xticks(list(counts), [f"{n} GT" + ("s" if n > 1 else "") for n in counts])
-    a2.set_ylim(0, 8760 * 1.3)
-    a2.set_ylabel("Hours per year [h]")
+    shades = {0: "white", 1: style.PALETTE["neutral"], 2: style.PALETTE["dark"], 3: "black"}
+    keys = list(sched)
+    for i, k in enumerate(keys):
+        units = sched[k]["gt_units_on"].round().astype(int)
+        left = 0
+        for n in range(n_max, -1, -1):
+            h = int((units == n).sum())
+            if h:
+                a2.barh(i, h, left=left, height=0.6, color=shades.get(n, "black"), edgecolor="black", lw=1)
+            left += h
+        top = int((units == n_max).sum())       # label the hours with the most units running
+        inside = top > 2500
+        a2.text(top - 150 if inside else top + 150, i, f"{top:,} h", va="center", ha="right" if inside else "left",
+                color="white" if inside else style.TEXT_COLOR, fontsize=style.FONT_SIZE - 2)
+    a2.set_yticks(range(len(keys)), [f"Case {case_label(cfg, k).split()[0]}" for k in keys])
+    a2.invert_yaxis()
+    a2.set_xlim(0, 8760)
+    a2.set_xticks([0, 2000, 4000, 6000, 8000])
+    a2.set_xlabel("Hours per year [h]")
     a2.set_title("Hours by number of GTs running", loc="left")
+    a2.legend(handles=[plt.Rectangle((0, 0), 1, 1, facecolor=shades.get(n, "black"), edgecolor="black")
+                       for n in range(n_max, 0, -1)],
+              labels=[f"{n} GT" + ("s" if n > 1 else "") + " running" for n in range(n_max, 0, -1)],
+              loc="upper center", bbox_to_anchor=(0.5, -0.19), ncol=n_max, frameon=False)
     return save(fig, out_dir, "fig06_gt_load_duration")
 
 
@@ -293,7 +304,13 @@ SENS_TITLES = {"wind_farm_size": "Wind farm size [turbines]", "co2_price": "CO2 
                "gas_price": "Gas price [NOK/Sm3]", "battery_size": "Battery [MW / MWh]",
                "injection_deficit": "Injection deficit limit [h]",
                "min_gt_online": "Min. GTs online (8 MW battery)", "gt_fleet": "GT fleet",
-               "gt_operation_practice": "Keep 2 GTs online", "line_pack": "Line pack buffer [h]"}
+               "gt_operation_practice": "Keep 2 GTs online", "line_pack": "Line pack buffer [h]",
+               "gt_min_load": "GT minimum load [% of rated]", "pump_start_cost": "Pump start cost [kNOK]",
+               "reserve_definition": "Reserve definition"}
+
+# Panels of the sensitivity overview (prices change CO2 by < 0.1 % and are reported in the text)
+OVERVIEW_GROUPS = ("wind_farm_size", "battery_size", "injection_deficit", "min_gt_online", "gt_fleet",
+                   "gt_operation_practice", "gt_min_load", "pump_start_cost", "reserve_definition", "line_pack")
 
 
 UNSERVED_FLAG_MWH = 1.0   # runs with more unmet demand than this are marked as not feasible
@@ -302,6 +319,18 @@ UNSERVED_FLAG_MWH = 1.0   # runs with more unmet demand than this are marked as 
 def override_label(text):
     """Short x-label for one sensitivity run, e.g. "{'battery': [8, 16]}" -> "8/16"."""
     o = ast.literal_eval(text)
+    if not o:
+        return "base"
+    if "wind_reserve_share" in o or "injection_reserve" in o:
+        if o.get("wind_reserve_share") and o.get("injection_reserve"):
+            return "both"
+        if o.get("wind_reserve_share"):
+            return f"+{100 * o['wind_reserve_share']:.0f} %\nwind"
+        return "pump\ntrip"
+    if "gt_min_load" in o:
+        return f"{o['gt_min_load']:.0%}"
+    if "pump_start_cost" in o:
+        return f"{o['pump_start_cost'] / 1000:g}"
     if "min_gt_online" in o:
         return str(o["min_gt_online"])
     if "fleet" in o:
@@ -311,8 +340,12 @@ def override_label(text):
     return str(next(iter(o.values())))
 
 
-def fig_sensitivity_overview(cfg, sens, out_dir, note=""):
-    groups = list(dict.fromkeys(sens["group"]))
+def fig_sensitivity_overview(cfg, sens, out_dir, note="", base=None):
+    groups = [g for g in dict.fromkeys(sens["group"]) if g in OVERVIEW_GROUPS]
+    if base is not None and "reserve_definition" in groups:       # base case as the first point
+        ref = base[base["case"].isin(sens.loc[sens["group"] == "reserve_definition", "case"])].copy()
+        ref["group"], ref["overrides"] = "reserve_definition", "{}"
+        sens = pd.concat([ref[sens.columns.intersection(ref.columns)], sens], ignore_index=True)
     ncol = 3
     nrow = int(np.ceil(len(groups) / ncol))
     fig, axes = plt.subplots(nrow, ncol, figsize=(11, 3.1 * nrow), constrained_layout=True, squeeze=False)
@@ -346,6 +379,52 @@ def fig_sensitivity_overview(cfg, sens, out_dir, note=""):
     fig.legend(handles.values(), handles.keys(), loc="outside lower center", ncol=3, frameon=False)
     fig.suptitle(f"Sensitivity of annual CO2{note}", x=0.01, ha="left")
     return save(fig, out_dir, "fig09_sensitivity_overview")
+
+
+def demand_reserve_table(cfg, sens, mean_demand_mw):
+    """Flexibility benefit (Case 2 - Case 3) for every demand scale and reserve of the map."""
+    d = sens[sens["group"] == "demand_reserve_map"].copy()
+    o = d["overrides"].map(ast.literal_eval)
+    d["demand_scale"], d["reserve_MW"] = o.map(lambda x: x["demand_scale"]), o.map(lambda x: x["reserve"])
+    t = d.pivot_table(index=["demand_scale", "reserve_MW"], columns="case", values="co2_kt").reset_index()
+    t["mean_demand_MW"] = t["demand_scale"] * mean_demand_mw
+    t["benefit_kt"] = t["wind_fixed"] - t["wind_flex"]
+    t["benefit_pct"] = 100 * t["benefit_kt"] / t["wind_fixed"]
+    rated = cfg["gas_turbine"]["units"]["main"]["rated_power"]["value"] / 1e6
+    t["margin_MW"] = rated - t["reserve_MW"] - t["mean_demand_MW"]   # one GT's headroom over the load
+    return t.rename(columns={"wind_fixed": "co2_case2_kt", "wind_flex": "co2_case3_kt"})
+
+
+def fig_demand_reserve_map(cfg, t, out_dir, note=""):
+    """Left: benefit over demand and reserve. Right: the same points against one GT's margin."""
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 4), constrained_layout=True,
+                                 gridspec_kw={"width_ratios": [1.1, 1]})
+    piv = t.pivot(index="reserve_MW", columns="mean_demand_MW", values="benefit_pct")
+    im = a1.imshow(piv.values, origin="lower", aspect="auto", cmap="Blues",
+                   extent=[-0.5, len(piv.columns) - 0.5, -0.5, len(piv.index) - 0.5], vmin=0)
+    for i, r in enumerate(piv.index):
+        for j, c in enumerate(piv.columns):
+            v = piv.loc[r, c]
+            a1.text(j, i, f"{v:.0f}", ha="center", va="center", fontsize=style.FONT_SIZE - 3,
+                    color="white" if v > 0.6 * np.nanmax(piv.values) else "black")
+    a1.set_xticks(range(len(piv.columns)), [f"{c:.1f}" for c in piv.columns])
+    a1.set_yticks(range(len(piv.index)), [f"{r:g}" for r in piv.index])
+    a1.set_xlabel("Mean platform demand [MW]")
+    a1.set_ylabel("Spinning reserve [MW]")
+    a1.set_title("Flexibility benefit [% of Case 2 CO2]", loc="left")
+    fig.colorbar(im, ax=a1, shrink=0.85, label="[%]")
+    markers = dict(zip(sorted(t["reserve_MW"].unique()), "osD^v"))
+    for r, d in t.groupby("reserve_MW"):
+        a2.plot(d["margin_MW"], d["benefit_pct"], marker=markers[r], ls="-", lw=1.5, ms=7,
+                color=style.PALETTE["blue_main"], alpha=0.35 + 0.65 * (r / t["reserve_MW"].max()),
+                label=f"{r:g} MW reserve")
+    a2.axvline(0, color=style.PALETTE["dark"], lw=1, ls="--")
+    a2.set_xlabel("One GT's margin: rating − reserve − mean demand [MW]")
+    a2.set_ylabel("Flexibility benefit [%]")
+    a2.set_title("Benefit against the margin of one GT", loc="left")
+    a2.set_ylim(0, None)
+    a2.legend(frameon=False, fontsize=style.FONT_SIZE - 3)
+    return save(fig, out_dir, "fig12_demand_reserve_map")
 
 
 # --------------------------------------------------------------------------
@@ -430,6 +509,12 @@ def main(argv=None):
     if {"wind_fixed", "wind_flex"} <= set(sched):
         attempt("fig05", fig_example_week, cfg, sched, out, note)
         attempt("fig07", fig_injection_mechanism, cfg, sched, out, note)
+    if {"wind_fixed", "wind_flex"} <= set(sched):
+        from topside import gas_turbine as _gt
+        dec = cases.fuel_saving_decomposition(sched["wind_fixed"], sched["wind_flex"],
+                                              _gt.gas_turbine_from_config(cfg, "main"),
+                                              _gt.fuel_gas_from_config(cfg).lhv)
+        write_table(pd.DataFrame([{"comparison": "Case 2 -> Case 3", **dec}]), tables, "T7_fuel_saving_split")
     if sched:
         attempt("fig06", fig_gt_load_duration, cfg, sched, out, note)
         attempt("fig08", fig_monthly_co2, cfg, sched, out, note)
@@ -437,7 +522,13 @@ def main(argv=None):
         print("skip fig05-08: no hourly schedules; run `python -m topside.cases` first")
 
     if inp["sensitivity"] is not None:
-        attempt("fig09", fig_sensitivity_overview, cfg, inp["sensitivity"], out, note)
+        attempt("fig09", fig_sensitivity_overview, cfg, inp["sensitivity"], out, note, inp["summary"])
+        if (inp["sensitivity"]["group"] == "demand_reserve_map").any() and inp["summary"] is not None:
+            sched_flex = inp["schedules"].get("wind_fixed")
+            mean_mw = sched_flex["p_demand_W"].mean() / 1e6 if sched_flex is not None else 18.8
+            drm = demand_reserve_table(cfg, inp["sensitivity"], mean_mw)
+            write_table(drm, tables, "T8_demand_reserve_map")
+            attempt("fig12", fig_demand_reserve_map, cfg, drm, out, note)
         write_table(inp["sensitivity"][["group", "case", "overrides", "co2_kt", "fuel_MSm3",
                                         "gt_low_load_unit_hours", "lost_production_pct",
                                         "wind_curtailed_GWh"]], tables, "T3_sensitivity")
