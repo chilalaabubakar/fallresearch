@@ -14,21 +14,22 @@ Gas turbines on offshore oil and gas platforms are a major source of CO~2~
 emissions, and the fuel saved by wind power integrated into these off-grid
 systems is smaller than expected, since the turbines must remain online at
 inefficient part load to provide reserve. Studies of wind-powered platforms
-usually consider the topside load as fixed. In this study, the electric demand
-of a generic North Sea oil platform was mapped with a steady-state process
-model, and each consumer was classified as must-run, flexible or sheddable. A
+usually consider the topside load as fixed. Here, the electric demand of a
+generic North Sea oil platform was mapped with a steady-state process model,
+and each consumer was classified as must-run, flexible or sheddable. A
 mixed-integer linear program was then used to schedule production rate, water
 injection rate, gas turbine commitment, wind use and an optional battery for
 one year at hourly resolution with ERA5 wind data, with postponed water
 injection represented as a virtual storage. For a 20.3 MW platform supplied by
-a 30 MW wind farm, wind with fixed demand reduces the annual CO~2~ emissions by
-49 %. Flexible scheduling cuts them by a further 11 % (7.2 kt/yr) without lost
-production, mainly because the operation of a second gas turbine is avoided:
-the hours with two turbines online fall from 1,702 to 28. Over ten weather
-years the benefit ranges from 10.5 to 11.7 %. About 24 h of deferrable
-injection captures it, and a small added gas turbine is complementary, whereas
-operating rules that keep two gas turbines online remove most of the gain. With two gas turbines kept online, as assumed in the operator's estimate, the
-model agrees with the CO~2~ avoided per MWh of wind expected for Hywind Tampen.
+a 30 MW wind farm, wind with fixed demand reduces the annual CO~2~ emissions
+by 49 %. Flexible scheduling cuts them by a further 11 % (7.2 kt/yr) without
+lost production, mostly because a second gas turbine is avoided: the hours
+with two turbines online fall from 1,702 to 28. Over ten weather years it
+ranges from 10.5 to 11.7 %. About 24 h of deferrable injection captures it,
+and a small added gas turbine is complementary, whereas operating rules that
+keep two gas turbines online remove most of the gain. With two gas turbines
+online, as the operator's estimate assumes, the model matches the CO~2~
+avoided per MWh of wind expected for Hywind Tampen.
 
 **Keywords:** offshore oil and gas platform; offshore wind; demand-side
 flexibility; gas turbine part load; unit commitment; water injection
