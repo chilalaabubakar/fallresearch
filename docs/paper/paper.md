@@ -164,8 +164,9 @@ saving? Its contributions are:
    consumers together with GT commitment, wind use and an optional battery
    for a full year at hourly resolution.
 4. A comparison of four cases, from GTs only to wind with flexible demand and
-   a battery, with sensitivity analysis on the assumptions that drive the
-   result, and validation against Hywind Tampen and reported field data.
+   a battery, over ten weather years, with sensitivity analysis on the
+   assumptions that drive the result, validation against Hywind Tampen and
+   reported field data, and economic indicators.
 
 Section 2 describes the platform, models and cases. Section 3 presents the
 results, Section 4 discusses the mechanism, implications and limitations,
@@ -217,7 +218,7 @@ limits; transient process dynamics are outside the scope. The model is
 written in Python with NeqSim for thermodynamics and process simulation
 [@neqsim] and Pyomo with the HiGHS solver for optimisation
 [@bynum2021; @huangfu2018]. Every parameter is stored in a single
-configuration file with its unit and source; 29 of 101 parameters are marked
+configuration file with its unit and source; 31 of 109 parameters are marked
 as assumptions because no published value could be found (Table S1). An
 automated test suite checks each model component against hand calculations
 and published values.
@@ -230,7 +231,7 @@ and published values.
 ### 2.2 Wind farm power
 
 Hourly eastward and northward wind components at 100 m above sea level for
-2023 were taken from the ERA5 reanalysis [@hersbach2020] at the grid point
+2014–2023 were taken from the ERA5 reanalysis [@hersbach2020] at the grid point
 nearest the site. Wind speed was extrapolated to the 150 m hub height with a
 power law,
 
@@ -431,7 +432,8 @@ weather year from 2014 to 2022 with ERA5 data at the same grid point and all
 other inputs unchanged. The injection deficit limit was varied for 2016 and
 2017 as well, the years in which the deficit reached its highest values.
 
-Cases 2–4 were rerun with one input changed at a time:
+For the base year 2023, cases 2–4 were rerun with one input changed at a
+time:
 
 * wind farm size (1–4 turbines, 15–60 MW);
 * CO2 price (0.5–3.0 NOK/kg) and gas price (2–8 NOK/Sm³);
@@ -803,7 +805,7 @@ its 262 starts per year are accounted for.
 | CO2 reduction, case 3 vs 1 | 57.1 % | 54.5–60.3 % | 55.0 % |
 | Flexibility benefit, case 2 − 3 | 6.8 kt (11.0 %) | 5.9–7.7 kt (10.5–11.7 %) | 7.2 kt (11.1 %) |
 | Hours with two GTs, case 2 / case 3 | | 1,082–1,889 / 4–66 | 1,702 / 28 |
-| Battery benefit, case 3 − 4 | 0.3 kt | 0.25–0.42 kt | 0.3 kt |
+| Battery benefit, case 3 − 4 | 0.35 kt | 0.25–0.42 kt | 0.32 kt |
 | Maximum injection deficit | | 25.8–59.3 h | 27.5 h |
 
 The weather year changes the benefit of wind more than the benefit of
@@ -840,7 +842,7 @@ are those in which the wind is just too weak for one turbine to carry the
 load with reserve. Deferring water injection in these hours keeps the
 second turbine off. This explains three results of Section 3. Most of the
 saving comes from 1,674 avoided hours with two GTs online. A deficit
-capacity of about one day captures it all, because these hours occur in
+capacity of about one day captures almost all of it, because these hours occur in
 short spells between windy periods. And the saving largely disappears when
 operating rules keep two GTs online anyway.
 
@@ -927,7 +929,8 @@ The result does not depend on the carbon price, because the fuel saved has
 value on its own. Operating practice, and in particular how many GTs must be
 online and what counts as reserve, has a larger effect on emissions than any
 price or the battery size. Rules that keep two GTs online for redundancy
-increase emissions by 40–50 % compared with the optimised schedules, and
+increase emissions by 40 % with fixed demand and by 53 % with flexible
+demand compared with the optimised schedules, and
 they remove most of the value of flexibility. Such rules are set for good
 reasons of safety and regularity, but the results suggest that they deserve
 the same attention as the choice of wind farm when emissions are to be
@@ -1006,8 +1009,8 @@ shore becomes necessary.
 
 This paper mapped the electric demand of a generic North Sea oil platform
 from a process model, classified the consumers by flexibility, and scheduled
-them together with the gas turbines and a wind farm for one year at hourly
-resolution. The main conclusions are:
+them together with the gas turbines and a wind farm at hourly resolution
+for ten weather years. The main conclusions are:
 
 1. A 30 MW wind farm halves the CO2 emissions of the 20 MW platform (−49 %)
    with fixed demand.
@@ -1057,7 +1060,7 @@ sources, and the processed results are available at [repository URL]. ERA5
 data are available from the Copernicus Climate Change Service.
 
 **Acknowledgements.** This work contains modified Copernicus Climate Change
-Service information (2023). [Funding.]
+Service information (2014–2023). [Funding.]
 
 ## References
 

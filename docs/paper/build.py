@@ -8,7 +8,7 @@
 * {{TABLE_S1}} in the supplementary material becomes the parameter table.
 * Checks: 3-5 highlights of at most 85 characters, abstract of at most 250
   words; prints the word count and the references still marked "check".
-Outputs: paper.docx, supplementary.docx and highlights.docx in docs/paper/.
+Outputs: paper.docx, supplementary.docx, highlights.docx and cover_letter.docx in docs/paper/.
 """
 
 import re
@@ -138,6 +138,10 @@ def main():
 
     supp = (HERE / "supplementary.md").read_text(encoding="utf-8").replace("{{TABLE_S1}}", parameter_table())
     print("Saved", to_docx(insert_figures(supp), HERE / "supplementary.docx"))
+
+    letter = HERE / "cover_letter.md"
+    if letter.exists():
+        print("Saved", to_docx(letter.read_text(encoding="utf-8"), HERE / "cover_letter.docx"))
 
     hl = (HERE / "highlights.md").read_text(encoding="utf-8")
     items, problems = check_highlights(hl)
