@@ -1171,7 +1171,7 @@ During the preparation of this work the author(s) used [tool name] in order to [
 
 ## Data and Code Availability
 
-The model code, configuration with all parameters and sources, and the processed results are available at [repository URL]. ERA5 data are available from the Copernicus Climate Change Service.
+The model code, configuration with all parameters and sources, and the processed results are available at https://github.com/chilalaabubakar/fallresearch. ERA5 data are available from the Copernicus Climate Change Service.
 
 ## Conflict of interest
 
