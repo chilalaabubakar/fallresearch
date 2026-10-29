@@ -629,38 +629,64 @@ below the demand.
 
 ### 3.4 Sensitivity analysis
 
-**Table 4.** Annual CO~2~ [kt/yr] in the sensitivity runs (2023). Re-planning
-runs include the fuel to catch up the injection deficit left at the end of the
-year.
+**Table 4.** Annual CO~2~ with fixed (Case 2) and flexible (Case 3) demand in the
+sensitivity runs (2023), and the saving from flexibility. Case 2 does not depend on the
+injection, pump and forecast settings. Forecast
+runs include the CO~2~ of catching up the injection deficit left at the end of the year.
 
-| Varied input | Values | Case 2 | Case 3 | Case 4 |
+| Varied input | Setting | Case 2 [kt/yr] | Case 3 [kt/yr] | Saving [kt/yr] | Saving [%] |
+|---|---|---|---|---|---|
+| Wind farm size | 15 MW | 77.5 | 71.9 | 5.6 | 7.2 |
+|  | 30 MW **(base)** | 64.7 | 57.5 | 7.2 | 11.1 |
+|  | 45 MW | 60.2 | 53.4 | 6.8 | 11.3 |
+|  | 60 MW | 57.6 | 50.9 | 6.7 | 11.6 |
+| Injection deficit limit | 0 h | 64.7 | 64.7 | 0.0 | 0.0 |
+|  | 24 h | 64.7 | 57.5 | 7.1 | 11.0 |
+|  | 72 h **(base)** | 64.7 | 57.5 | 7.2 | 11.1 |
+|  | 168 h | 64.7 | 57.5 | 7.1 | 11.0 |
+| GT fleet | 3 main **(base)** | 64.7 | 57.5 | 7.2 | 11.1 |
+|  | 2 main + 1 small | 53.9 | 47.8 | 6.1 | 11.3 |
+|  | 3 main + 1 small | 53.9 | 47.7 | 6.2 | 11.5 |
+| GT operating practice | at least 1 GT online **(base)** | 64.7 | 57.5 | 7.2 | 11.1 |
+|  | 2 GTs always online | 90.7 | 87.7 | 3.1 | 3.4 |
+| GT minimum load | 16 % **(base)** | 64.7 | 57.5 | 7.2 | 11.1 |
+|  | 30 % | 71.9 | 64.6 | 7.3 | 10.1 |
+|  | 40 % | 77.5 | 70.2 | 7.3 | 9.5 |
+|  | 50 % | 86.4 | 76.2 | 10.2 | 11.8 |
+| Pump start cost | 0 NOK **(base)** | 64.7 | 57.5 | 7.2 | 11.1 |
+|  | 1,000 NOK | 64.7 | 57.6 | 7.1 | 11.0 |
+|  | 5,000 NOK | 64.7 | 57.6 | 7.1 | 10.9 |
+|  | 20,000 NOK | 64.7 | 57.6 | 7.0 | 10.9 |
+| Reserve definition | 5 MW **(base)** | 64.7 | 57.5 | 7.2 | 11.1 |
+|  | 5 MW + 50 % of wind used | 66.2 | 57.7 | 8.5 | 12.8 |
+|  | 5 MW + 100 % of wind used | 90.7 | 78.2 | 12.5 | 13.8 |
+|  | injection pumps count as reserve | 60.4 | 57.6 | 2.8 | 4.7 |
+| Wind forecast (hourly re-planning) | actual wind, deficit repaid in each plan | 64.7 | 59.2 | 5.5 | 8.5 |
+|  | persistence, deficit repaid in each plan | 64.7 | 64.2 | 0.5 | 0.7 |
+|  | persistence, deficit valued at 25 % | 64.7 | 57.9 | 6.7 | 10.4 |
+|  | persistence, deficit valued at 50 % | 64.7 | 58.0 | 6.7 | 10.3 |
+
+**Table 5.** Annual CO~2~ with a battery added to flexible scheduling (Case 4),
+against Case 3 without a battery (57.5 kt/yr).
+
+| Battery | Min. GTs online | Case 4 [kt/yr] | Saving vs Case 3 [kt/yr] | Saving vs Case 3 [%] |
 |---|---|---|---|---|
-| Wind farm size [turbines] | 1 / 2 / 3 / 4 | 77.6 / 64.7 / 60.2 / 57.6 | 71.9 / 57.5 / 53.4 / 50.9 | |
-| Battery [MW / MWh] | 0 / 2/2 / 4/4 / 8/8 / 8/16 | | | 57.5 / 57.3 / 57.2 / 56.9 / 56.4 |
-| Solver gap 0.1 % | | | 57.5 | 57.1 |
-| Injection deficit limit [h] | 0 / 24 / 72 / 168 | | 64.7 / 57.5 / 57.5 / 57.5 | |
-| Min. GTs online (8 MW battery) | 1 / 0 | | | 56.9 / 38.7 |
-| GT fleet | 3 main / 2 main + 1 small / 3 main + 1 small | 64.7 / 53.9 / 53.9 | 57.5 / 47.8 / 47.7 | |
-| Keep two GTs online | | 90.7 | 87.7 | |
-| GT minimum load [% of rating] | 16 / 30 / 40 / 50 | 64.7 / 71.9 / 77.5 / 86.4 | 57.5 / 64.6 / 70.2 / 76.2 | |
-| Pump start cost [kNOK] | 0 / 1 / 5 / 20 | | 57.5 / 57.6 / 57.6 / 57.6 | |
-| Reserve covers wind used [%] | 0 / 50 / 100 | 64.7 / 66.2 / 90.7 | 57.5 / 57.7 / 78.2 | |
-| Injection pumps as reserve | | 60.4 | 57.6 | |
-| Hourly re-planning, deficit repaid in each plan: perfect / persistence wind | | 64.7 / 64.7 | 59.2 / 64.2 | |
-| Hourly re-planning, deficit valued at 25 / 50 %: persistence wind | | | 57.9 / 58.0 | |
+| none | 1 | 57.5 | 0.0 | 0.0 |
+| 2 MW / 2 MWh | 1 | 57.3 | 0.2 | 0.3 |
+| 4 MW / 4 MWh **(base)** | 1 | 57.2 | 0.3 | 0.6 |
+| 8 MW / 8 MWh | 1 | 56.9 | 0.6 | 1.0 |
+| 8 MW / 16 MWh | 1 | 56.4 | 1.1 | 1.9 |
+| 8 MW / 8 MWh | 0 | 38.7 | 18.8 | 32.8 |
 
-The results of the sensitivity runs are given in Table 4 and Fig. 7. The CO~2~
+The results of the sensitivity runs are given in Tables 4 and 5 and Fig. 7. The CO~2~
 and gas prices have almost no effect: across CO~2~ prices of 0.5–3 NOK/kg and
-gas prices of 2–8 NOK/Sm³, the emissions change by less than 0.1 %. This is
-expected, since the objective is dominated by fuel multiplied by a price, so
-the prices scale the cost of every option alike and the cheapest schedule
-remains the cheapest. Deferring injection saves fuel at any price, and
+gas prices of 2–8 NOK/Sm³, the emissions change by less than 0.1 %. The prices scale the cost of every option alike, so the cheapest schedule remains the cheapest. Deferring injection saves fuel at any price, and
 shedding production is never profitable, as the lost oil and gas are worth
 about a hundred times more than the fuel saved.
 
-The deferral capacity required is small. With no deferral allowed, Case 3 is
-identical to Case 2 (64.7 kt). A limit of 24 h already gives the full saving,
-with 5 GT starts instead of 3, and a limit of 168 h changes nothing. The
+The deferral capacity required is small. Without deferral, Case 3 equals Case 2
+(64.7 kt); a limit of 24 h already gives the full saving, and 168 h changes
+nothing. The
 benefit would thus still be captured under a conservative reservoir
 constraint.
 
@@ -670,11 +696,10 @@ to 50.9 kt, while the curtailment increases from 39 to 160 GWh, since one GT
 must remain online and the platform cannot use more wind in windy hours. The
 value of flexibility (Case 2 minus Case 3) is highest at the base-case size
 (7.2 kt). It is 5.6 kt for a 15 MW farm, where the wind seldom covers the
-demand, and 6.7–6.8 kt for 45–60 MW. Batteries add little as long as one GT
-must remain online; the largest one tested, 8 MW / 16 MWh, saves 1.1 kt (2 %).
-The effect of the 4 MW / 4 MWh battery, 0.3 kt or 0.5 %, is of the order of
-the 0.5 % solver gap. With a gap of 0.1 % it is 0.4 kt (0.7 %), so it is small
-but real.
+demand, and 6.7–6.8 kt for 45–60 MW. Batteries add little as long as one GT must remain online; the largest one
+tested saves 1.1 kt (2 %, Table 5).
+The 0.3 kt (0.6 %) of the 4 MW / 4 MWh battery is close to the 0.5 % solver gap,
+but with a gap of 0.1 % it is 0.4 kt (0.7 %), so it is small but real.
 
 Two assumptions on GT operation have a larger effect than any of these inputs.
 If an 8 MW / 8 MWh battery could provide reserve and grid stability, so that
@@ -772,7 +797,7 @@ margin about 4–5 %.
 
 ### 3.6 Benchmark checks
 
-**Table 5.** Model results against published benchmarks.
+**Table 6.** Model results against published benchmarks.
 
 | Benchmark | Model | Published | Status |
 |---|---|---|---|
@@ -786,7 +811,7 @@ margin about 4–5 %.
 | Water injection specific energy [@svendsen2023] | 8.8 kWh/m³ | 9.0 kWh/m³ | agrees |
 | CO~2~ intensity, Norwegian shelf 2023 [@offshorenorge2024] | 3.1 kg/boe | 7.3 kg/boe | lower |
 
-The model results are compared with the published benchmarks in Table 5 and
+The model results are compared with the published benchmarks in Table 6 and
 Fig. 9. The platform power, the wind resource and the pump energy agree with
 the published values. The platform power lies within the range of
 processing-plant power of three real oil platforms and within 20 % of the
@@ -835,7 +860,7 @@ from the boundary and not from the power system model.
 
 ### 3.7 Economic indicators
 
-**Table 6.** Economic indicators (real NOK, 20 years; abatement cost range
+**Table 7.** Economic indicators (real NOK, 20 years; abatement cost range
 from the O&M range of floating wind).
 
 | Measure | CO~2~ avoided [kt/yr] | Fuel value saved [MNOK/yr] | Abatement cost [NOK/t], 7 % / 4 % | Break-even investment [MNOK], fuel / fuel + CO~2~ |
@@ -846,7 +871,7 @@ from the O&M range of floating wind).
 | Battery 4 MW / 4 MWh (Case 4 vs 3) | 0.3 | 0.5 | −1,562 before battery cost | 5 / 13 |
 | Small GT replacing one main GT (flexible) | 9.7 | 17.4 | −1,786 before GT cost | 184 / 391 |
 
-The economic indicators are given in Table 6. With an investment of 2.5
+The economic indicators are given in Table 7. With an investment of 2.5
 billion NOK for 30 MW, the wind farm with fixed demand avoids CO~2~ at
 2,180–2,519 NOK/t at a 7 % discount rate and at 1,347–1,686 NOK/t at 4 %.
 These values are of the same order as the abatement cost of the
@@ -868,7 +893,7 @@ its additional maintenance and its 262 starts per year are taken into account.
 
 ### 3.8 Weather years
 
-**Table 7.** Results for ten weather years (ERA5, 2014–2023).
+**Table 8.** Results for ten weather years (ERA5, 2014–2023).
 
 | | Mean | Range | 2023 |
 |---|---|---|---|
@@ -880,7 +905,7 @@ its additional maintenance and its 262 starts per year are taken into account.
 | Battery benefit, Case 3 − 4 | 0.35 kt | 0.25–0.42 kt | 0.32 kt |
 | Maximum injection deficit | | 25.8–59.3 h | 27.5 h |
 
-The results for the ten weather years are summarized in Table 7 and Fig. 10.
+The results for the ten weather years are summarized in Table 8 and Fig. 10.
 The weather year affects the benefit of wind more than the benefit of
 flexibility. Over the ten years, the capacity factor of the wind farm ranges
 from 50.3 % to 59.8 %, and 2023 is one of the calmer years. The reduction with

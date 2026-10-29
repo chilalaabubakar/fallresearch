@@ -448,6 +448,82 @@ def parameter_table(cfg):
     return pd.DataFrame(rows)
 
 
+def sensitivity_paper_tables(sens, base, forecast=None, catch_up_co2_kt_per_h=0.0):
+    """Tables 4 and 5 of the paper: one row per setting, base settings marked.
+
+    Table 4 compares fixed (Case 2) and flexible (Case 3) demand and gives the saving from
+    flexibility; Table 5 gives the battery runs (Case 4) against Case 3 without a battery.
+    Forecast runs include the CO2 of catching up the injection deficit left at the end."""
+    def co2(group, case, overrides=None):
+        if group == "base":
+            return float(base.loc[base["case"] == case, "co2_kt"].iloc[0])
+        d = sens[(sens["group"] == group) & (sens["case"] == case)]
+        hit = d[d["overrides"].map(ast.literal_eval) == overrides]
+        return float(hit["co2_kt"].iloc[0]) if len(hit) else np.nan
+
+    def fc(case, mode, overrides=None):
+        d = forecast[(forecast["case"] == case) & (forecast["forecast"] == mode)]
+        d = d[d["overrides"].fillna("{}").map(ast.literal_eval) == (overrides or {})]
+        r = d.iloc[0]
+        return float(r["co2_kt"] + r["end_deficit_h"] * catch_up_co2_kt_per_h)
+
+    b2, b3 = co2("base", "wind_fixed"), co2("base", "wind_flex")
+    rows = []
+
+    def add(inp, setting, c2, c3):
+        rows.append({"Varied input": inp, "Setting": setting, "Case 2 [kt/yr]": c2, "Case 3 [kt/yr]": c3})
+
+    for n, mw in ((1, 15), (2, 30), (3, 45), (4, 60)):
+        g = ("base",) if n == 2 else ("wind_farm_size",)
+        o = None if n == 2 else {"n_turbines": n}
+        add("Wind farm size", f"{mw} MW" + (" (base)" if n == 2 else ""),
+            co2(*g, "wind_fixed", o) if o else b2, co2(*g, "wind_flex", o) if o else b3)
+    for h in (0, 24, 72, 168):
+        add("Injection deficit limit", f"{h} h" + (" (base)" if h == 72 else ""), b2,
+            b3 if h == 72 else co2("injection_deficit", "wind_flex", {"max_deficit": h}))
+    add("GT fleet", "3 main (base)", b2, b3)
+    for label, fl in (("2 main + 1 small", {"main": 2, "small": 1}), ("3 main + 1 small", {"main": 3, "small": 1})):
+        add("GT fleet", label, co2("gt_fleet", "wind_fixed", {"fleet": fl}), co2("gt_fleet", "wind_flex", {"fleet": fl}))
+    add("GT operating practice", "at least 1 GT online (base)", b2, b3)
+    add("GT operating practice", "2 GTs always online", co2("gt_operation_practice", "wind_fixed", {"min_gt_online": 2}),
+        co2("gt_operation_practice", "wind_flex", {"min_gt_online": 2}))
+    for ml in (0.161, 0.3, 0.4, 0.5):
+        o = {"gt_min_load": ml}
+        add("GT minimum load", f"{ml:.0%}".replace("%", " %") + (" (base)" if ml == 0.161 else ""),
+            b2 if ml == 0.161 else co2("gt_min_load", "wind_fixed", o), b3 if ml == 0.161 else co2("gt_min_load", "wind_flex", o))
+    for c in (0, 1000, 5000, 20000):
+        add("Pump start cost", f"{c:,} NOK" + (" (base)" if c == 0 else ""), b2,
+            b3 if c == 0 else co2("pump_start_cost", "wind_flex", {"pump_start_cost": c}))
+    add("Reserve definition", "5 MW (base)", b2, b3)
+    for label, o in (("5 MW + 50 % of wind used", {"wind_reserve_share": 0.5}),
+                     ("5 MW + 100 % of wind used", {"wind_reserve_share": 1.0}),
+                     ("injection pumps count as reserve", {"injection_reserve": True})):
+        add("Reserve definition", label, co2("reserve_definition", "wind_fixed", o), co2("reserve_definition", "wind_flex", o))
+    if forecast is not None:
+        add("Wind forecast (hourly re-planning)", "actual wind, deficit repaid in each plan",
+            fc("wind_fixed", "perfect"), fc("wind_flex", "perfect"))
+        add("Wind forecast (hourly re-planning)", "persistence, deficit repaid in each plan",
+            fc("wind_fixed", "persistence"), fc("wind_flex", "persistence"))
+        for share in (0.25, 0.5):
+            add("Wind forecast (hourly re-planning)", f"persistence, deficit valued at {share:.0%}".replace("%", " %"),
+                fc("wind_fixed", "persistence"), fc("wind_flex", "persistence", {"deficit_terminal_share": share}))
+    t4 = pd.DataFrame(rows)
+    t4["Saving [kt/yr]"] = t4["Case 2 [kt/yr]"] - t4["Case 3 [kt/yr]"]
+    t4["Saving [%]"] = 100 * t4["Saving [kt/yr]"] / t4["Case 2 [kt/yr]"]
+
+    rows = []
+    for pw, en in ((0, 0), (2, 2), (4, 4), (8, 8), (8, 16)):
+        c4 = co2("battery_size", "wind_flex_battery", {"battery": [pw, en]})
+        rows.append({"Battery": "none" if pw == 0 else f"{pw} MW / {en} MWh" + (" (base)" if pw == 4 else ""),
+                     "Min. GTs online": 1, "Case 4 [kt/yr]": c4})
+    rows.append({"Battery": "8 MW / 8 MWh", "Min. GTs online": 0,
+                 "Case 4 [kt/yr]": co2("min_gt_online", "wind_flex_battery", {"min_gt_online": 0, "battery": [8, 8]})})
+    t5 = pd.DataFrame(rows)
+    t5["Saving vs Case 3 [kt/yr]"] = b3 - t5["Case 4 [kt/yr]"]
+    t5["Saving vs Case 3 [%]"] = 100 * t5["Saving vs Case 3 [kt/yr]"] / b3
+    return t4, t5
+
+
 def write_table(df, out_dir, name, float_fmt="%.4g"):
     out_dir.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_dir / f"{name}.csv", index=False, float_format=float_fmt)
@@ -530,6 +606,14 @@ def main(argv=None):
             drm = demand_reserve_table(cfg, inp["sensitivity"], mean_mw)
             write_table(drm, tables, "T8_demand_reserve_map")
             attempt("fig12", fig_demand_reserve_map, cfg, drm, out, note)
+        fpath = results_path(cfg, f"cases/forecast_summary{tag}.csv")
+        from topside import scheduler as _sch
+        _s = _sch.build_system(cfg, dp)
+        t4, t5 = sensitivity_paper_tables(inp["sensitivity"], inp["summary"],
+                                          pd.read_csv(fpath) if fpath.exists() else None,
+                                          _sch.catch_up_fuel(_s) * _s.fuel.co2_factor / 1e6)
+        write_table(t4, tables, "T4_sensitivity_flexibility")
+        write_table(t5, tables, "T5_sensitivity_battery")
         write_table(inp["sensitivity"][["group", "case", "overrides", "co2_kt", "fuel_MSm3",
                                         "gt_low_load_unit_hours", "lost_production_pct",
                                         "wind_curtailed_GWh"]], tables, "T3_sensitivity")

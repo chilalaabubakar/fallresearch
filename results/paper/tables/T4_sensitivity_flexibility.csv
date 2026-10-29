@@ -1,0 +1,30 @@
+Varied input,Setting,Case 2 [kt/yr],Case 3 [kt/yr],Saving [kt/yr],Saving [%]
+Wind farm size,15 MW,77.55,71.94,5.61,7.234
+Wind farm size,30 MW (base),64.66,57.49,7.17,11.09
+Wind farm size,45 MW,60.23,53.41,6.82,11.32
+Wind farm size,60 MW,57.56,50.87,6.69,11.62
+Injection deficit limit,0 h,64.66,64.65,0.01,0.01547
+Injection deficit limit,24 h,64.66,57.52,7.14,11.04
+Injection deficit limit,72 h (base),64.66,57.49,7.17,11.09
+Injection deficit limit,168 h,64.66,57.52,7.14,11.04
+GT fleet,3 main (base),64.66,57.49,7.17,11.09
+GT fleet,2 main + 1 small,53.86,47.75,6.11,11.34
+GT fleet,3 main + 1 small,53.86,47.68,6.18,11.47
+GT operating practice,at least 1 GT online (base),64.66,57.49,7.17,11.09
+GT operating practice,2 GTs always online,90.74,87.68,3.06,3.372
+GT minimum load,16 % (base),64.66,57.49,7.17,11.09
+GT minimum load,30 %,71.9,64.63,7.27,10.11
+GT minimum load,40 %,77.53,70.18,7.35,9.48
+GT minimum load,50 %,86.44,76.22,10.22,11.82
+Pump start cost,0 NOK (base),64.66,57.49,7.17,11.09
+Pump start cost,"1,000 NOK",64.66,57.57,7.09,10.97
+Pump start cost,"5,000 NOK",64.66,57.6,7.06,10.92
+Pump start cost,"20,000 NOK",64.66,57.63,7.03,10.87
+Reserve definition,5 MW (base),64.66,57.49,7.17,11.09
+Reserve definition,5 MW + 50 % of wind used,66.16,57.69,8.47,12.8
+Reserve definition,5 MW + 100 % of wind used,90.74,78.23,12.51,13.79
+Reserve definition,injection pumps count as reserve,60.41,57.57,2.84,4.701
+Wind forecast (hourly re-planning),"actual wind, deficit repaid in each plan",64.66,59.18,5.485,8.482
+Wind forecast (hourly re-planning),"persistence, deficit repaid in each plan",64.66,64.18,0.4843,0.749
+Wind forecast (hourly re-planning),"persistence, deficit valued at 25 %",64.66,57.92,6.737,10.42
+Wind forecast (hourly re-planning),"persistence, deficit valued at 50 %",64.66,57.96,6.695,10.35

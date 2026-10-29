@@ -308,7 +308,7 @@ def _border(tag, val="single", sz="4"):
     return el
 
 
-def full_width_columns(table, text_width=Cm(16.51), min_share=0.08):
+def full_width_columns(table, text_width=Cm(16.51), min_share=0.11):
     """Table across the text width, columns in proportion to their longest line of text."""
     pr = table._tbl.tblPr
     w = pr.find(qn("w:tblW"))
@@ -364,6 +364,14 @@ def three_line_tables(doc, skip=()):
                     p.paragraph_format.space_after = Pt(1)
                     for r in p.runs:
                         r.font.size = SIZE
+        # Header row repeats on every page; the caption above stays with the table
+        trpr = t.rows[0]._tr.get_or_add_trPr()
+        trpr.append(OxmlElement("w:tblHeader"))
+        prev = t._tbl.getprevious()
+        if prev is not None and prev.tag == qn("w:p"):
+            cap = Paragraph(prev, t._parent)
+            if cap.text.startswith("Table"):
+                cap.paragraph_format.keep_with_next = True
         # Space between the bottom rule and the text that follows
         nxt = t._tbl.getnext()
         if nxt is not None and nxt.tag == qn("w:p"):

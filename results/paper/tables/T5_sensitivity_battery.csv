@@ -1,0 +1,7 @@
+Battery,Min. GTs online,Case 4 [kt/yr],Saving vs Case 3 [kt/yr],Saving vs Case 3 [%]
+none,1,57.49,0,0
+2 MW / 2 MWh,1,57.32,0.17,0.2957
+4 MW / 4 MWh (base),1,57.17,0.32,0.5566
+8 MW / 8 MWh,1,56.9,0.59,1.026
+8 MW / 16 MWh,1,56.38,1.11,1.931
+8 MW / 8 MWh,0,38.66,18.83,32.75
