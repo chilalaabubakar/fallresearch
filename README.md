@@ -154,3 +154,8 @@ docs/paper/             manuscript sources (Markdown, references.yaml) and build
 - See `docs/parameter_verification.md` for what was verified and what is still assumed.
 - Seawater properties: Sharqawy, Lienhard & Zubair (2010), Desalin. Water Treat. 16:354–380.
 - Wind shear exponent at sea: Hsu, Meindl & Gilhousen (1994), J. Appl. Meteorol. 33:757–765.
+
+## Licence
+The code is released under the MIT License (see `LICENSE`). ERA5 data are
+provided by the Copernicus Climate Change Service under the Copernicus licence;
+field data remain subject to the terms of their sources.
