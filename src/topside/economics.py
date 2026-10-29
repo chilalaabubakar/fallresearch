@@ -99,6 +99,37 @@ def load_results(cfg):
     return out
 
 
+def paper_tables(table):
+    """The two economics tables of the paper, one number per cell.
+
+    Measures with a known investment (the wind farm) get an abatement cost; measures whose
+    investment is not known get the fuel value saved per tonne of CO2 avoided and the
+    largest investment that still breaks even."""
+    wind = table[table["investment_MNOK"].notna()]
+    names = {"Wind farm, fixed demand": "Fixed demand (Case 2 vs 1)",
+             "Wind farm + flexibility": "Flexible demand (Case 3 vs 1)"}
+    abatement = pd.DataFrame({
+        "Wind farm operated with": wind["measure"].map(names).fillna(wind["measure"]),
+        "CO2 avoided [kt/yr]": wind["co2_avoided_kt_per_yr"].round(1),
+        "Fuel value saved [MNOK/yr]": wind["fuel_value_saved_MNOK_per_yr"].round(1),
+        "Abatement cost at 7 % [NOK/t]": wind["abatement_cost_NOK_per_t"],
+        "Abatement cost at 4 % [NOK/t]": wind["abatement_cost_NOK_per_t_low_rate"]})
+    other = table[table["investment_MNOK"].isna()]
+    names = {"Flexibility (case 3 vs 2)": "Flexibility (Case 3 vs 2)",
+             "Battery 4 MW / 4 MWh (case 4 vs 3)": "Battery 4 MW / 4 MWh (Case 4 vs 3)",
+             "Small GT replacing one main GT (flexible)": "Small GT replacing one main GT (flexible demand)"}
+    break_even = pd.DataFrame({
+        "Measure": other["measure"].map(names).fillna(other["measure"]),
+        "CO2 avoided [kt/yr]": other["co2_avoided_kt_per_yr"].round(1),
+        "Fuel value saved [MNOK/yr]": other["fuel_value_saved_MNOK_per_yr"].round(1),
+        # minus the abatement cost without investment, i.e. from the unrounded results
+        "Fuel value per t CO2 [NOK/t]": other["abatement_cost_NOK_per_t"].map(
+            lambda v: f"{-float(str(v).split()[0].replace(',', '')):,.0f}"),
+        "Break-even, fuel only [MNOK]": other["break_even_investment_fuel_MNOK"].round(0),
+        "Break-even, fuel + CO2 [MNOK]": other["break_even_investment_fuel_co2_MNOK"].round(0)})
+    return abatement, break_even
+
+
 def main():
     cfg = load_config()
     table = economics_table(cfg, load_results(cfg))
@@ -106,6 +137,9 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     table.to_csv(out / "T5_economics.csv", index=False, float_format="%.4g")
     (out / "T5_economics.md").write_text(table.to_markdown(index=False, floatfmt=",.1f"))
+    for name, t in zip(("T5a_abatement_cost", "T5b_break_even"), paper_tables(table)):
+        t.to_csv(out / f"{name}.csv", index=False)
+        (out / f"{name}.md").write_text(t.to_markdown(index=False))
     inv = cfg["investment"]
     print(f"Discount rate {param(inv['discount_rate']):.0%} (low {param(inv['discount_rate_low']):.0%}), "
           f"lifetime {param(inv['lifetime'])} yr; power from shore benchmark "

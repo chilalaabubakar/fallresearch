@@ -319,10 +319,11 @@ def full_width_columns(table, text_width=Cm(16.51), min_share=0.11):
     w.set(qn("w:w"), "5000")
     ncol = len(table.columns)
     need = [1] * ncol
-    for row in table.rows:
+    for i, row in enumerate(table.rows):
         for j, cell in enumerate(row.cells[:ncol]):
             longest = max((len(word) for word in cell.text.split()), default=1)
-            need[j] = max(need[j], min(len(cell.text), 40), longest)
+            # header text may wrap, so it only needs room for its longest word
+            need[j] = max(need[j], longest + 1 if i == 0 else min(len(cell.text), 28))
     share = [max(n / sum(need), min_share) for n in need]
     share = [x / sum(share) for x in share]
     widths = [int(text_width.twips * x) for x in share]
@@ -460,6 +461,7 @@ def to_docx(markdown, out, title=None, references=False):
 def words(text):
     text = re.sub(r"(?m)^\|.*$", "", text)            # tables
     text = re.sub(r"(?m)^>.*$", "", text)             # figure captions
+    text = re.sub(r"(?ms)^\*\*Table \d+\.\*\*.*?(?=\n\n)", "", text)   # table captions
     text = re.sub(r"\$\$.*?\$\$", "", text, flags=re.S)
     text = re.sub(r"~(\w+)~", r"\1", text)             # subscripts such as CO~2~
     return len(re.findall(r"[A-Za-z0-9][\w'’–-]*", text))

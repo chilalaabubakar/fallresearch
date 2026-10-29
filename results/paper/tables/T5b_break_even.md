@@ -1,0 +1,5 @@
+| Measure                                          |   CO2 avoided [kt/yr] |   Fuel value saved [MNOK/yr] |   Fuel value per t CO2 [NOK/t] |   Break-even, fuel only [MNOK] |   Break-even, fuel + CO2 [MNOK] |
+|:-------------------------------------------------|----------------------:|-----------------------------:|-------------------------------:|-------------------------------:|--------------------------------:|
+| Flexibility (Case 3 vs 2)                        |                   7.2 |                         12.9 |                          1,799 |                            137 |                             288 |
+| Battery 4 MW / 4 MWh (Case 4 vs 3)               |                   0.3 |                          0.5 |                          1,562 |                              5 |                              13 |
+| Small GT replacing one main GT (flexible demand) |                   9.7 |                         17.4 |                          1,786 |                            184 |                             391 |

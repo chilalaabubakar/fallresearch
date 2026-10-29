@@ -860,18 +860,25 @@ from the boundary and not from the power system model.
 
 ### 3.7 Economic indicators
 
-**Table 7.** Economic indicators (real NOK, 20 years; abatement cost range
-from the O&M range of floating wind).
+**Table 7.** Abatement cost of the 30 MW wind farm (investment 2,523 MNOK, real NOK,
+20 years). The ranges span the operation and maintenance cost of floating wind.
 
-| Measure | CO~2~ avoided [kt/yr] | Fuel value saved [MNOK/yr] | Abatement cost [NOK/t], 7 % / 4 % | Break-even investment [MNOK], fuel / fuel + CO~2~ |
+| Wind farm operated with | CO~2~ avoided [kt/yr] | Fuel value saved [MNOK/yr] | Abatement cost at 7 % [NOK/t] | Abatement cost at 4 % [NOK/t] |
 |---|---|---|---|---|
-| Wind farm, fixed demand (Case 2 vs 1) | 63.0 | 112.8 | 2,180–2,519 / 1,347–1,686 | – |
-| Wind farm with flexibility (Case 3 vs 1) | 70.2 | 125.7 | 1,774–2,078 / 1,026–1,330 | – |
-| Flexibility (Case 3 vs 2) | 7.2 | 12.9 | −1,799 before implementation cost | 137 / 288 |
-| Battery 4 MW / 4 MWh (Case 4 vs 3) | 0.3 | 0.5 | −1,562 before battery cost | 5 / 13 |
-| Small GT replacing one main GT (flexible) | 9.7 | 17.4 | −1,786 before GT cost | 184 / 391 |
+| Fixed demand (Case 2 vs 1) | 63.0 | 112.8 | 2,180–2,519 | 1,347–1,686 |
+| Flexible demand (Case 3 vs 1) | 70.2 | 125.7 | 1,774–2,078 | 1,026–1,330 |
 
-The economic indicators are given in Table 7. With an investment of 2.5
+**Table 8.** Measures whose investment is not known: fuel value saved per tonne of
+CO~2~ avoided, and the largest investment that still breaks even (present value of
+the annual saving over 20 years at 7 %).
+
+| Measure | CO~2~ avoided [kt/yr] | Fuel value saved [MNOK/yr] | Fuel value per t CO~2~ [NOK/t] | Break-even, fuel only [MNOK] | Break-even, fuel + CO~2~ [MNOK] |
+|---|---|---|---|---|---|
+| Flexibility (Case 3 vs 2) | 7.2 | 12.9 | 1,799 | 137 | 288 |
+| Battery 4 MW / 4 MWh (Case 4 vs 3) | 0.3 | 0.5 | 1,562 | 5 | 13 |
+| Small GT replacing one main GT (flexible demand) | 9.7 | 17.4 | 1,786 | 184 | 391 |
+
+The economic indicators are given in Tables 7 and 8. With an investment of 2.5
 billion NOK for 30 MW, the wind farm with fixed demand avoids CO~2~ at
 2,180–2,519 NOK/t at a 7 % discount rate and at 1,347–1,686 NOK/t at 4 %.
 These values are of the same order as the abatement cost of the
@@ -893,7 +900,7 @@ its additional maintenance and its 262 starts per year are taken into account.
 
 ### 3.8 Weather years
 
-**Table 8.** Results for ten weather years (ERA5, 2014–2023).
+**Table 9.** Results for ten weather years (ERA5, 2014–2023).
 
 | | Mean | Range | 2023 |
 |---|---|---|---|
@@ -905,7 +912,7 @@ its additional maintenance and its 262 starts per year are taken into account.
 | Battery benefit, Case 3 − 4 | 0.35 kt | 0.25–0.42 kt | 0.32 kt |
 | Maximum injection deficit | | 25.8–59.3 h | 27.5 h |
 
-The results for the ten weather years are summarized in Table 8 and Fig. 10.
+The results for the ten weather years are summarized in Table 9 and Fig. 10.
 The weather year affects the benefit of wind more than the benefit of
 flexibility. Over the ten years, the capacity factor of the wind farm ranges
 from 50.3 % to 59.8 %, and 2023 is one of the calmer years. The reduction with
